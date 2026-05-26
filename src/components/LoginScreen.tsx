@@ -372,11 +372,6 @@ export const LoginScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer labels */}
-      <div className="mt-7 text-slate-800/55 text-[11px] text-center z-10 font-sans tracking-wide">
-        <p>© 2026 Asiaray Angola. Todos os direitos reservados.</p>
-        <p className="mt-0.5 opacity-70">Certificação de segurança WS2 ativa e encriptada.</p>
-      </div>
 
     </div>
   );
