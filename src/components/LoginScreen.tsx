@@ -208,22 +208,23 @@ export const LoginScreen: React.FC = () => {
                   />
                 </div>
 
-                {/* Input 4: Captcha Verification Code Block */}
-                <div className="flex gap-2">
-                  <div className="flex-1 bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
-                    <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
-                      <Shield size={16} className="text-[#0d7377] mr-1.5" />
-                      <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
-                    </div>
-                    <input 
-                      id="cadastro-verificacao-field"
-                      type="text" 
-                      placeholder="Código de verificação"
-                      value={verificacao}
-                      onChange={(e) => setVerificacao(e.target.value.replace(/\s+/g, ''))}
-                      className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13px] font-bold focus:outline-none placeholder-slate-500"
-                    />
+                {/* Input 4: Captcha Verification Code Block (Unified inside a single row to match layout perfectly) */}
+                <div className="relative bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
+                  <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
+                    <Shield size={16} className="text-[#0d7377] mr-1.5" />
+                    <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
                   </div>
+                  <input 
+                    id="cadastro-verificacao-field"
+                    type="text" 
+                    placeholder="Código de verificação"
+                    value={verificacao}
+                    onChange={(e) => setVerificacao(e.target.value.replace(/\s+/g, ''))}
+                    className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13px] font-bold focus:outline-none placeholder-slate-500"
+                  />
+                  
+                  {/* Vertical divider */}
+                  <span className="text-slate-800/20 font-light mx-2 select-none">|</span>
 
                   {/* 
                     Simulated Wavy Green Custom Captcha, built via high-fidelity SVGs 
@@ -231,7 +232,7 @@ export const LoginScreen: React.FC = () => {
                   */}
                   <div 
                     onClick={generateCaptcha}
-                    className="w-[110px] shrink-0 bg-slate-100 rounded-[4px] border border-neutral-300 h-[48px] relative overflow-hidden flex items-center justify-center cursor-pointer select-none group"
+                    className="w-[100px] shrink-0 bg-[#f1f5f9] rounded-[4px] border border-neutral-300/60 h-[34px] relative overflow-hidden flex items-center justify-center cursor-pointer select-none group"
                     title="Toque para reconfigurar código"
                     id="cadastro-verification-captcha-box"
                   >
@@ -246,7 +247,7 @@ export const LoginScreen: React.FC = () => {
                     </svg>
 
                     {/* Highly authentic rotated captcha lettering */}
-                    <div className="relative font-mono text-[16px] font-black text-[#2e7d32] tracking-wider flex items-center justify-center gap-[4px] select-none uppercase">
+                    <div className="relative font-mono text-[15px] font-black text-[#2e7d32] tracking-wider flex items-center justify-center gap-[3px] select-none uppercase">
                       {captchaText.split('').map((char, index) => {
                         const rot = (index % 2 === 0 ? 1 : -1) * (15 + index * 4);
                         const transY = (index % 3 === 0 ? -2 : index % 3 === 1 ? 3 : 0);
