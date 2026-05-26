@@ -193,7 +193,7 @@ export const LoginScreen: React.FC = () => {
                     placeholder="9XXXXXXXX"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\s+/g, ''))}
-                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-white/40"
+                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
                   />
                 </div>
 
@@ -209,7 +209,7 @@ export const LoginScreen: React.FC = () => {
                     placeholder="Senha"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
-                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-white/40"
+                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
                   />
                 </div>
 
@@ -225,7 +225,7 @@ export const LoginScreen: React.FC = () => {
                     placeholder="Código do convite"
                     value={convite}
                     onChange={(e) => setConvite(e.target.value)}
-                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-white/40"
+                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
                   />
                 </div>
 
@@ -242,7 +242,7 @@ export const LoginScreen: React.FC = () => {
                       placeholder="Código de verificação"
                       value={verificacao}
                       onChange={(e) => setVerificacao(e.target.value.replace(/\s+/g, ''))}
-                      className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13px] font-bold focus:outline-none placeholder-white/40"
+                      className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13px] font-bold focus:outline-none placeholder-slate-500"
                     />
                   </div>
 
@@ -333,7 +333,7 @@ export const LoginScreen: React.FC = () => {
                     placeholder="Seu telemóvel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\s+/g, ''))}
-                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-white/40"
+                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
                   />
                 </div>
 
@@ -349,7 +349,7 @@ export const LoginScreen: React.FC = () => {
                     placeholder="Sua senha de acesso"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
-                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-white/40"
+                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
                   />
                 </div>
 
