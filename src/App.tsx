@@ -244,7 +244,7 @@ function MainAppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent flex flex-col max-w-md mx-auto relative border-x border-slate-200 backdrop-blur-sm">
+    <div className="h-[100dvh] overflow-hidden bg-transparent flex flex-col max-w-md mx-auto relative border-x border-slate-200 backdrop-blur-sm">
       
       {/* Dynamic Header block removed to match the screenshot designs exactly */}
 
