@@ -172,7 +172,7 @@ export const LoginScreen: React.FC = () => {
                     placeholder="9XXXXXXXX"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\s+/g, ''))}
-                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
+                    className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
                   />
                 </div>
 
@@ -188,7 +188,7 @@ export const LoginScreen: React.FC = () => {
                     placeholder="Senha"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
-                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
+                    className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
                   />
                 </div>
 
@@ -204,7 +204,7 @@ export const LoginScreen: React.FC = () => {
                     placeholder="Código do convite"
                     value={convite}
                     onChange={(e) => setConvite(e.target.value)}
-                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
+                    className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
                   />
                 </div>
 
@@ -221,7 +221,7 @@ export const LoginScreen: React.FC = () => {
                       placeholder="Código de verificação"
                       value={verificacao}
                       onChange={(e) => setVerificacao(e.target.value.replace(/\s+/g, ''))}
-                      className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13px] font-bold focus:outline-none placeholder-slate-500"
+                      className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13px] font-bold focus:outline-none placeholder-slate-500"
                     />
                   </div>
 
@@ -231,7 +231,7 @@ export const LoginScreen: React.FC = () => {
                   */}
                   <div 
                     onClick={generateCaptcha}
-                    className="w-[110px] bg-slate-100 rounded-[4px] border border-neutral-300 h-[48px] relative overflow-hidden flex items-center justify-center cursor-pointer select-none group"
+                    className="w-[110px] shrink-0 bg-slate-100 rounded-[4px] border border-neutral-300 h-[48px] relative overflow-hidden flex items-center justify-center cursor-pointer select-none group"
                     title="Toque para reconfigurar código"
                     id="cadastro-verification-captcha-box"
                   >
@@ -312,7 +312,7 @@ export const LoginScreen: React.FC = () => {
                     placeholder="Seu telemóvel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\s+/g, ''))}
-                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
+                    className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
                   />
                 </div>
 
@@ -328,7 +328,7 @@ export const LoginScreen: React.FC = () => {
                     placeholder="Sua senha de acesso"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
-                    className="flex-1 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
+                    className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
                   />
                 </div>
 
