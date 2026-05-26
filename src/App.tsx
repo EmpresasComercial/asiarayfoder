@@ -11,6 +11,7 @@ import { CustomToast } from './components/CustomToast';
 import { CustomSpinner } from './components/CustomSpinner';
 import { Home, Shield, Sparkles, ClipboardCheck, User, Headphones } from 'lucide-react';
 import { TaskType } from './types';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 function MainAppLayout() {
   const { isLoggedIn, user, stats, showConfirm, isFullScreenActive } = useApp();
@@ -205,11 +206,6 @@ function MainAppLayout() {
     }
   }, [isNoticeVisible, noticeCountdown]);
 
-  // If user is not authenticated, render registration/login dashboard
-  if (!isLoggedIn) {
-    return <LoginScreen />;
-  }
-
   // Render components according to chosen active footer navigation bar tab
   const renderActiveTabContent = () => {
     switch (activeTab) {
@@ -250,168 +246,181 @@ function MainAppLayout() {
   };
 
   return (
-    <div className="h-[100dvh] overflow-hidden bg-transparent flex flex-col max-w-md mx-auto relative border-x border-slate-200 backdrop-blur-sm">
-      
-      {/* Dynamic Header block removed to match the screenshot designs exactly */}
+    <div className="min-h-screen bg-transparent font-sans">
+      <Routes>
+        <Route path="/login" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/" replace />} />
+        <Route path="/register" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/" replace />} />
+        <Route 
+          path="/*" 
+          element={
+            isLoggedIn ? (
+              <div className="h-[100dvh] overflow-hidden bg-transparent flex flex-col max-w-md mx-auto relative border-x border-slate-200 backdrop-blur-sm">
+                
+                {/* Main viewport area */}
+                <main id="main-scroll-area" className="flex-1 overflow-y-auto bg-transparent no-scrollbar p-2">
+                  {renderActiveTabContent()}
+                </main>
 
-      {/* Main viewport area */}
-      <main id="main-scroll-area" className="flex-1 overflow-y-auto bg-transparent no-scrollbar p-2">
-        {renderActiveTabContent()}
-      </main>
+                {/* Quick floating chatbot action to talk to helpline (Draggable) */}
+                {!isFullScreenActive && (
+                  <div className="fixed inset-0 max-w-md mx-auto pointer-events-none z-40">
+                    <button 
+                      id="quick-support-btn"
+                      className={`pointer-events-auto w-[52px] h-[52px] rounded-full bg-[#111827] border border-gray-800 flex items-center justify-center shadow-xl transition-transform duration-100 cursor-pointer select-none active:scale-95 ${supportPos ? 'absolute' : 'absolute bottom-[84px] right-4'}`}
+                      style={{ 
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+                        ...(supportPos ? { left: `${supportPos.x}px`, top: `${supportPos.y}px` } : {}),
+                        touchAction: 'none'
+                      }}
+                      onMouseDown={handleMouseDown}
+                      onTouchStart={handleTouchStart}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
+                      onClick={handleSupportClick}
+                    >
+                      {/* Beautiful premium custom glowing headset icon */}
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        className="h-[28px] w-[28px]" 
+                        viewBox="0 0 24 24" 
+                        fill="none"
+                      >
+                        <path 
+                          d="M3 12c0-4.97 4.03-9 9-9s9 4.03 9 9v3.5c0 1.38-1.12 2.5-2.5 2.5H16.5c-1.38 0-2.5-1.12-2.5-2.5V12c0-1.66-1.34-3-3-3s-3 1.34-3 3v3.5c0 1.38-1.12 2.5-2.5 2.5H5c-1.38 0-2.5-1.12-2.5-2.5V12z" 
+                          stroke="url(#headsetGlow)" 
+                          strokeWidth={2}
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                        />
+                        <path 
+                          d="M21 15.5c0 1.93-1.57 3.5-3.5 3.5H16" 
+                          stroke="#14ffec" 
+                          strokeWidth={1.8} 
+                          strokeLinecap="round" 
+                        />
+                        <defs>
+                          <linearGradient id="headsetGlow" x1="3" y1="3" x2="21" y2="18" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stopColor="#14ffec" />
+                            <stop offset="50%" stopColor="#0d7377" />
+                            <stop offset="100%" stopColor="#14ffec" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                    </button>
+                  </div>
+                )}
 
-      {/* Quick floating chatbot action to talk to helpline (Draggable) */}
-      {!isFullScreenActive && (
-        <div className="fixed inset-0 max-w-md mx-auto pointer-events-none z-40">
-          <button 
-            id="quick-support-btn"
-            className={`pointer-events-auto w-[52px] h-[52px] rounded-full bg-[#111827] border border-gray-800 flex items-center justify-center shadow-xl transition-transform duration-100 cursor-pointer select-none active:scale-95 ${supportPos ? 'absolute' : 'absolute bottom-[84px] right-4'}`}
-            style={{ 
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
-              ...(supportPos ? { left: `${supportPos.x}px`, top: `${supportPos.y}px` } : {}),
-              touchAction: 'none'
-            }}
-            onMouseDown={handleMouseDown}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            onClick={handleSupportClick}
-          >
-            {/* Beautiful premium custom glowing headset icon */}
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-[28px] w-[28px]" 
-              viewBox="0 0 24 24" 
-              fill="none"
-            >
-              <path 
-                d="M3 12c0-4.97 4.03-9 9-9s9 4.03 9 9v3.5c0 1.38-1.12 2.5-2.5 2.5H16.5c-1.38 0-2.5-1.12-2.5-2.5V12c0-1.66-1.34-3-3-3s-3 1.34-3 3v3.5c0 1.38-1.12 2.5-2.5 2.5H5c-1.38 0-2.5-1.12-2.5-2.5V12z" 
-                stroke="url(#headsetGlow)" 
-                strokeWidth={2}
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-              />
-              <path 
-                d="M21 15.5c0 1.93-1.57 3.5-3.5 3.5H16" 
-                stroke="#14ffec" 
-                strokeWidth={1.8} 
-                strokeLinecap="round" 
-              />
-              <defs>
-                <linearGradient id="headsetGlow" x1="3" y1="3" x2="21" y2="18" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor="#14ffec" />
-                  <stop offset="50%" stopColor="#0d7377" />
-                  <stop offset="100%" stopColor="#14ffec" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </button>
-        </div>
-      )}
+                {/* Footer sticky navigations */}
+                {!isFullScreenActive && (
+                  <footer className="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass-nav py-2.5 px-2 flex justify-around items-center text-center z-50 rounded-t-2xl pb-4">
+                    
+                    {/* Tab 1: Página inicial */}
+                    <button
+                      id="btn-nav-inicial"
+                      onClick={() => setActiveTab('inicial')}
+                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'inicial' ? 'text-[#0d7377] font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      <Home size={20} className={activeTab === 'inicial' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
+                      <span className="text-[10px] tracking-tight">Início</span>
+                    </button>
 
-      {/* Footer sticky navigations */}
-      {!isFullScreenActive && (
-        <footer className="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass-nav py-2.5 px-2 flex justify-around items-center text-center z-50 rounded-t-2xl pb-4">
-          
-          {/* Tab 1: Página inicial */}
-          <button
-            id="btn-nav-inicial"
-            onClick={() => setActiveTab('inicial')}
-            className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'inicial' ? 'text-[#0d7377] font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <Home size={20} className={activeTab === 'inicial' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
-            <span className="text-[10px] tracking-tight">Início</span>
-          </button>
+                    {/* Tab 2: ws */}
+                    <button
+                      id="btn-nav-ws"
+                      onClick={() => setActiveTab('ws')}
+                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'ws' ? 'text-[#0d7377] font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      <Shield size={20} className={activeTab === 'ws' ? 'stroke-[2.5] text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]' : 'stroke-[1.5]'} />
+                      <span className="text-[10px] tracking-tight">WS</span>
+                    </button>
 
-          {/* Tab 2: ws */}
-          <button
-            id="btn-nav-ws"
-            onClick={() => setActiveTab('ws')}
-            className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'ws' ? 'text-[#0d7377] font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <Shield size={20} className={activeTab === 'ws' ? 'stroke-[2.5] text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]' : 'stroke-[1.5]'} />
-            <span className="text-[10px] tracking-tight">WS</span>
-          </button>
+                    {/* Tab 3: tarefa */}
+                    <button
+                      id="btn-nav-tarefa"
+                      onClick={() => setActiveTab('tarefa')}
+                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'tarefa' ? 'text-[#0d7377] font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      <Sparkles size={20} className={activeTab === 'tarefa' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
+                      <span className="text-[10px] tracking-tight font-bold">Tarefa</span>
+                    </button>
 
-          {/* Tab 3: tarefa */}
-          <button
-            id="btn-nav-tarefa"
-            onClick={() => setActiveTab('tarefa')}
-            className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'tarefa' ? 'text-[#0d7377] font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <Sparkles size={20} className={activeTab === 'tarefa' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
-            <span className="text-[10px] tracking-tight font-bold">Tarefa</span>
-          </button>
+                    {/* Tab 4: Gravar */}
+                    <button
+                      id="btn-nav-gravar"
+                      onClick={() => setActiveTab('gravar')}
+                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'gravar' ? 'text-[#0d7377] font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      <ClipboardCheck size={20} className={activeTab === 'gravar' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
+                      <span className="text-[10px] tracking-tight">Gravar</span>
+                    </button>
 
-          {/* Tab 4: Gravar */}
-          <button
-            id="btn-nav-gravar"
-            onClick={() => setActiveTab('gravar')}
-            className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'gravar' ? 'text-[#0d7377] font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <ClipboardCheck size={20} className={activeTab === 'gravar' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
-            <span className="text-[10px] tracking-tight">Gravar</span>
-          </button>
+                    {/* Tab 5: meu */}
+                    <button
+                      id="btn-nav-meu"
+                      onClick={() => setActiveTab('meu')}
+                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'meu' ? 'text-[#0d7377] font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      <User size={20} className={activeTab === 'meu' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
+                      <span className="text-[10px] tracking-tight">Meu</span>
+                    </button>
 
-          {/* Tab 5: meu */}
-          <button
-            id="btn-nav-meu"
-            onClick={() => setActiveTab('meu')}
-            className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'meu' ? 'text-[#0d7377] font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <User size={20} className={activeTab === 'meu' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
-            <span className="text-[10px] tracking-tight">Meu</span>
-          </button>
+                  </footer>
+                )}
 
-        </footer>
-      )}
+                {/* Pop-up Notice / Anúncio de Início */}
+                {isNoticeVisible && (
+                  <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center px-6 font-sans animate-fadeIn">
+                    <div className="relative w-full max-w-[360px]">
 
-      {/* Pop-up Notice / Anúncio de Início */}
-      {isNoticeVisible && (
-        <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center px-6 font-sans animate-fadeIn">
-          <div className="relative w-full max-w-[360px]">
+                      {/* Outer amber gradient card */}
+                      <div className="bg-gradient-to-b from-[#fde68a] to-[#fbbf24] rounded-2xl pt-3 pb-5 px-4 shadow-2xl">
 
-            {/* Outer amber gradient card */}
-            <div className="bg-gradient-to-b from-[#fde68a] to-[#fbbf24] rounded-2xl pt-3 pb-5 px-4 shadow-2xl">
+                        {/* Countdown row */}
+                        <div className="text-center text-gray-700 text-[12px] font-semibold mb-2 select-none">
+                          Shut down after {noticeCountdown} seconds
+                        </div>
 
-              {/* Countdown row */}
-              <div className="text-center text-gray-700 text-[12px] font-semibold mb-2 select-none">
-                Shut down after {noticeCountdown} seconds
+                        {/* ~Notice~ title row */}
+                        <div className="flex items-center justify-center gap-2 mb-3 select-none">
+                          <span className="text-xl">💧🍂</span>
+                          <span className="text-[22px] font-black text-gray-800 tracking-wider">~Notice~</span>
+                          <span className="text-xl">🍃💠</span>
+                        </div>
+
+                        {/* White inner card */}
+                        <div className="bg-white rounded-xl px-4 py-4 text-[13px] text-gray-700 leading-[1.65] text-left font-normal max-h-[230px] overflow-y-auto no-scrollbar shadow-sm">
+                          Documento n.º 20230501701: Relativamente ao apoio total da empresa à rápida expansão do mercado angolano, a primeira decisão é: convidar outras pessoas para trabalhar, podendo o convidante como gestor obter um bónus de 10% do seguinte salário do empregado. Exemplo: O seu equipe tem 100 pessoas, todos no WS5, quanto dinheiro você pode ganhar todos os dias com isso.
+                        </div>
+
+                      </div>
+
+                      {/* Orange X close button — top-right outside card, exactly as in screenshot */}
+                      <button
+                        onClick={() => setIsNoticeVisible(false)}
+                        className="absolute -top-3 -right-3 w-[34px] h-[34px] rounded-full bg-[#f97316] flex items-center justify-center shadow-lg cursor-pointer border-2 border-white hover:bg-[#ea580c] transition-colors focus:outline-none"
+                        id="notice-close-btn"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+
+                    </div>
+                  </div>
+                )}
+
               </div>
-
-              {/* ~Notice~ title row */}
-              <div className="flex items-center justify-center gap-2 mb-3 select-none">
-                <span className="text-xl">💧🍂</span>
-                <span className="text-[22px] font-black text-gray-800 tracking-wider">~Notice~</span>
-                <span className="text-xl">🍃💠</span>
-              </div>
-
-              {/* White inner card */}
-              <div className="bg-white rounded-xl px-4 py-4 text-[13px] text-gray-700 leading-[1.65] text-left font-normal max-h-[230px] overflow-y-auto no-scrollbar shadow-sm">
-                Documento n.º 20230501701: Relativamente ao apoio total da empresa à rápida expansão do mercado angolano, a primeira decisão é: convidar outras pessoas para trabalhar, podendo o convidante como gestor obter um bónus de 10% do seguinte salário do empregado. Exemplo: O seu equipe tem 100 pessoas, todos no WS5, quanto dinheiro você pode ganhar todos os dias com isso.
-              </div>
-
-            </div>
-
-            {/* Orange X close button — top-right outside card, exactly as in screenshot */}
-            <button
-              onClick={() => setIsNoticeVisible(false)}
-              className="absolute -top-3 -right-3 w-[34px] h-[34px] rounded-full bg-[#f97316] flex items-center justify-center shadow-lg cursor-pointer border-2 border-white hover:bg-[#ea580c] transition-colors focus:outline-none"
-              id="notice-close-btn"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-          </div>
-        </div>
-      )}
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          } 
+        />
+      </Routes>
 
       {/* Global state-driven custom notifications overlay */}
       <CustomAlert />
       <CustomToast />
       <CustomSpinner />
-
     </div>
   );
 }

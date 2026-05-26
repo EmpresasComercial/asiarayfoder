@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { User, Lock, Shield, ArrowRightLeft, Headphones } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export const LoginScreen: React.FC = () => {
   const { login, registerUser, showLoading, hideLoading } = useApp();
   
-  // Set default view to 'cadastro' (registration/signup) to match the requested image as default, but allow toggling
-  const [currentView, setCurrentView] = useState<'cadastro' | 'login'>('cadastro');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentView = location.pathname === '/login' ? 'login' : 'cadastro';
   
   const [phone, setPhone] = useState<string>('');
   const [senha, setSenha] = useState<string>('');
@@ -280,7 +282,7 @@ export const LoginScreen: React.FC = () => {
                     id="toggle-to-login-view-btn"
                     type="button"
                     onClick={() => {
-                      setCurrentView('login');
+                      navigate('/login');
                       setValidationError('');
                       setSuccessMsg('');
                     }}
@@ -346,7 +348,7 @@ export const LoginScreen: React.FC = () => {
                     id="toggle-to-cadastro-view-btn"
                     type="button"
                     onClick={() => {
-                      setCurrentView('cadastro');
+                      navigate('/register');
                       setValidationError('');
                       setSuccessMsg('');
                     }}
