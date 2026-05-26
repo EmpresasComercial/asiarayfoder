@@ -126,18 +126,6 @@ export const LoginScreen: React.FC = () => {
         <div className="absolute top-[65%] left-[-10%] w-[120%] h-[2px] bg-white/5 -rotate-6"></div>
       </div>
 
-      {/* Floating Gold/Orange Right Action Icon (Support Headset Bubble) from original image */}
-      <div 
-        onClick={() => {
-          alert('Suporte: WhatsApp/Telegram Geral Asiaray Angola +244 922 342 885.');
-        }}
-        className="fixed right-4 top-[40%] -translate-y-1/2 bg-[#f57c00] border border-white/20 text-slate-800 p-2.5 rounded-full shadow-lg z-50 cursor-pointer hover:scale-105 active:scale-95 transition-transform flex items-center justify-center"
-        id="auth-right-floating-support"
-       
-      >
-        <Headphones size={22} className="text-slate-800" />
-      </div>
-
       {/* Main card box with translucent wrapper to match the exact spacing and design */}
       <div 
         className="w-full max-w-[382px] p-[6px] rounded-[14px] glass shadow-2xl z-10"
