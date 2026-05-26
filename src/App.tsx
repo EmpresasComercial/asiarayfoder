@@ -179,8 +179,14 @@ function MainAppLayout() {
   const [isNoticeVisible, setIsNoticeVisible] = useState<boolean>(false);
   const [noticeCountdown, setNoticeCountdown] = useState<number>(15);
 
-  // Trigger Notice popup when entering/returning to the home tab
+  // Trigger Notice popup when entering/returning to the home tab and reset scroll position
   useEffect(() => {
+    // Reset scroll position to top when changing tabs
+    const mainArea = document.getElementById('main-scroll-area');
+    if (mainArea) {
+      mainArea.scrollTop = 0;
+    }
+
     if (activeTab === 'inicial') {
       setIsNoticeVisible(true);
       setNoticeCountdown(15);
@@ -249,7 +255,7 @@ function MainAppLayout() {
       {/* Dynamic Header block removed to match the screenshot designs exactly */}
 
       {/* Main viewport area */}
-      <main className="flex-1 overflow-y-auto bg-transparent no-scrollbar p-2">
+      <main id="main-scroll-area" className="flex-1 overflow-y-auto bg-transparent no-scrollbar p-2">
         {renderActiveTabContent()}
       </main>
 
