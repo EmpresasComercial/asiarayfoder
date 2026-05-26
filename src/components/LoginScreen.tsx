@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { User, Lock, Shield, ArrowRightLeft, Headphones } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
 
 export const LoginScreen: React.FC = () => {
   const { login, registerUser, showLoading, hideLoading } = useApp();
@@ -132,16 +131,16 @@ export const LoginScreen: React.FC = () => {
         onClick={() => {
           alert('Suporte: WhatsApp/Telegram Geral Asiaray Angola +244 922 342 885.');
         }}
-        className="fixed right-4 top-[40%] -translate-y-1/2 bg-[#f57c00] border border-white/20 text-slate-800 p-2.5 rounded-full shadow-lg z-50 cursor-pointer hover:scale-105 active:scale-95 transition-transform flex items-center justify-center animate-bounce"
+        className="fixed right-4 top-[40%] -translate-y-1/2 bg-[#f57c00] border border-white/20 text-slate-800 p-2.5 rounded-full shadow-lg z-50 cursor-pointer hover:scale-105 active:scale-95 transition-transform flex items-center justify-center"
         id="auth-right-floating-support"
-        style={{ animationDuration: '3s' }}
+       
       >
         <Headphones size={22} className="text-slate-800" />
       </div>
 
       {/* Main card box with translucent wrapper to match the exact spacing and design */}
       <div 
-        className="w-full max-w-[382px] p-[6px] rounded-[14px] glass shadow-2xl z-10 animate-float"
+        className="w-full max-w-[382px] p-[6px] rounded-[14px] glass shadow-2xl z-10"
         id="auth-card-border-outer"
       >
         <div 
@@ -166,7 +165,7 @@ export const LoginScreen: React.FC = () => {
           )}
 
           {successMsg && (
-            <div className="text-[11.5px] bg-emerald-50 text-emerald-700 px-3 py-2 rounded-sm border border-emerald-200 font-medium tracking-tight animate-pulse">
+            <div className="text-[11.5px] bg-emerald-50 text-emerald-700 px-3 py-2 rounded-sm border border-emerald-200 font-medium tracking-tight">
               ✓ {successMsg}
             </div>
           )}
@@ -176,19 +175,13 @@ export const LoginScreen: React.FC = () => {
             1. Registration view matches the original image.
             2. Login view is optimized and aligned in identical fashion.
           */}
-          <AnimatePresence mode="wait">
-            {currentView === 'cadastro' ? (
-              <motion.form 
-                key="cadastro-form"
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                onSubmit={handleSubmitCadastro}
+          {currentView === 'cadastro' ? (
+              <form onSubmit={handleSubmitCadastro}
                 className="space-y-3 flex flex-col"
                 id="form-cadastro-asiaray"
               >
                 {/* Input 1: Phone Element */}
-                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 hover-lift transition-all">
+                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
                   <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
                     <User size={16} className="text-[#0d7377] mr-1.5" />
                     <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
@@ -205,7 +198,7 @@ export const LoginScreen: React.FC = () => {
                 </div>
 
                 {/* Input 2: Senha (Password) */}
-                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 hover-lift transition-all">
+                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
                   <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
                     <Lock size={16} className="text-[#0d7377] mr-1.5" />
                     <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
@@ -221,7 +214,7 @@ export const LoginScreen: React.FC = () => {
                 </div>
 
                 {/* Input 3: Invitation Code (Código do convite) */}
-                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 hover-lift transition-all">
+                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
                   <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
                     <Lock size={16} className="text-[#0d7377] mr-1.5" />
                     <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
@@ -238,7 +231,7 @@ export const LoginScreen: React.FC = () => {
 
                 {/* Input 4: Captcha Verification Code Block */}
                 <div className="flex gap-2">
-                  <div className="flex-1 glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 hover-lift transition-all">
+                  <div className="flex-1 glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
                     <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
                       <Shield size={16} className="text-[#0d7377] mr-1.5" />
                       <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
@@ -320,20 +313,15 @@ export const LoginScreen: React.FC = () => {
                   </button>
                 </div>
 
-              </motion.form>
+              </form>
             ) : (
               /* LOGIN TAB VIEW (Renders when switched) */
-              <motion.form 
-                key="login-form"
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                onSubmit={handleSubmitLogin}
+              <form onSubmit={handleSubmitLogin}
                 className="space-y-3.5 flex flex-col"
                 id="form-login-asiaray"
               >
                 {/* Input 1: Phone */}
-                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 hover-lift transition-all">
+                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
                   <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
                     <User size={16} className="text-[#0d7377] mr-1.5" />
                     <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
@@ -350,7 +338,7 @@ export const LoginScreen: React.FC = () => {
                 </div>
 
                 {/* Input 2: Senha (Password) */}
-                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 hover-lift transition-all">
+                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
                   <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
                     <Lock size={16} className="text-[#0d7377] mr-1.5" />
                     <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
@@ -390,9 +378,8 @@ export const LoginScreen: React.FC = () => {
                     Não tem conta? Registar
                   </button>
                 </div>
-              </motion.form>
+              </form>
             )}
-          </AnimatePresence>
 
         </div>
       </div>
