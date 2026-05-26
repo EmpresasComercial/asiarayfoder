@@ -110,29 +110,18 @@ export const LoginScreen: React.FC = () => {
         {/* Top-Left Jet Airliner */}
         <svg className="absolute top-[3%] left-[2%] w-[42%] max-w-[400px] h-auto text-slate-800/10" viewBox="0 0 400 200" fill="currentColor">
           <path d="M50,120 L150,110 L280,40 L300,43 L210,112 L350,115 C370,116 390,125 390,135 C390,145 370,148 350,148 L220,150 L260,190 L240,195 L170,151 L50,155 C30,155 10,145 10,135 C10,125 30,120 50,120 Z" />
-          {/* Jet engines details */}
           <ellipse cx="160" cy="140" rx="15" ry="5" fill="rgba(255,255,255,0.2)" />
           <ellipse cx="200" cy="140" rx="12" ry="4" fill="rgba(255,255,255,0.2)" />
         </svg>
-
-        {/* Right Edge Airfoil Tail/Cockpit Silhouette */}
-        <svg className="absolute right-[-4%] top-[10%] w-[25%] max-w-[280px] h-auto text-black/15" viewBox="0 0 200 600" fill="currentColor">
-          <path d="M150,0 C170,100 190,250 190,400 C190,550 160,600 130,600 L110,600 C110,600 140,510 140,400 C140,290 100,100 80,0 Z" />
-        </svg>
-
-        {/* Diagonal Soft Clouds / Navigation Trails */}
-        <div className="absolute top-[40%] left-[-10%] w-[120%] h-[3px] bg-slate-100 rotate-12"></div>
-        <div className="absolute top-[48%] left-[-10%] w-[120%] h-[1.5px] bg-white/15 rotate-12"></div>
-        <div className="absolute top-[65%] left-[-10%] w-[120%] h-[2px] bg-white/5 -rotate-6"></div>
       </div>
 
-      {/* Main card box with translucent wrapper to match the exact spacing and design */}
+      {/* Main card box */}
       <div 
-        className="w-full max-w-[382px] p-[6px] rounded-[14px] glass shadow-2xl z-10"
+        className="w-full max-w-[382px] z-10"
         id="auth-card-border-outer"
       >
         <div 
-          className="bg-[#0f172a]/40 backdrop-blur-md rounded-[10px] p-5 flex flex-col items-stretch space-y-3.5 border border-slate-200"
+          className="bg-[#0f172a]/40 backdrop-blur-md rounded-[10px] p-5 flex flex-col items-stretch space-y-3.5"
           id="auth-card-body-inner"
         >
           {/* App title header inside auth */}
@@ -169,7 +158,7 @@ export const LoginScreen: React.FC = () => {
                 id="form-cadastro-asiaray"
               >
                 {/* Input 1: Phone Element */}
-                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
+                <div className="relative bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
                   <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
                     <User size={16} className="text-[#0d7377] mr-1.5" />
                     <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
@@ -186,7 +175,7 @@ export const LoginScreen: React.FC = () => {
                 </div>
 
                 {/* Input 2: Senha (Password) */}
-                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
+                <div className="relative bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
                   <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
                     <Lock size={16} className="text-[#0d7377] mr-1.5" />
                     <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
@@ -202,7 +191,7 @@ export const LoginScreen: React.FC = () => {
                 </div>
 
                 {/* Input 3: Invitation Code (Código do convite) */}
-                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
+                <div className="relative bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
                   <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
                     <Lock size={16} className="text-[#0d7377] mr-1.5" />
                     <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
@@ -219,7 +208,7 @@ export const LoginScreen: React.FC = () => {
 
                 {/* Input 4: Captcha Verification Code Block */}
                 <div className="flex gap-2">
-                  <div className="flex-1 glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
+                  <div className="flex-1 bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
                     <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
                       <Shield size={16} className="text-[#0d7377] mr-1.5" />
                       <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
@@ -309,7 +298,7 @@ export const LoginScreen: React.FC = () => {
                 id="form-login-asiaray"
               >
                 {/* Input 1: Phone */}
-                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
+                <div className="relative bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
                   <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
                     <User size={16} className="text-[#0d7377] mr-1.5" />
                     <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
@@ -326,7 +315,7 @@ export const LoginScreen: React.FC = () => {
                 </div>
 
                 {/* Input 2: Senha (Password) */}
-                <div className="relative glass border border-white/20 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
+                <div className="relative bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
                   <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
                     <Lock size={16} className="text-[#0d7377] mr-1.5" />
                     <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
