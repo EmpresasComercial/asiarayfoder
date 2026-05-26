@@ -11,7 +11,7 @@ import { CustomToast } from './components/CustomToast';
 import { CustomSpinner } from './components/CustomSpinner';
 import { Home, Shield, Sparkles, ClipboardCheck, User, Headphones } from 'lucide-react';
 import { TaskType } from './types';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 function MainAppLayout() {
   const { isLoggedIn, user, stats, showConfirm, isFullScreenActive } = useApp();
@@ -24,42 +24,34 @@ function MainAppLayout() {
     gravar:  'Gravar',
     meu:     'Meu',
   };
-  const VALID_TABS = Object.keys(PAGE_ROUTES);
 
-  // Read hash on first render; fall back to 'inicial'
-  const [activeTab, setActiveTabRaw] = useState<string>(() => {
-    const hash = window.location.hash.replace('#', '').toLowerCase();
-    return VALID_TABS.includes(hash) ? hash : 'inicial';
-  });
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  // Keep URL hash + document.title in sync on every tab change
-  const setActiveTab = (tab: string) => {
-    const key = tab.toLowerCase();
-    setActiveTabRaw(key);
-    window.location.hash = key;
-    document.title = `Asiaray | ${PAGE_ROUTES[key] ?? key}`;
+  const getActiveTabFromPath = (pathname: string): string => {
+    if (pathname === '/ws') return 'ws';
+    if (pathname === '/tarefa') return 'tarefa';
+    if (pathname === '/gravar') return 'gravar';
+    if (pathname === '/meu') return 'meu';
+    return 'inicial';
   };
 
-  // Sync title on mount
-  useEffect(() => {
-    const key = activeTab.toLowerCase();
-    document.title = `Asiaray | ${PAGE_ROUTES[key] ?? key}`;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const activeTab = getActiveTabFromPath(location.pathname);
 
-  // Handle browser back/forward navigation
+  // Keep document.title in sync with routing
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '').toLowerCase();
-      if (VALID_TABS.includes(hash)) {
-        setActiveTabRaw(hash);
-        document.title = `Asiaray | ${PAGE_ROUTES[hash]}`;
-      }
-    };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const key = activeTab;
+    document.title = `Asiaray | ${PAGE_ROUTES[key] ?? key}`;
+  }, [activeTab]);
+
+  const setActiveTab = (tab: string) => {
+    const key = tab.toLowerCase();
+    if (key === 'ws') navigate('/ws');
+    else if (key === 'tarefa') navigate('/tarefa');
+    else if (key === 'gravar') navigate('/gravar');
+    else if (key === 'meu') navigate('/meu');
+    else navigate('/');
+  };
 
   const [selectedTaskCategory, setSelectedTaskCategory] = useState<TaskType>('Amazon');
 
