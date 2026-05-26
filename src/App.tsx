@@ -6,6 +6,7 @@ import { WSTab } from './components/WSTab';
 import { TaskTab } from './components/TaskTab';
 import { GravarTab } from './components/GravarTab';
 import { MeuTab } from './components/MeuTab';
+import { RetirarPage } from './components/RetirarPage';
 import { CustomAlert } from './components/CustomAlert';
 import { CustomToast } from './components/CustomToast';
 import { CustomSpinner } from './components/CustomSpinner';
@@ -242,6 +243,7 @@ function MainAppLayout() {
       <Routes>
         <Route path="/login" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/" replace />} />
         <Route path="/register" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/" replace />} />
+        <Route path="/retirar" element={isLoggedIn ? <RetirarPage /> : <Navigate to="/login" replace />} />
         <Route 
           path="/*" 
           element={

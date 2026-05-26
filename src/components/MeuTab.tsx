@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { 
   Bell, Settings, User, Copy, ClipboardList, Wallet, Sparkles, 
@@ -13,6 +14,7 @@ import { MyInfoModal } from './MyInfoModal';
 
 export const MeuTab: React.FC = () => {
   const { user, stats, logout, resetAll } = useApp();
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
   // Modal open states
@@ -197,7 +199,7 @@ export const MeuTab: React.FC = () => {
         {/* Left Tab Folder style */}
         <button 
           id="sub-invite-friends"
-          onClick={() => setIsInviteOpen(true)}
+          onClick={() => navigate('/retirar')}
           className="flex-1 text-center font-normal text-slate-600 bg-transparent border-r border-white/50 text-[12px] h-full flex items-center justify-center relative"
         >
           {/* subtle background icon */}
