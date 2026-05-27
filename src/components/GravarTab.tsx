@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { ClipboardList, Image, CheckCircle2, ChevronDown, Check, Zap, AlertTriangle, Eye, UploadCloud, Link } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Task, TaskStatus } from '../types';
 
@@ -10,7 +9,6 @@ export const GravarTab: React.FC = () => {
   
   // Track expanded task detail blocks
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [proofUrl, setProofUrl] = useState<string>('https://asiaray.com/proof/931242');
   const [selectedFile, setSelectedFile] = useState<string>('');
 
   const segments = [
@@ -35,27 +33,27 @@ export const GravarTab: React.FC = () => {
       {
         id: 'mock_task_1',
         title: 'Gosto disso',
-        type: 'Facebook',
+        type: 'outros',
         reward: 300,
         requiredLevel: 'WS2',
         desc: 'Gosto disso',
         status: 'andamento',
-        joinedAt: '2023-08-06 11:56:39'
+        joinedAt: '2023-08-06 11:56:34'
       },
       {
         id: 'mock_task_2',
         title: 'Gosto disso',
-        type: 'Facebook',
+        type: 'outros',
         reward: 300,
         requiredLevel: 'WS2',
         desc: 'Gosto disso',
         status: 'andamento',
-        joinedAt: '2023-08-06 11:56:37'
+        joinedAt: '2023-08-06 11:56:30'
       },
       {
         id: 'mock_task_3',
         title: 'Gosto disso',
-        type: 'Facebook',
+        type: 'outros',
         reward: 300,
         requiredLevel: 'WS2',
         desc: 'Gosto disso',
@@ -65,7 +63,7 @@ export const GravarTab: React.FC = () => {
       {
         id: 'mock_task_4',
         title: 'Gosto disso',
-        type: 'Facebook',
+        type: 'outros',
         reward: 300,
         requiredLevel: 'WS2',
         desc: 'Gosto disso',
@@ -82,10 +80,6 @@ export const GravarTab: React.FC = () => {
       setExpandedId(id);
       setSelectedFile('');
     }
-  };
-
-  const chooseMockPhoto = (pic: string) => {
-    setSelectedFile(pic);
   };
 
   const handleSubmit = (taskId: string) => {
@@ -132,7 +126,7 @@ export const GravarTab: React.FC = () => {
         <textarea
           rows={3}
           placeholder="Please write a message (If you have nothing to say, you don't have to write anything.)"
-          className="w-full text-[12px] p-3 border border-neutral-200 rounded-xs bg-white text-neutral-850 placeholder-neutral-400 focus:outline-none focus:border-neutral-350 resize-none pr-12 font-sans"
+          className="w-full text-[12px] p-3 border border-neutral-200 rounded-sm bg-white text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-neutral-300 resize-none pr-12 font-sans"
           id={`msg-textarea-${task.id}`}
         />
         <span className="absolute bottom-2 right-3 text-[10px] text-neutral-400 select-none font-sans">
@@ -146,7 +140,7 @@ export const GravarTab: React.FC = () => {
           onClick={() => {
             setSelectedFile('https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=300');
           }}
-          className="w-[58px] h-[58px] border-[1.5px] border-dashed border-red-500 rounded-md bg-neutral-50 hover:bg-neutral-100 flex items-center justify-center cursor-pointer select-none relative overflow-hidden active:scale-95 transition-all shadow-none"
+          className="w-[58px] h-[58px] border-[1.5px] border-dashed border-red-500 rounded bg-neutral-50 hover:bg-neutral-100 flex items-center justify-center cursor-pointer select-none relative overflow-hidden active:scale-95 transition-all shadow-none"
           id={`upload-box-plus-${task.id}`}
         >
           {selectedFile ? (
@@ -177,7 +171,7 @@ export const GravarTab: React.FC = () => {
         <button
           id={`submit-proof-btn-${task.id}`}
           onClick={() => handleSubmit(task.id)}
-          className="w-full max-w-[420px] h-[34px] bg-gradient-to-r from-[#ff4c15] to-[#f41e1e] hover:brightness-105 active:scale-[0.99] text-slate-800 font-extrabold text-[12px] text-center rounded-[3px] transition-all flex items-center justify-center lowercase tracking-wider cursor-pointer shadow-sm select-none"
+          className="w-full max-w-[420px] h-[34px] bg-[#f97316] hover:bg-[#ea580c] text-white font-semibold text-[12px] text-center rounded-[3px] transition-all flex items-center justify-center lowercase tracking-wider cursor-pointer shadow-none select-none border-none outline-none"
         >
           salvar
         </button>
@@ -186,26 +180,26 @@ export const GravarTab: React.FC = () => {
   );
 
   return (
-    <div id="gravar-tab-container" className="pb-24 bg-[#f4f6f9] min-h-screen animate-fadeIn">
+    <div id="gravar-tab-container" className="pb-24 bg-[#f4f6f9] min-h-screen animate-fadeIn font-sans">
       
       {/* 1. Page Header & Info block identical to image */}
       <div className="bg-[#f4f6f9] pt-4 pb-2 px-4 flex items-center justify-between select-none" id="gravar-header-area">
         <div className="space-y-0.5">
-          <h2 className="text-[17px] font-bold text-gray-805 tracking-tight leading-none">Registo de tarefas</h2>
-          <p className="text-[9px] text-gray-400 select-none">
+          <h2 className="text-[17px] font-bold text-neutral-800 tracking-tight leading-none">Registo de tarefas</h2>
+          <p className="text-[9px] text-[#9ea3a9] font-medium select-none">
             Estes dados são criados porAsiarayOficialmente fornecido
           </p>
         </div>
         <div className="text-right flex flex-col items-end justify-center pr-2">
-          <div className="text-[20px] font-bold text-gray-800 font-mono leading-none">0</div>
-          <div className="text-[9px] text-gray-400 mt-0.5 tracking-tight font-medium uppercase text-right">
+          <div className="text-[20px] font-semibold text-neutral-800 font-mono leading-none">0</div>
+          <div className="text-[9px] text-[#9ea3a9] mt-0.5 tracking-tight font-semibold uppercase text-right">
             Tarefas restantes
           </div>
         </div>
       </div>
 
       {/* 2. Segments Row representing the exact layout/count icons in image */}
-      <div className="bg-white border-b border-gray-150 grid grid-cols-4 py-2 select-none" id="gravar-segments-bar">
+      <div className="bg-white border-b border-gray-200 grid grid-cols-4 py-2 select-none" id="gravar-segments-bar">
         {segments.map((seg) => {
           const isActive = activeSegment === seg.status;
           let countVal = 0;
@@ -226,43 +220,43 @@ export const GravarTab: React.FC = () => {
               onClick={() => { setActiveSegment(seg.status); setExpandedId(null); }}
               className="flex flex-col items-center justify-center text-center focus:outline-none transition-all cursor-pointer relative"
             >
-              <div className="mb-0.5">
+              <div className="mb-1">
                 {seg.iconType === 'transformacao' && (
                   <svg className="w-[20px] h-[20px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="5" y="4" width="14" height="15" rx="1.5" stroke="#3182ce" strokeWidth="1.8" />
-                    <line x1="8" y1="2" x2="8" y2="5" stroke="#3182ce" strokeWidth="1.8" />
-                    <line x1="16" y1="2" x2="16" y2="5" stroke="#3182ce" strokeWidth="1.8" />
-                    <circle cx="12" cy="12" r="2" stroke="#3182ce" strokeWidth="1.8" />
+                    <rect x="5" y="4" width="14" height="15" rx="1.5" stroke={isActive ? "#f35a5a" : "#3182ce"} strokeWidth="1.8" />
+                    <line x1="8" y1="2" x2="8" y2="5" stroke={isActive ? "#f35a5a" : "#3182ce"} strokeWidth="1.8" />
+                    <line x1="16" y1="2" x2="16" y2="5" stroke={isActive ? "#f35a5a" : "#3182ce"} strokeWidth="1.8" />
+                    <circle cx="12" cy="12" r="2.5" stroke={isActive ? "#f35a5a" : "#3182ce"} strokeWidth="1.8" />
                   </svg>
                 )}
 
                 {seg.iconType === 'naorevisto' && (
                   <svg className="w-[20px] h-[20px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="5" y="4" width="14" height="16" rx="1.5" stroke="#e53e3e" strokeWidth="1.8" />
-                    <circle cx="12" cy="11" r="2.5" stroke="#e53e3e" strokeWidth="1.8" />
-                    <line x1="14" y1="13" x2="16" y2="15" stroke="#e53e3e" strokeWidth="1.8" strokeLinecap="round" />
+                    <rect x="5" y="4" width="14" height="16" rx="1.5" stroke={isActive ? "#f35a5a" : "#f56565"} strokeWidth="1.8" />
+                    <circle cx="12" cy="11.5" r="2.5" stroke={isActive ? "#f35a5a" : "#f56565"} strokeWidth="1.8" />
+                    <line x1="14" y1="13.5" x2="16.5" y2="16" stroke={isActive ? "#f35a5a" : "#f56565"} strokeWidth="1.8" strokeLinecap="round" />
                   </svg>
                 )}
 
                 {seg.iconType === 'terminado' && (
                   <svg className="w-[20px] h-[20px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="9" stroke="#319795" strokeWidth="1.8" />
-                    <path d="M9 12l2 2 4-4" stroke="#319795" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    <circle cx="12" cy="12" r="9" stroke={isActive ? "#f35a5a" : "#319795"} strokeWidth="1.8" />
+                    <path d="M8.5 12.5l2 2 4.5-4.5" stroke={isActive ? "#f35a5a" : "#319795"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
 
                 {seg.iconType === 'falhou' && (
                   <svg className="w-[20px] h-[20px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="5" y="4" width="14" height="16" rx="1.5" stroke="#e53e3e" strokeWidth="1.8" />
-                    <line x1="9" y1="9" x2="15" y2="15" stroke="#e53e3e" strokeWidth="1.8" strokeLinecap="round" />
-                    <line x1="15" y1="9" x2="9" y2="15" stroke="#e53e3e" strokeWidth="1.8" strokeLinecap="round" />
+                    <rect x="5" y="4" width="14" height="16" rx="1.5" stroke={isActive ? "#f35a5a" : "#f56565"} strokeWidth="1.8" />
+                    <line x1="9.5" y1="9.5" x2="14.5" y2="14.5" stroke={isActive ? "#f35a5a" : "#f56565"} strokeWidth="1.8" strokeLinecap="round" />
+                    <line x1="14.5" y1="9.5" x2="9.5" y2="14.5" stroke={isActive ? "#f35a5a" : "#f56565"} strokeWidth="1.8" strokeLinecap="round" />
                   </svg>
                 )}
               </div>
-              <span className={`text-[9.5px] tracking-tight transition-colors leading-none ${isActive ? 'text-[#f35a5a] font-normal' : 'text-gray-500'}`}>
+              <span className={`text-[9.5px] tracking-tight transition-colors leading-none ${isActive ? 'text-[#f35a5a] font-semibold' : 'text-gray-500 font-medium'}`}>
                 {seg.label}
               </span>
-              <span className={`text-[11px] font-mono mt-0.5 leading-tight ${isActive ? 'text-[#f35a5a] font-black' : 'text-gray-500'}`}>
+              <span className={`text-[11px] font-semibold font-mono mt-1 leading-tight ${isActive ? 'text-[#f35a5a]' : 'text-gray-500'}`}>
                 {countVal}
               </span>
             </button>
@@ -274,20 +268,18 @@ export const GravarTab: React.FC = () => {
       {activeSegment === 'revisao' && countNaoRevisto > 0 && (
         <div className="bg-amber-50 border-b border-amber-200 p-3 flex flex-col sm:flex-row gap-2 justify-between items-start sm:items-center px-4" id="fast-approve-cue">
           <div className="space-y-0.5">
-            <h4 className="text-xs font-bold text-amber-800 flex items-center gap-1">
-              <Zap size={14} className="fill-current text-amber-500" />
+            <h4 className="text-xs font-semibold text-amber-800 flex items-center gap-1">
               Auditoria Automática Ativa
             </h4>
-            <p className="text-[10px] text-amber-700">
+            <p className="text-[10px] text-amber-700 font-medium">
               O sistema processará a auditoria e creditará o saldo automaticamente. Se preferir, teste aprovação imediata abaixo:
             </p>
           </div>
           <button
             id="instant-audit-btn"
             onClick={handleInstantApproval}
-            className="text-[10px] bg-amber-500 hover:bg-amber-600 text-slate-800 font-black py-1.5 px-3 rounded-md flex items-center gap-1 cursor-pointer select-none"
+            className="text-[10px] bg-amber-500 hover:bg-amber-600 text-neutral-800 font-semibold py-1.5 px-3 rounded flex items-center gap-1 cursor-pointer select-none border-none outline-none"
           >
-            <Zap size={10} className="fill-current" />
             Aprovação Imediata
           </button>
         </div>
@@ -297,42 +289,44 @@ export const GravarTab: React.FC = () => {
       <div className="p-0 flex flex-col relative w-full" id="gravar-task-items-wrapper">
         {displayTasks.length === 0 ? (
           <div className="text-center py-20 px-6 bg-white text-neutral-400 text-xs flex flex-col items-center justify-center gap-2">
-            <ClipboardList size={30} className="text-neutral-300 opacity-60" />
-            <span className="font-bold">Nenhum registo de tarefa encontrado</span>
+            <span className="font-semibold">Nenhum registo de tarefa encontrado</span>
             <span className="text-[10px] text-neutral-400 italic">
               Visite a aba "tarefa" para aceitar e participar em missões diárias!
             </span>
           </div>
         ) : (
-          displayTasks.map((task) => {
+          displayTasks.map((task, idx) => {
             const isExpanded = expandedId === task.id;
+            // The first card in active segment 'andamento' has a floating announcement icon exactly matching the screenshot
+            const hasFloatingBadge = activeSegment === 'andamento' && idx === 0;
+
             return (
               <div 
                 key={task.id}
-                className="bg-white border-b-8 border-neutral-100/70 overflow-hidden flex flex-col relative w-full"
+                className="bg-white flex flex-col relative w-full border-b-[10px] border-[#f4f6f9]"
                 id={`gravar-card-${task.id}`}
               >
                 {/* 3.1 Card Header bar (outros | X) */}
-                <div className="bg-[#dbe4f0] px-3 py-2 flex items-center justify-between border-b border-gray-150 select-none mx-2 mt-2">
-                  <span className="text-[12px] text-gray-700 tracking-wide">outros</span>
-                  <span className="text-[12px] text-gray-400 select-none cursor-pointer hover:text-gray-700" onClick={() => setExpandedId(null)}>X</span>
+                <div className="bg-[#dbe4f0] px-3.5 py-1.5 flex items-center justify-between border-b border-neutral-200 select-none w-full">
+                  <span className="text-[11.5px] text-[#4a5568] font-medium tracking-wide">outros</span>
+                  <span className="text-[11.5px] text-[#a0aec0] select-none cursor-pointer hover:text-[#4a5568] font-semibold" onClick={() => setExpandedId(null)}>X</span>
                 </div>
 
                 {/* 3.2 Card body content with high-accuracy field names and values */}
-                <div className="p-4 text-gray-600 text-[12px] font-sans relative pr-[90px] bg-white mx-2 border border-t-0 border-gray-100 flex flex-col gap-1.5">
+                <div className="p-4 text-[#4a5568] text-[11.5px] font-sans relative pr-[84px] bg-white flex flex-col gap-1 w-full">
                   
                   {/* Objectivo da tarefa: Gosto disso */}
                   <div className="flex items-start leading-tight">
-                    <span className="text-gray-500 font-normal min-w-[110px] select-none">Objectivo da tarefa:</span>
-                    <span className="text-gray-800 ml-1">{task.desc || 'Gosto disso'}</span>
+                    <span className="text-gray-400 font-medium min-w-[124px] select-none">Objectivo da tarefa:</span>
+                    <span className="text-neutral-850 font-medium">{task.desc || 'Gosto disso'}</span>
                   </div>
                   
                   {/* ligação da tarefa: abrir a ligação de vídeo */}
-                  <div className="flex items-center leading-normal">
-                    <span className="text-gray-500 font-normal min-w-[110px] select-none">ligação da tarefa:</span>
+                  <div className="flex items-center leading-normal mt-0.5">
+                    <span className="text-gray-400 font-medium min-w-[124px] select-none">ligação da tarefa:</span>
                     <button 
                       onClick={() => handleOpenLink(task.desc)}
-                      className="ml-1 bg-[#1a73e8] hover:bg-[#1557b0] text-white text-[10px] py-0.5 px-2 rounded-[2px] transition-colors cursor-pointer select-none"
+                      className="bg-[#1a73e8] hover:bg-[#1557b0] text-white text-[10px] py-0.5 px-2 rounded-[3px] transition-colors cursor-pointer select-none border-none outline-none font-medium"
                     >
                       abrir a ligação de vídeo
                     </button>
@@ -341,25 +335,25 @@ export const GravarTab: React.FC = () => {
                   {!isExpanded && (
                     <>
                       {/* Criar: 2023-08-06 11:56:39 */}
-                      <div className="flex items-start leading-tight">
-                        <span className="text-gray-500 font-normal min-w-[110px] select-none">Criar:</span>
-                        <span className="text-gray-600 font-mono ml-1 select-all">{task.joinedAt || '2023-08-06 11:56:39'}</span>
+                      <div className="flex items-start leading-tight mt-0.5">
+                        <span className="text-gray-400 font-medium min-w-[124px] select-none">Criar:</span>
+                        <span className="text-gray-600 font-mono ml-0.5 select-all">{task.joinedAt}</span>
                       </div>
 
                       {/* revisão: Transformação */}
-                      <div className="flex items-start leading-tight">
-                        <span className="text-gray-500 font-normal min-w-[110px] select-none">revisão:</span>
-                        <span className="text-gray-800 ml-1 select-none">
+                      <div className="flex items-start leading-tight mt-0.5">
+                        <span className="text-gray-400 font-medium min-w-[124px] select-none">revisão:</span>
+                        <span className="text-neutral-850 font-medium select-none">
                           {activeSegment === 'andamento' ? 'Transformação' : activeSegment === 'revisao' ? 'Não revisto' : activeSegment === 'concluido' ? 'Terminado' : 'Falhou'}
                         </span>
                       </div>
 
                       {/* Action Orange button row */}
                       {activeSegment === 'andamento' && (
-                        <div className="pt-1.5 select-none flex">
+                        <div className="pt-2 select-none flex">
                           <button 
                             onClick={() => toggleExpand(task.id)}
-                            className="bg-[#f97316] hover:bg-[#ea580c] text-white font-normal text-[10px] py-1 px-3 rounded-full border border-dashed border-white transition-all cursor-pointer select-none"
+                            className="bg-[#ff4c15] hover:bg-[#ea3a00] text-white font-medium text-[9.5px] py-1 px-4 rounded-full border border-dashed border-white/90 transition-all cursor-pointer select-none active:scale-95 shadow-none"
                           >
                             add a screenshot of done task
                           </button>
@@ -367,24 +361,24 @@ export const GravarTab: React.FC = () => {
                       )}
 
                       {activeSegment === 'revisao' && (
-                        <div className="pt-1.5">
-                          <span className="bg-amber-50 text-amber-700 text-[10px] py-0.5 px-2 rounded inline-block border border-amber-100">
+                        <div className="pt-2">
+                          <span className="bg-amber-50 text-amber-700 text-[9.5px] py-0.5 px-2 rounded inline-block border border-amber-100 font-medium">
                             Em Revisão por Auditoria Automática
                           </span>
                         </div>
                       )}
 
                       {activeSegment === 'concluido' && (
-                        <div className="pt-1.5">
-                          <span className="bg-emerald-50 text-emerald-700 text-[10px] py-0.5 px-2 rounded inline-block border border-emerald-100">
+                        <div className="pt-2">
+                          <span className="bg-emerald-50 text-emerald-700 text-[9.5px] py-0.5 px-2 rounded inline-block border border-emerald-100 font-medium">
                             Tarefa Confirmada e Liquidada
                           </span>
                         </div>
                       )}
 
                       {activeSegment === 'falhado' && (
-                        <div className="pt-1.5">
-                          <span className="bg-red-50 text-red-700 text-[10px] py-0.5 px-2 rounded inline-block border border-red-100">
+                        <div className="pt-2">
+                          <span className="bg-red-50 text-red-700 text-[9.5px] py-0.5 px-2 rounded inline-block border border-red-100 font-medium">
                             Pendente / Falhada
                           </span>
                         </div>
@@ -394,14 +388,28 @@ export const GravarTab: React.FC = () => {
 
                   {/* 3.3 Blue-Grey Coin Badge Centered Vertically on the Right Column representing the exact circle layout in the image */}
                   {!isExpanded && (
-                    <div className="absolute right-3 top-[50%] -translate-y-1/2 flex items-center gap-2">
-                      <div 
-                        className="h-[52px] w-[52px] rounded-full border-2 border-white shadow-sm flex items-center justify-center shrink-0" 
-                        style={{ backgroundColor: '#9aaec4' }}
-                      >
-                        <span className="text-white text-[11px] font-black tracking-tight select-all text-center">
-                          {task.reward}KZ
-                        </span>
+                    <div className="absolute right-4 top-[50%] -translate-y-1/2 flex items-center select-none">
+                      <div className="relative">
+                        <div 
+                          className="h-[52px] w-[52px] rounded-full border border-white/80 shadow-xs flex items-center justify-center shrink-0" 
+                          style={{ backgroundColor: '#9aaec4' }}
+                        >
+                          <span className="text-white text-[11px] font-bold tracking-tight select-all text-center">
+                            {task.reward}KZ
+                          </span>
+                        </div>
+
+                        {/* Floating orange megaphone/speaker action badge on the first card matching the screenshot */}
+                        {hasFloatingBadge && (
+                          <div 
+                            className="absolute -right-1 bottom-1 h-5 w-5 rounded-full bg-[#f97316] border border-white flex items-center justify-center cursor-pointer shadow-xs active:scale-95 transition-transform"
+                            onClick={() => alert('Dica: Envie a prova de captura para revisão para creditar de imediato os KZ 300!')}
+                          >
+                            <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v.354L3.435 6.64A2 2 0 002 8.44V12.5a2.25 2.25 0 001.293 2.036L6 15.93V19a1 1 0 001 1h3a1 1 0 001-1v-2.28a1 1 0 00.304-.707l5.214-5.214A1 1 0 0017 9.5a1 1 0 001-1V3z" />
+                            </svg>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

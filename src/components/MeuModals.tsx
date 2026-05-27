@@ -185,13 +185,38 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   );
 };
 
+// Custom high-fidelity credit card SVG resembling a standard bank card with golden chip
+const BlueCardIcon: React.FC = () => (
+  <svg className="w-[30px] h-[21px] rounded-[3px] shadow-xs select-none shrink-0" viewBox="0 0 30 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="30" height="21" rx="2.5" fill="#1b4d89" />
+    <path d="M2 13C8 16 14 10.5 17 12.5C21 14.5 25.5 17 28 15.5" stroke="#4a86cf" strokeWidth="0.8" strokeLinecap="round" />
+    <path d="M1 16C10 20 18 15 29 17.5" stroke="#71a9ee" strokeWidth="0.6" strokeLinecap="round" />
+    <rect x="3.5" y="6.5" width="5" height="4" rx="0.5" fill="#fbbf24" />
+    <line x1="6" y1="6.5" x2="6" y2="10.5" stroke="#92400e" strokeWidth="0.4" />
+    <line x1="3.5" y1="8.5" x2="8.5" y2="8.5" stroke="#92400e" strokeWidth="0.4" />
+    <circle cx="23" cy="14" r="2" fill="white" fillOpacity="0.4" />
+    <circle cx="25" cy="14" r="2" fill="white" fillOpacity="0.2" />
+  </svg>
+);
+
+// Custom high-fidelity Tether/USDT gold coin icon resembling the cryptocurrency symbol from the screenshot
+const GoldCoinIcon: React.FC = () => (
+  <svg className="w-[26px] h-[26px] select-none shrink-0" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="13" cy="13" r="11.5" fill="#fffbeb" stroke="#f59e0b" strokeWidth="2.2" />
+    <circle cx="13" cy="13" r="8.2" fill="#fef08a" stroke="#d97706" strokeWidth="1.2" />
+    <text x="13.2" y="16.5" fill="#a16207" fontSize="10.5" fontWeight="950" textAnchor="middle" fontFamily="sans-serif">B</text>
+    <line x1="11.5" y1="3.5" x2="11.5" y2="5" stroke="#d97706" strokeWidth="0.8" />
+    <line x1="14.5" y1="3.5" x2="14.5" y2="5" stroke="#d97706" strokeWidth="0.8" />
+  </svg>
+);
+
 // 3. RECHARGE AND WITHDRAWAL MODAL ("Carteira" / Transações)
 interface WalletModalProps extends ModalProps {
   initialTab?: 'recharge' | 'withdraw';
 }
 
 export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initialTab = 'recharge' }) => {
-  const { stats, user, addRecharge, addWithdrawal, showLoading, hideLoading, setIsFullScreenActive } = useApp();
+  const { stats, user, addRecharge, showLoading, hideLoading, setIsFullScreenActive } = useApp();
 
   React.useEffect(() => {
     if (isOpen) {
@@ -202,7 +227,6 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
     };
   }, [isOpen, setIsFullScreenActive]);
   
-  const [activeSubTab, setActiveSubTab] = useState<'recharge' | 'withdraw'>(initialTab);
   const [rechargeStep, setRechargeStep] = useState<'amount' | 'method' | 'instructions'>('amount');
   const [rechargeAmt, setRechargeAmt] = useState<number>(0);
   const [selectedMethod, setSelectedMethod] = useState<'BIC' | 'BFA' | 'Atlântico' | 'BCI' | 'BAI' | 'USDT-TRC20'>('BFA');
@@ -210,7 +234,6 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
   const [fileLabel, setFileLabel] = useState<string>('Nenhum arquivo escolhido');
   const [ibanCopied, setIbanCopied] = useState(false);
   const [usdtCopied, setUsdtCopied] = useState(false);
-  const [withdrawAmt, setWithdrawAmt] = useState<string>('');
 
   const IBAN = 'A086 8886 1145 9312 4224 5813 7';
   const USDT_ADDR = 'TQdoJo3s13AtTPY1NZsnxrnLdLwJFSCqT1';
@@ -231,320 +254,260 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
     }, 1400);
   };
 
-  const handleWithdrawal = (e: React.FormEvent) => {
-    e.preventDefault();
-    const amt = parseFloat(withdrawAmt);
-    if (isNaN(amt) || amt <= 0) { alert('Montante inválido.'); return; }
-    showLoading('A validar saldo...');
-    setTimeout(() => {
-      const result = addWithdrawal(amt);
-      hideLoading();
-      if (result.success) { alert(`Ordem de KZ ${amt.toLocaleString('pt-AO')} registada.`); onClose(); }
-      else alert(result.error);
-    }, 1500);
-  };
-
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#f1f4f8] overflow-y-auto" id="wallet-fullscreen">
+    <div className="fixed inset-0 z-50 flex flex-col bg-[#f1f4f8] overflow-y-auto font-sans" id="wallet-fullscreen">
       {/* Header */}
-      <div className="bg-white border-b border-neutral-200 px-4 py-3 flex items-center sticky top-0 z-10">
+      <div className="bg-white border-b border-neutral-200 px-4 py-3 flex items-center sticky top-0 z-10 select-none h-12">
         <button 
           onClick={() => {
-            if (activeSubTab === 'recharge') {
-              if (rechargeStep === 'instructions') setRechargeStep('method');
-              else if (rechargeStep === 'method') setRechargeStep('amount');
-              else onClose();
-            } else {
-              onClose();
-            }
+            if (rechargeStep === 'instructions') setRechargeStep('method');
+            else if (rechargeStep === 'method') setRechargeStep('amount');
+            else onClose();
           }} 
-          className="mr-3 text-slate-700 cursor-pointer" 
+          className="mr-3 text-slate-700 cursor-pointer focus:outline-none" 
           id="wallet-back-btn"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px] text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <span className="font-bold text-[15px] text-slate-800">
-          {activeSubTab === 'recharge' ? (rechargeStep === 'instructions' && selectedMethod === 'USDT-TRC20' ? 'Cobrança da moeda digital' : 'Recarregar') : 'Levantamento'}
+        <span className="font-bold text-[15px] text-slate-800 tracking-tight text-center flex-1 translate-x-[-10px]">
+          {rechargeStep === 'instructions' && selectedMethod === 'USDT-TRC20' ? 'Cobrança da moeda digital' : 'Recarregar'}
         </span>
       </div>
 
-      <div className="flex-1 max-w-md mx-auto w-full p-4 space-y-3">
-        {/* Tab: Recharge / Withdraw */}
-        <div className="flex bg-white border border-neutral-200 rounded-lg p-0.5">
-          <button id="btn-tab-recharge" type="button" onClick={() => setActiveSubTab('recharge')}
-            className={`flex-1 py-2 text-xs font-bold rounded transition-all ${activeSubTab === 'recharge' ? 'bg-[#0d7377] text-white' : 'text-neutral-500'}`}>
-            Recarregar
-          </button>
-          <button id="btn-tab-withdraw" type="button" onClick={() => setActiveSubTab('withdraw')}
-            className={`flex-1 py-2 text-xs font-bold rounded transition-all ${activeSubTab === 'withdraw' ? 'bg-[#0d7377] text-white' : 'text-neutral-500'}`}>
-            Levantar
-          </button>
-        </div>
-
-        {activeSubTab === 'recharge' ? (
-          <div className="space-y-3">
-            {rechargeStep === 'amount' && (
-              <div className="space-y-4">
-                {/* Input box */}
-                <div className="bg-white rounded-xl p-4 border border-neutral-200 shadow-sm">
-                  <label className="text-xs text-neutral-400 font-bold block mb-1">DIGITE O VALOR DO RECARGA (KZ)</label>
+      <div className="flex-1 max-w-md mx-auto w-full p-4 space-y-3 bg-[#f1f4f8]">
+        <div className="space-y-3">
+          {rechargeStep === 'amount' && (
+            <div className="space-y-4">
+              {/* Input box styled exactly like Bank linkage card */}
+              <div className="border border-gray-200 bg-white rounded-sm overflow-hidden shadow-xs">
+                <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Montante a Recarregar (KZ)</div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-2.5 text-[12px] border-t border-gray-200">
                   <input 
                     type="number" 
-                    placeholder="Introduza o valor"
+                    placeholder="Introduza o valor do recarga"
                     value={rechargeAmt === 0 ? '' : rechargeAmt}
                     onChange={(e) => setRechargeAmt(Number(e.target.value))}
-                    className="w-full text-xl font-black text-slate-800 border-b border-neutral-200 pb-2 focus:outline-none bg-transparent"
+                    className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold placeholder-neutral-400"
                   />
                 </div>
+              </div>
 
-                {/* Suggested values */}
-                <div className="grid grid-cols-3 gap-2">
-                  {[10000, 20000, 50000, 100000, 150000, 300000].map(val => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => setRechargeAmt(val)}
-                      className={`py-2 px-1 text-center font-bold rounded-lg border text-xs shadow-sm cursor-pointer transition-all ${rechargeAmt === val ? 'bg-[#1e88e5] border-[#1e88e5] text-white' : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
+              {/* Suggested values */}
+              <div className="grid grid-cols-3 gap-2">
+                {[10000, 20000, 50000, 100000, 150000, 300000].map(val => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setRechargeAmt(val)}
+                    className={`py-2.5 px-1 text-center font-extrabold rounded-sm border text-[11px] cursor-pointer transition-all ${rechargeAmt === val ? 'bg-[#1e88e5] border-[#1e88e5] text-white' : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
+                  >
+                    {val.toLocaleString('pt-AO')} KZ
+                  </button>
+                ))}
+              </div>
+
+              {/* Continuar button */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (rechargeAmt <= 0) {
+                    alert('Por favor, introduza um valor de recarga válido.');
+                    return;
+                  }
+                  setRechargeStep('method');
+                }}
+                className="w-full bg-[#1e88e5] hover:bg-[#1565c0] text-white font-bold py-3 rounded-lg text-[13px] uppercase tracking-wider shadow-sm transition-colors cursor-pointer border-none outline-none mt-2"
+              >
+                Continuar
+              </button>
+            </div>
+          )}
+
+          {rechargeStep === 'method' && (
+            <div className="space-y-3 bg-white rounded-xl shadow-xs p-3">
+              <p className="text-center text-[14px] text-[#6d28d9] font-semibold py-2 select-none tracking-wide">
+                Seleccione por favor o método de pagamento
+              </p>
+
+              <div className="divide-y divide-slate-100 overflow-hidden">
+                {/* BIC, BFA, Atlântico, BCI, BAI, USDT-TRC20 */}
+                {['BIC', 'BFA', 'Atlântico', 'BCI', 'BAI', 'USDT-TRC20'].map((methodName, idx) => {
+                  const isUSDT = methodName === 'USDT-TRC20';
+                  const usdtVal = (rechargeAmt / 430).toFixed(1);
+                  return (
+                    <div
+                      key={methodName}
+                      onClick={() => {
+                        setSelectedMethod(methodName as any);
+                        setRechargeStep('instructions');
+                      }}
+                      className="py-3.5 flex items-center justify-between hover:bg-neutral-50/50 cursor-pointer transition-colors"
+                      id={`payment-method-row-${idx}`}
                     >
-                      {val.toLocaleString('pt-AO')} KZ
-                    </button>
-                  ))}
-                </div>
-
-                {/* Continuar button */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (rechargeAmt <= 0) {
-                      alert('Por favor, introduza um valor de recarga válido.');
-                      return;
-                    }
-                    setRechargeStep('method');
-                  }}
-                  className="w-full bg-[#1e88e5] hover:bg-[#1565c0] text-white font-bold py-3 rounded-xl text-sm tracking-wide shadow-md transition-colors cursor-pointer border-none outline-none mt-2"
-                >
-                  Continuar
-                </button>
+                      <div className="flex items-center gap-4 select-none">
+                        {isUSDT ? (
+                          <GoldCoinIcon />
+                        ) : (
+                          <BlueCardIcon />
+                        )}
+                        <span className="text-[13px] font-semibold text-stone-700 tracking-wide">{methodName}</span>
+                      </div>
+                      <div className="flex items-center text-neutral-400 text-xs font-semibold">
+                        {isUSDT ? (
+                          <span className="text-[12px] font-semibold text-stone-600 pr-1 tracking-tight">
+                            {usdtVal}USDT&gt;
+                          </span>
+                        ) : (
+                          <span className="text-[12px] font-semibold text-neutral-400 pr-1 tracking-tight">&gt;</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            )}
+            </div>
+          )}
 
-            {rechargeStep === 'method' && (
-              <div className="space-y-3">
-                <p className="text-center text-[13px] text-purple-700 font-bold py-2">
-                  Seleccione por favor o método de pagamento
-                </p>
+          {rechargeStep === 'instructions' && (
+            <div className="space-y-3">
+              {selectedMethod !== 'USDT-TRC20' ? (
+                <form onSubmit={handleRecharge} className="space-y-3">
+                  {/* NÍVEL ALVO card */}
+                  <div className="bg-white rounded-xl p-4 border border-neutral-200 shadow-sm">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-[10px] font-bold text-neutral-400 tracking-widest">NÍVEL ALVO</span>
+                      <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">WS3</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-[9px] font-bold text-neutral-400 mb-1">VALOR DO RECARGA</p>
+                        <p className="text-[17px] font-black text-slate-800">{rechargeAmt.toLocaleString('pt-AO')} KZ</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-bold text-neutral-400 mb-1">EQUIVALENTE EM USDT</p>
+                        <p className="text-[17px] font-black text-indigo-600">{(rechargeAmt / 430).toFixed(1)} USDT</p>
+                      </div>
+                    </div>
+                  </div>
 
-                <div className="bg-white border border-neutral-200 rounded-xl divide-y divide-neutral-100 overflow-hidden shadow-sm">
-                  {/* BIC, BFA, Atlântico, BCI, BAI, USDT-TRC20 */}
-                  {['BIC', 'BFA', 'Atlântico', 'BCI', 'BAI', 'USDT-TRC20'].map(methodName => {
-                    const isUSDT = methodName === 'USDT-TRC20';
-                    return (
-                      <div
-                        key={methodName}
+                  {/* INSTRUÇÕES card */}
+                  <div className="bg-white rounded-xl p-4 border border-dashed border-indigo-300 space-y-2 shadow-sm">
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                      <span className="text-[11px] font-black text-indigo-700 tracking-wider">INSTRUÇÕES PARA DEPÓSITO</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-neutral-400">Banco de Destino:</span>
+                      <span className="font-extrabold text-slate-800">{selectedMethod}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-neutral-400">Titular da Conta:</span>
+                      <span className="font-extrabold text-slate-800">Asiaray Angola Media Lda.</span>
+                    </div>
+                    <div className="bg-[#f1f5f9] rounded-xl p-3 flex justify-between items-center mt-2">
+                      <div>
+                        <p className="text-[9px] font-bold text-neutral-400 mb-1">NÚMERO DO IBAN OFICIAL</p>
+                        <p className="text-[13px] font-extrabold text-slate-800 font-mono">
+                          {selectedMethod === 'BIC' ? 'AO06 0004 0000 1234 5678 1012 3' :
+                           selectedMethod === 'BFA' ? 'AO86 8886 1145 9312 4224 5813 7' :
+                           selectedMethod === 'Atlântico' ? 'AO06 0055 0000 8765 4321 1015 6' :
+                           selectedMethod === 'BCI' ? 'AO06 0005 0000 9999 8888 1019 1' :
+                           'AO06 0040 0000 9312 4224 1018 3'}
+                        </p>
+                      </div>
+                      <button type="button" 
                         onClick={() => {
-                          setSelectedMethod(methodName as any);
-                          setRechargeStep('instructions');
+                          const currentIban = selectedMethod === 'BIC' ? 'AO06 0004 0000 1234 5678 1012 3' :
+                           selectedMethod === 'BFA' ? 'AO86 8886 1145 9312 4224 5813 7' :
+                           selectedMethod === 'Atlântico' ? 'AO06 0055 0000 8765 4321 1015 6' :
+                           selectedMethod === 'BCI' ? 'AO06 0005 0000 9999 8888 1019 1' :
+                           'AO06 0040 0000 9312 4224 1018 3';
+                          navigator.clipboard.writeText(currentIban);
+                          setIbanCopied(true);
+                          setTimeout(() => setIbanCopied(false), 2000);
                         }}
-                        className="p-4 flex items-center justify-between hover:bg-neutral-50 cursor-pointer transition-colors"
+                        className="bg-slate-200 text-blue-500 text-[10px] font-black px-3 py-1 rounded-full cursor-pointer border-none outline-none"
                       >
-                        <div className="flex items-center gap-3">
-                          {isUSDT ? (
-                            <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-sm shadow-sm select-none">
-                              ₮
-                            </div>
-                          ) : (
-                            <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
-                              </svg>
-                            </div>
-                          )}
-                          <span className="text-xs font-bold text-neutral-800">{methodName}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-neutral-400 text-xs font-medium">
-                          {isUSDT && <span className="text-neutral-500 text-[10px] mr-1">58.1USDT</span>}
-                          <span>&gt;</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {rechargeStep === 'instructions' && (
-              <div className="space-y-3">
-                {selectedMethod !== 'USDT-TRC20' ? (
-                  <form onSubmit={handleRecharge} className="space-y-3">
-                    {/* NÍVEL ALVO card */}
-                    <div className="bg-white rounded-2xl p-4 border border-neutral-200">
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-[10px] font-bold text-neutral-400 tracking-widest">NÍVEL ALVO</span>
-                        <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">WS3</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <p className="text-[9px] font-bold text-neutral-400 mb-1">VALOR DO RECARGA</p>
-                          <p className="text-[17px] font-black text-slate-800">{rechargeAmt.toLocaleString('pt-AO')} KZ</p>
-                        </div>
-                        <div>
-                          <p className="text-[9px] font-bold text-neutral-400 mb-1">EQUIVALENTE EM USDT</p>
-                          <p className="text-[17px] font-black text-indigo-600">{(rechargeAmt / 430).toFixed(1)} USDT</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* INSTRUÇÕES card */}
-                    <div className="bg-white rounded-2xl p-4 border border-dashed border-indigo-300 space-y-2">
-                      <div className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-                        <span className="text-[11px] font-black text-indigo-700 tracking-wider">INSTRUÇÕES PARA DEPÓSITO</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-neutral-400">Banco de Destino:</span>
-                        <span className="font-extrabold text-slate-800">{selectedMethod}</span>
-                      </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-neutral-400">Titular da Conta:</span>
-                        <span className="font-extrabold text-slate-800">Asiaray Angola Media Lda.</span>
-                      </div>
-                      <div className="bg-[#f1f5f9] rounded-xl p-3 flex justify-between items-center">
-                        <div>
-                          <p className="text-[9px] font-bold text-neutral-400 mb-1">NÚMERO DO IBAN OFICIAL</p>
-                          <p className="text-[13px] font-extrabold text-slate-800 font-mono">
-                            {selectedMethod === 'BIC' ? 'AO06 0004 0000 1234 5678 1012 3' :
-                             selectedMethod === 'BFA' ? 'AO86 8886 1145 9312 4224 5813 7' :
-                             selectedMethod === 'Atlântico' ? 'AO06 0055 0000 8765 4321 1015 6' :
-                             selectedMethod === 'BCI' ? 'AO06 0005 0000 9999 8888 1019 1' :
-                             'AO06 0040 0000 9312 4224 1018 3'}
-                          </p>
-                        </div>
-                        <button type="button" 
-                          onClick={() => {
-                            const currentIban = selectedMethod === 'BIC' ? 'AO06 0004 0000 1234 5678 1012 3' :
-                             selectedMethod === 'BFA' ? 'AO86 8886 1145 9312 4224 5813 7' :
-                             selectedMethod === 'Atlântico' ? 'AO06 0055 0000 8765 4321 1015 6' :
-                             selectedMethod === 'BCI' ? 'AO06 0005 0000 9999 8888 1019 1' :
-                             'AO06 0040 0000 9312 4224 1018 3';
-                            navigator.clipboard.writeText(currentIban);
-                            setIbanCopied(true);
-                            setTimeout(() => setIbanCopied(false), 2000);
-                          }}
-                          className="bg-slate-200 text-blue-500 text-[10px] font-black px-3 py-1 rounded-full cursor-pointer border-none outline-none"
-                        >
-                          {ibanCopied ? 'COPIADO' : 'COPIAR'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* COMPROVATIVO card */}
-                    <div className="bg-white rounded-2xl p-4 border border-neutral-200 space-y-3">
-                      <p className="text-[10px] font-bold text-neutral-400 tracking-widest">COMPROVATIVO DE TRANSFERÊNCIA</p>
-                      <div className="relative">
-                        <textarea maxLength={100} value={comprovativo} onChange={e => setComprovativo(e.target.value)}
-                          placeholder="Se desejar, adicione uma mensagem de verificação para auditoria"
-                          className="w-full text-xs border border-neutral-200 rounded-lg p-3 h-20 resize-none focus:outline-none placeholder-neutral-400" />
-                        <span className="absolute bottom-2 right-2 text-[9px] text-neutral-400">{comprovativo.length}/100</span>
-                      </div>
-                      <div
-                        onClick={() => setFileLabel('comprovativo.jpg')}
-                        className="h-16 w-16 border-2 border-dashed border-red-500 rounded-lg flex items-center justify-center cursor-pointer hover:bg-red-50 transition-colors">
-                        {fileLabel !== 'Nenhum arquivo escolhido'
-                          ? <Check size={20} className="text-green-500" />
-                          : <span className="text-2xl font-black text-red-500">+</span>}
-                      </div>
-                      <button type="submit"
-                        className="w-full bg-[#1e88e5] hover:bg-[#1565c0] text-white font-extrabold py-3.5 rounded-lg text-sm tracking-widest uppercase cursor-pointer border-none outline-none">
-                        SALVAR
+                        {ibanCopied ? 'COPIADO' : 'COPIAR'}
                       </button>
                     </div>
-                  </form>
-                ) : (
-                  <form onSubmit={handleRecharge} className="space-y-3">
-                    <p className="text-center text-[11px] text-red-500 font-semibold">Por favor, transfira fundos manualmente para a seguinte conta</p>
+                  </div>
 
-                    <div className="border border-neutral-200 rounded-lg overflow-hidden">
-                      {[['Tipo','USDT'],['Nome do banco','USDT-TRC20'],['conta bancária', USDT_ADDR]].map(([label, val]) => (
-                        <div key={label} className="divide-y divide-neutral-200">
-                          <div className="bg-white px-4 py-2 text-xs font-bold text-blue-600">{label}</div>
-                          <div className="bg-slate-50 px-4 py-2 text-xs font-mono text-slate-700 break-all">{val}</div>
-                        </div>
-                      ))}
-                      <div className="bg-white px-4 py-2 text-xs font-bold text-blue-600">Número da carteira</div>
-                      <div className="bg-slate-50 px-4 py-2 flex items-center justify-between gap-2">
-                        <span className="text-xs font-mono text-slate-700 break-all flex-1">{USDT_ADDR}</span>
-                        <button type="button" onClick={copyUSDT}
-                          className="bg-blue-500 hover:bg-blue-600 text-white text-[10px] px-3 py-1 rounded cursor-pointer border-none outline-none shrink-0 font-bold">
-                          {usdtCopied ? 'Copiado' : 'cópia'}
-                        </button>
+                  {/* COMPROVATIVO card */}
+                  <div className="bg-white rounded-xl p-4 border border-neutral-200 space-y-3 shadow-sm">
+                    <p className="text-[10px] font-bold text-neutral-400 tracking-widest">COMPROVATIVO DE TRANSFERÊNCIA</p>
+                    <div className="relative">
+                      <textarea maxLength={100} value={comprovativo} onChange={e => setComprovativo(e.target.value)}
+                        placeholder="Se desejar, adicione uma mensagem de verificação para auditoria"
+                        className="w-full text-xs border border-neutral-200 rounded-lg p-3 h-20 resize-none focus:outline-none placeholder-neutral-400" />
+                      <span className="absolute bottom-2 right-2 text-[9px] text-neutral-400">{comprovativo.length}/100</span>
+                    </div>
+                    <div
+                      onClick={() => setFileLabel('comprovativo.jpg')}
+                      className="h-16 w-16 border-2 border-dashed border-red-500 rounded-lg flex items-center justify-center cursor-pointer hover:bg-red-50 transition-colors">
+                      {fileLabel !== 'Nenhum arquivo escolhido'
+                        ? <Check size={20} className="text-green-500" />
+                        : <span className="text-2xl font-black text-red-500">+</span>}
+                    </div>
+                    <button type="submit"
+                      className="w-full bg-[#1e88e5] hover:bg-[#1565c0] text-white font-extrabold py-3.5 rounded-lg text-sm tracking-widest uppercase cursor-pointer border-none outline-none">
+                      SALVAR
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleRecharge} className="space-y-3">
+                  <p className="text-center text-[11px] text-red-500 font-semibold">Por favor, transfira fundos manualmente para a seguinte conta</p>
+
+                  <div className="border border-neutral-200 rounded-lg overflow-hidden">
+                    {[['Tipo','USDT'],['Nome do banco','USDT-TRC20'],['conta bancária', USDT_ADDR]].map(([label, val]) => (
+                      <div key={label} className="divide-y divide-neutral-200">
+                        <div className="bg-white px-4 py-2 text-xs font-bold text-blue-600">{label}</div>
+                        <div className="bg-slate-50 px-4 py-2 text-xs font-mono text-slate-700 break-all">{val}</div>
                       </div>
-                    </div>
-
-                    <p className="text-center text-[11px] text-red-500 font-semibold">Informação sobre a procura</p>
-                    <div className="border border-neutral-200 rounded-lg overflow-hidden">
-                      {[['Número do pedido','202308060508708470'],['número da conta', user.phone || '244922342885'],['requisito', (rechargeAmt / 430).toFixed(2)]].map(([label, val]) => (
-                        <div key={label}>
-                          <div className="bg-white px-4 py-2 text-xs font-bold text-blue-600">{label}</div>
-                          <div className="bg-slate-50 px-4 py-2 text-xs font-mono text-slate-700">{val}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button type="button" onClick={() => setFileLabel('comprovativo_usdt.png')}
-                        className="flex-1 bg-[#1e88e5] hover:bg-[#1565c0] text-white font-bold py-2.5 rounded text-xs flex items-center justify-center gap-1 cursor-pointer border-none outline-none">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                        </svg>
-                        Credenciais
-                      </button>
-                      <button type="submit" className="flex-1 bg-[#1e88e5] hover:bg-[#1565c0] text-white font-bold py-2.5 rounded text-xs cursor-pointer border-none outline-none">
-                        Confirmar
+                    ))}
+                    <div className="bg-white px-4 py-2 text-xs font-bold text-blue-600">Número da carteira</div>
+                    <div className="bg-slate-50 px-4 py-2 flex items-center justify-between gap-2">
+                      <span className="text-xs font-mono text-slate-700 break-all flex-1">{USDT_ADDR}</span>
+                      <button type="button" onClick={copyUSDT}
+                        className="bg-blue-500 hover:bg-blue-600 text-white text-[10px] px-3 py-1 rounded cursor-pointer border-none outline-none shrink-0 font-bold">
+                        {usdtCopied ? 'Copiado' : 'cópia'}
                       </button>
                     </div>
-                    <p className="text-center text-[10px] text-slate-500 bg-white border border-neutral-200 rounded px-2 py-0.5 inline-block w-full">{fileLabel}</p>
-                  </form>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          /* WITHDRAWAL */
-          <form onSubmit={handleWithdrawal} className="space-y-3">
-            <div className="bg-white rounded-xl p-3 border border-neutral-200 flex justify-between items-center">
-              <span className="text-xs text-neutral-500">Saldo Disponível:</span>
-              <span className="text-sm font-bold font-mono">KZ {stats.balance.toLocaleString('pt-AO',{minimumFractionDigits:2})}</span>
+                  </div>
+
+                  <p className="text-center text-[11px] text-red-500 font-semibold">Informação sobre a procura</p>
+                  <div className="border border-neutral-200 rounded-lg overflow-hidden">
+                    {[['Número do pedido','202308060508708470'],['número da conta', user.phone || '244922342885'],['requisito', (rechargeAmt / 430).toFixed(2)]].map(([label, val]) => (
+                      <div key={label}>
+                        <div className="bg-white px-4 py-2 text-xs font-bold text-blue-600">{label}</div>
+                        <div className="bg-slate-50 px-4 py-2 text-xs font-mono text-slate-700">{val}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button type="button" onClick={() => setFileLabel('comprovativo_usdt.png')}
+                      className="flex-1 bg-[#1e88e5] hover:bg-[#1565c0] text-white font-bold py-2.5 rounded text-xs flex items-center justify-center gap-1 cursor-pointer border-none outline-none">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                      </svg>
+                      Credenciais
+                    </button>
+                    <button type="submit" className="flex-1 bg-[#1e88e5] hover:bg-[#1565c0] text-white font-bold py-2.5 rounded text-xs cursor-pointer border-none outline-none">
+                      Confirmar
+                    </button>
+                  </div>
+                  <p className="text-center text-[10px] text-slate-500 bg-white border border-neutral-200 rounded px-2 py-0.5 inline-block w-full">{fileLabel}</p>
+                </form>
+              )}
             </div>
-            {user.bankAccount ? (
-              <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-[11px] text-green-800 space-y-1">
-                <p className="font-bold">Conta Bancária Associada:</p>
-                <p>Banco: <strong>{user.bankName}</strong></p>
-                <p>IBAN: <strong className="font-mono">{user.bankAccount}</strong></p>
-                <p>Titular: <strong>{user.holderName}</strong></p>
-              </div>
-            ) : (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-[11px] text-red-700">
-                Associe primeiro o seu IBAN em <strong>Banco associado</strong>.
-              </div>
-            )}
-            <input id="withdraw-amt-input" type="number" placeholder="Valor mínimo KZ 2.000,00"
-              value={withdrawAmt} onChange={e => setWithdrawAmt(e.target.value)} disabled={!user.bankAccount}
-              className="w-full text-xs font-mono py-2.5 px-3 bg-white border border-neutral-200 rounded-xl" />
-            <div className="bg-white rounded-xl p-3 border border-neutral-200 text-[10px] text-neutral-500 space-y-1">
-              <p className="font-bold text-red-700">Regras de Levantamento:</p>
-              <p>• Seg–Sex 09:00–18:00h.</p>
-              <p>• Taxa administrativa: 5%.</p>
-            </div>
-            <button id="withdraw-submit-btn" type="submit" disabled={!user.bankAccount || !withdrawAmt}
-              className="w-full bg-[#0d7377] hover:bg-neutral-800 text-white font-bold py-3 rounded-xl text-xs cursor-pointer border-none outline-none disabled:opacity-50">
-              Confirmar Levantamento
-            </button>
-          </form>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
