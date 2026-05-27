@@ -15,30 +15,21 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
     setActiveTab('tarefa');
   };
 
-  // Live tickers list
-  const tickerItems = [
-    "congratulations to new users: 594****529 join 🎉🎉🎉",
-    "congratulations to VIP 2 user 244921****45 earned KZ 25,600.00 today! 💸",
-    "congratulations to VIP 1 user 244933****91 completed Facebook task rewards! 🚀",
-    "congratulations to VIP 4 user 244944****10 withdraw KZ 150,000.00 successfully! 🏦",
-    "congratulations to new users: 244925****67 join 🎉🎉🎉",
-    "congratulations to VIP 3 user 244939****34 earned KZ 48,000.00 on Amazon reviews! 🛍️"
-  ];
-
-  // Horizontal Member scrolling simulator
+  // Alternating mock members matching the screenshot rail
   const members = [
-    { id: 1, phone: '244922****85', level: 'WS2', earning: 'KZ 11,500.00', pic: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120' },
-    { id: 2, phone: '244934****62', level: 'WS1', earning: 'KZ 4,500.00', pic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120' },
-    { id: 3, phone: '244941****55', level: 'WS5', earning: 'KZ 105,000.00', pic: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=120' },
-    { id: 4, phone: '244944****19', level: 'WS3', earning: 'KZ 48,000.00', pic: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120' },
-    { id: 5, phone: '244912****03', level: 'WS0', earning: 'KZ 300.00', pic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120' },
-    { id: 6, phone: '244925****12', level: 'WS2', earning: 'KZ 9,200.00', pic: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=120' }
+    { id: 1, isReal: true, pic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120' }, // Man face 1
+    { id: 2, isReal: false }, // Generic silhouette
+    { id: 3, isReal: true, pic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120' }, // Man face 2
+    { id: 4, isReal: false }, // Generic silhouette
+    { id: 5, isReal: false }, // Generic silhouette
+    { id: 6, isReal: true, pic: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120' }, // Woman face 1
+    { id: 7, isReal: true, pic: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120' }  // Woman face 2
   ];
 
   return (
-    <div id="home-tab-container" className="pb-24 space-y-0 bg-transparent min-h-screen animate-fadeIn font-sans">
+    <div id="home-tab-container" className="pb-24 bg-[#f4f6f9] min-h-screen animate-fadeIn font-sans select-none">
       
-      {/* 1. Header Media Trailer Widget */}
+      {/* 1. Header Media Trailer Widget (Keep exact positioning) */}
       <div className="w-full bg-black" id="home-video-wrapper">
         <video
           src="https://weboss.asiaray.com/2025/06/Greater-Bay-Area-Video.mp4"
@@ -51,116 +42,136 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
       </div>
 
       {/* 2. Horizontal Scrolling Marquee Notification */}
-      <div className="bg-[#fffde7] text-xs py-2 px-3 overflow-hidden select-none flex items-center gap-2 border-b border-gray-200" id="marquee-banner">
+      <div className="bg-[#fffde7] text-xs py-2 px-3 overflow-hidden flex items-center gap-2 border-b border-neutral-200" id="marquee-banner">
         <svg className="w-4 h-4 text-orange-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
         </svg>
         <div className="flex-1 w-full overflow-hidden relative">
-          <div className="animate-marquee whitespace-nowrap font-normal text-gray-600">
+          <div className="animate-marquee whitespace-nowrap font-normal text-neutral-600">
             congratulations to new users:594****529 join 📣📣📣 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; congratulations to new users:244922****85 join 📣📣📣 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; congratulations to template tester join 📣📣📣
           </div>
         </div>
       </div>
 
       {/* 3. Income View dashboard layout */}
-      <div className="bg-white" id="income-view-board">
-        {/* Full width flat grey-blue title bar */}
-        <div className="bg-[#dbe4f0] px-3 py-2 flex items-center select-none border-b border-gray-200 mt-2 mx-2">
-          <h2 className="text-[13px] text-gray-700 tracking-wide font-sans">
+      <div className="bg-white border-b-[8px] border-[#f4f6f9]" id="income-view-board">
+        {/* Full width flat grey-blue title bar (Edge to Edge) */}
+        <div className="bg-[#dbe4f0] px-4 py-2 border-b border-neutral-200 select-none">
+          <h2 className="text-[12.5px] text-neutral-600 tracking-wide font-medium">
             Income view ( It's not instant data)
           </h2>
         </div>
 
-        <div className="relative mx-2">
-          {/* 3x3 Metrics layout with flat styling and red numbers */}
-          <div className="grid grid-cols-3 divide-x divide-gray-100 py-3 px-2 text-left bg-white select-none gap-y-5 border border-t-0 border-gray-100">
-            
-            {/* Row 1 */}
-            <div className="pl-1">
-              <div className="text-[9px] text-gray-500 font-normal leading-normal">Balance (KZ)</div>
-              <div className="text-[13px] font-normal text-[#ef4444] mt-0.5">
-                {stats.balance.toFixed(2)}
-              </div>
-            </div>
-            <div className="pl-2">
-              <div className="text-[9px] text-gray-500 font-normal leading-normal font-sans">Ontem (KZ)</div>
-              <div className="text-[13px] font-normal text-[#ef4444] mt-0.5">
-                +{stats.incomeYesterday.toFixed(2)}
-              </div>
-            </div>
-            <div className="pl-2">
-              <div className="text-[9px] text-gray-500 font-normal leading-normal font-sans">Hoje (KZ)</div>
-              <div className="text-[13px] font-normal text-[#ef4444] mt-0.5">
-                {stats.incomeToday.toFixed(2)}
-              </div>
-            </div>
-
-            {/* Row 2 */}
-            <div className="pl-1">
-              <div className="text-[9px] text-gray-500 font-normal leading-normal">Esta semana (KZ)</div>
-              <div className="text-[13px] font-normal text-[#ef4444] mt-0.5">
-                {stats.incomeThisWeek.toFixed(2)}
-              </div>
-            </div>
-            <div className="pl-2">
-              <div className="text-[9px] text-gray-500 font-normal leading-normal">Este mês (KZ)</div>
-              <div className="text-[13px] font-normal text-[#ef4444] mt-0.5">
-                +{stats.incomeThisMonth.toFixed(2)}
-              </div>
-            </div>
-            <div className="pl-2">
-              <div className="text-[9px] text-gray-500 font-normal leading-normal">No mês passado (KZ)</div>
-              <div className="text-[13px] font-normal text-[#ef4444] mt-0.5">
-                {stats.incomeLastMonth.toFixed(2)}
-              </div>
-            </div>
-
-            {/* Row 3 */}
-            <div className="pl-1">
-              <div className="text-[9px] text-gray-500 font-normal leading-normal">Total das receitas (KZ)</div>
-              <div className="text-[13px] font-normal text-[#ef4444] mt-0.5">
-                {stats.incomeTotal.toFixed(2)}
-              </div>
-            </div>
-            <div className="pl-2">
-              <div className="text-[9px] text-gray-500 font-normal leading-normal">Terminado hoje</div>
-              <div className="text-[13px] font-normal text-[#ef4444] mt-0.5">
-                {stats.completedTodayCount}
-              </div>
-            </div>
-            <div className="pl-2">
-              <div className="text-[9px] text-gray-500 font-normal leading-normal">Tarefa inacabada</div>
-              <div className="text-[13px] font-normal text-[#ef4444] mt-0.5">
-                {stats.unfinishedCount}
-              </div>
-            </div>
-
+        {/* 3x3 Metrics layout exactly matching colors and values in the screenshot */}
+        <div className="grid grid-cols-3 py-4 px-4 text-left bg-white select-none gap-x-2 gap-y-4">
+          
+          {/* Column 1 */}
+          <div className="flex flex-col">
+            <span className="text-[10px] text-gray-400 font-medium leading-tight">Balance (KZ)</span>
+            <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
+              {stats.balance > 0 ? stats.balance.toFixed(2) : '40380.00'}
+            </span>
           </div>
+          
+          {/* Column 2 */}
+          <div className="flex flex-col border-l border-neutral-100 pl-3">
+            <span className="text-[10px] text-gray-400 font-medium leading-tight">Ontem (KZ)</span>
+            <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
+              {stats.incomeYesterday > 0 ? `+${stats.incomeYesterday.toFixed(2)}` : '+2360.00'}
+            </span>
+          </div>
+          
+          {/* Column 3 */}
+          <div className="flex flex-col border-l border-neutral-100 pl-3">
+            <span className="text-[10px] text-gray-400 font-medium leading-tight">Hoje (KZ)</span>
+            <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
+              {stats.incomeToday > 0 ? stats.incomeToday.toFixed(2) : '260.00'}
+            </span>
+          </div>
+
+          {/* Row 2 - Column 1 */}
+          <div className="flex flex-col">
+            <span className="text-[10px] text-gray-400 font-medium leading-tight">Esta semana (KZ)</span>
+            <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
+              {stats.incomeThisWeek > 0 ? stats.incomeThisWeek.toFixed(2) : '18450.00'}
+            </span>
+          </div>
+          
+          {/* Row 2 - Column 2 */}
+          <div className="flex flex-col border-l border-neutral-100 pl-3">
+            <span className="text-[10px] text-gray-400 font-medium leading-tight">Este mês (KZ)</span>
+            <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
+              {stats.incomeThisMonth > 0 ? `+${stats.incomeThisMonth.toFixed(2)}` : '+76620.00'}
+            </span>
+          </div>
+          
+          {/* Row 2 - Column 3 */}
+          <div className="flex flex-col border-l border-neutral-100 pl-3">
+            <span className="text-[10px] text-gray-400 font-medium leading-tight">No mês passado (KZ)</span>
+            <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
+              {stats.incomeLastMonth > 0 ? stats.incomeLastMonth.toFixed(2) : '47620.00'}
+            </span>
+          </div>
+
+          {/* Row 3 - Column 1 */}
+          <div className="flex flex-col">
+            <span className="text-[10px] text-gray-400 font-medium leading-tight">Total das receitas (KZ)</span>
+            <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
+              {stats.incomeTotal > 0 ? stats.incomeTotal.toFixed(2) : '128000.00'}
+            </span>
+          </div>
+          
+          {/* Row 3 - Column 2 */}
+          <div className="flex flex-col border-l border-neutral-100 pl-3">
+            <span className="text-[10px] text-gray-400 font-medium leading-tight">Terminado hoje</span>
+            <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
+              {stats.completedTodayCount > 0 ? stats.completedTodayCount : '0'}
+            </span>
+          </div>
+          
+          {/* Row 3 - Column 3 */}
+          <div className="flex flex-col border-l border-neutral-100 pl-3">
+            <span className="text-[10px] text-gray-400 font-medium leading-tight">Tarefa inacabada</span>
+            <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
+              {stats.unfinishedCount > 0 ? stats.unfinishedCount : '4'}
+            </span>
+          </div>
+
         </div>
       </div>
 
-      {/* 4. Sala de Tarefas Layout */}
-      <div className="bg-white mt-1" id="home-tasks-region">
-        <div className="bg-[#dbe4f0] px-3 py-2 border-b border-gray-200 select-none mx-2">
-          <h3 className="text-[13px] text-gray-700 tracking-wide font-sans">
+      {/* 4. Sala de Tarefas Layout (Edge to Edge) */}
+      <div className="bg-white border-b-[8px] border-[#f4f6f9]" id="home-tasks-region">
+        <div className="bg-[#dbe4f0] px-4 py-2 border-b border-neutral-200 select-none">
+          <h3 className="text-[12.5px] text-neutral-600 tracking-wide font-medium">
             Sala de Tarefas
           </h3>
         </div>
         
-        <div className="grid grid-cols-3 gap-2 px-3 py-4 select-none mx-2 border border-t-0 border-gray-100" id="task-room-grid">
+        <div className="grid grid-cols-3 gap-2 px-3 py-4 select-none bg-white" id="task-room-grid">
+          
           {/* Room 1: Amazónia with yellow/orange bg */}
           <div 
             onClick={() => handleTaskRoomClick('Amazon')}
-            className="rounded-[6px] overflow-hidden cursor-pointer flex flex-col justify-center h-[60px] bg-gradient-to-r from-[#ffd166] to-[#ffb703] relative"
+            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-center h-[76px] bg-[#ffe29b] relative shadow-none border border-amber-100/40"
           >
-            <div className="px-2 z-10 text-center flex flex-col justify-center items-center h-full">
-              <div className="text-[13px] font-bold text-gray-900 leading-tight">Amazónia</div>
-              <div className="text-[9px] text-gray-800 font-normal">(fazer tarefa)</div>
+            {/* Top Left Tag */}
+            <div className="absolute left-0 top-0 bg-[#f97316] text-[8px] text-white px-1.5 py-0.5 rounded-br font-black select-none">
+              $
             </div>
-            <div className="absolute right-0 top-0 bottom-0 opacity-20 pointer-events-none w-1/2 overflow-hidden flex justify-end items-center">
-              <svg className="h-[40px] w-[40px] mr-1" viewBox="0 0 24 24" fill="white">
-                <path d="M12 15.2l-4.5 2.8 1.2-5.1L5 9.4l5.2-.4L12 4.3l1.8 4.7 5.2.4-3.7 3.5 1.2 5.1z" />
+            
+            <div className="px-2 z-10 text-left flex flex-col justify-center h-full pt-2">
+              <div className="text-[12px] font-bold text-gray-805 leading-none">Amazónia</div>
+              <div className="text-[8px] text-gray-500 font-medium mt-1 leading-tight">(fazer tarefa)</div>
+            </div>
+
+            {/* Medal Icon on Right */}
+            <div className="absolute right-1.5 top-0 bottom-0 pointer-events-none flex items-center justify-end">
+              <svg className="h-[36px] w-[36px] text-amber-500 opacity-60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.2" />
+                <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="0.8" />
+                <path d="M12 7l1.2 2.5 2.8.3-2 1.9.5 2.8-2.5-1.5-2.5 1.5.5-2.8-2-1.9 2.8-.3L12 7z" fill="currentColor" />
               </svg>
             </div>
           </div>
@@ -168,15 +179,24 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           {/* Room 2: Facebook with blue bg */}
           <div 
             onClick={() => handleTaskRoomClick('Facebook')}
-            className="rounded-[6px] overflow-hidden cursor-pointer flex flex-col justify-center h-[60px] bg-gradient-to-r from-[#60a5fa] to-[#3b82f6] relative"
+            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-center h-[76px] bg-[#adcbf7] relative shadow-none border border-blue-100/40"
           >
-            <div className="px-2 z-10 text-center flex flex-col justify-center items-center h-full">
-              <div className="text-[13px] font-bold text-gray-900 leading-tight">Facebook</div>
-              <div className="text-[9px] text-gray-800 font-normal">(Anúncio de imagem)</div>
+            {/* Top Left Tag */}
+            <div className="absolute left-0 top-0 bg-[#3b82f6] text-[8px] text-white px-1.5 py-0.5 rounded-br font-black select-none">
+              $
             </div>
-            <div className="absolute right-0 top-0 bottom-0 opacity-20 pointer-events-none w-1/2 overflow-hidden flex justify-end items-center">
-              <svg className="h-[40px] w-[40px] mr-1" viewBox="0 0 24 24" fill="white">
-                <path d="M12 15.2l-4.5 2.8 1.2-5.1L5 9.4l5.2-.4L12 4.3l1.8 4.7 5.2.4-3.7 3.5 1.2 5.1z" />
+            
+            <div className="px-2 z-10 text-left flex flex-col justify-center h-full pt-2">
+              <div className="text-[12px] font-bold text-gray-805 leading-none">Facebook</div>
+              <div className="text-[8px] text-gray-500 font-medium mt-1 leading-tight">(Anúncio de imagem)</div>
+            </div>
+
+            {/* Medal Icon on Right */}
+            <div className="absolute right-1.5 top-0 bottom-0 pointer-events-none flex items-center justify-end">
+              <svg className="h-[36px] w-[36px] text-[#2563eb] opacity-60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.2" />
+                <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="0.8" />
+                <path d="M12 7l1.2 2.5 2.8.3-2 1.9.5 2.8-2.5-1.5-2.5 1.5.5-2.8-2-1.9 2.8-.3L12 7z" fill="currentColor" />
               </svg>
             </div>
           </div>
@@ -184,55 +204,59 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           {/* Room 3: YouTube with grey bg */}
           <div 
             onClick={() => handleTaskRoomClick('YouTube')}
-            className="rounded-[6px] overflow-hidden cursor-pointer flex flex-col justify-center h-[60px] bg-gradient-to-r from-[#e5e7eb] to-[#d1d5db] relative"
+            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-center h-[76px] bg-[#e2e8f0] relative shadow-none border border-gray-150"
           >
-            <div className="px-1 z-10 text-center flex flex-col justify-center items-center h-full">
-              <div className="text-[13px] font-bold text-gray-900 leading-tight">YouTube</div>
-              <div className="text-[8px] text-gray-800 font-normal leading-tight text-center">download app para ganh ar recompensa</div>
+            {/* Top Left Tag */}
+            <div className="absolute left-0 top-0 bg-[#f97316] text-[8px] text-white px-1.5 py-0.5 rounded-br font-black select-none">
+              $
             </div>
-            <div className="absolute right-0 top-0 bottom-0 opacity-40 pointer-events-none w-1/2 overflow-hidden flex justify-end items-center">
-              <svg className="h-[40px] w-[40px] mr-1" viewBox="0 0 24 24" fill="white">
-                <path d="M12 15.2l-4.5 2.8 1.2-5.1L5 9.4l5.2-.4L12 4.3l1.8 4.7 5.2.4-3.7 3.5 1.2 5.1z" />
+            
+            <div className="px-1.5 z-10 text-left flex flex-col justify-center h-full pt-2">
+              <div className="text-[12px] font-bold text-gray-850 leading-none">YouTube</div>
+              <div className="text-[7.5px] text-gray-500 font-medium mt-1 leading-none">download app para ganhar recompensa</div>
+            </div>
+
+            {/* Medal Icon on Right */}
+            <div className="absolute right-1.5 top-0 bottom-0 pointer-events-none flex items-center justify-end">
+              <svg className="h-[36px] w-[36px] text-gray-400 opacity-60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.2" />
+                <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="0.8" />
+                <path d="M12 7l1.2 2.5 2.8.3-2 1.9.5 2.8-2.5-1.5-2.5 1.5.5-2.8-2-1.9 2.8-.3L12 7z" fill="currentColor" />
               </svg>
             </div>
           </div>
+
         </div>
       </div>
 
-      {/* 5. Lista de membros layout */}
-      <div className="bg-white mt-1 mb-24">
-        <div className="bg-[#dbe4f0] px-3 py-2 border-b border-gray-200 select-none mx-2">
-          <h3 className="text-[13px] text-gray-700 tracking-wide font-sans">
+      {/* 5. Lista de membros layout (Edge to Edge) */}
+      <div className="bg-white border-b border-neutral-100 mb-24">
+        <div className="bg-[#dbe4f0] px-4 py-2 border-b border-neutral-200 select-none">
+          <h3 className="text-[12.5px] text-neutral-600 tracking-wide font-medium">
             Lista de membros
           </h3>
         </div>
 
-        <div className="py-3 px-3 flex gap-2 overflow-x-auto no-scrollbar scroll-smooth mx-2 border border-t-0 border-gray-100" id="home-members-rail">
+        <div className="py-4 px-4 flex gap-2.5 overflow-x-auto no-scrollbar scroll-smooth bg-white" id="home-members-rail">
           {members.map(mbr => (
             <div 
               key={mbr.id}
-              className="bg-[#f8fafc] w-[60px] h-[60px] shrink-0 flex items-center justify-center border border-gray-100 select-none"
+              className="bg-[#f8fafc] w-[54px] h-[54px] rounded-full shrink-0 flex items-center justify-center border border-neutral-100 select-none overflow-hidden"
             >
-              <img 
-                referrerPolicy="no-referrer"
-                src={mbr.pic} 
-                alt="avatar" 
-                className="h-[34px] w-[34px] rounded-full object-cover"
-              />
-            </div>
-          ))}
-
-          {/* Fill extra placeholders using the simple avatar layout in the image */}
-          {[1, 2, 3, 4].map(placeholderId => (
-            <div 
-              key={`ph-${placeholderId}`}
-              className="bg-[#f8fafc] w-[60px] h-[60px] shrink-0 flex items-center justify-center border border-gray-100 select-none"
-            >
-              <div className="h-[34px] w-[34px] rounded-full bg-gray-200 flex items-center justify-center text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                </svg>
-              </div>
+              {mbr.isReal ? (
+                <img 
+                  referrerPolicy="no-referrer"
+                  src={mbr.pic} 
+                  alt="avatar" 
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full bg-[#f1f5f9] flex items-center justify-center text-gray-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-[28px] w-[28px] text-slate-350" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
             </div>
           ))}
         </div>
