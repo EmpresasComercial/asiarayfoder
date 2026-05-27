@@ -4,7 +4,7 @@ import { User, Lock, Shield, ArrowRightLeft, Headphones } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export const LoginScreen: React.FC = () => {
-  const { login, registerUser, showLoading, hideLoading } = useApp();
+  const { login, registerUser, showLoading, hideLoading, addToast } = useApp();
   
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,19 +39,19 @@ export const LoginScreen: React.FC = () => {
     setSuccessMsg('');
 
     if (!phone) {
-      setValidationError('Por favor, informe seu número de telefone.');
+      addToast('Por favor, informe seu número de telefone.', 'warning');
       return;
     }
     if (!senha) {
-      setValidationError('Por favor, digite sua senha de segurança.');
+      addToast('Por favor, digite sua senha de segurança.', 'warning');
       return;
     }
     if (!convite) {
-      setValidationError('Por favor, informe o código de convite obrigatório.');
+      addToast('Por favor, informe o código de convite obrigatório.', 'warning');
       return;
     }
     if (verificacao.toLowerCase() !== captchaText.toLowerCase()) {
-      setValidationError('Código de verificação incorreto.');
+      addToast('Código de verificação incorreto.', 'error');
       generateCaptcha();
       setVerificacao('');
       return;
@@ -62,9 +62,9 @@ export const LoginScreen: React.FC = () => {
     setTimeout(() => {
       try {
         registerUser(phone, senha, convite);
-        setSuccessMsg('Conta registrada com sucesso! Carregando painel...');
+        addToast('Conta registrada com sucesso!', 'success');
       } catch (err) {
-        setValidationError('Erro ao registrar conta.');
+        addToast('Erro ao registrar conta.', 'error');
       } finally {
         hideLoading();
       }
@@ -77,11 +77,11 @@ export const LoginScreen: React.FC = () => {
     setSuccessMsg('');
 
     if (!phone) {
-      setValidationError('Por favor, informe seu número de telefone.');
+      addToast('Por favor, informe seu número de telefone.', 'warning');
       return;
     }
     if (!senha) {
-      setValidationError('Por favor, digite sua senha.');
+      addToast('Por favor, digite sua senha.', 'warning');
       return;
     }
 
@@ -91,9 +91,9 @@ export const LoginScreen: React.FC = () => {
       const ok = login(phone, senha);
       hideLoading();
       if (ok) {
-        setSuccessMsg('Conectado com sucesso!');
+        addToast('Conectado com sucesso!', 'success');
       } else {
-        setValidationError('Falha ao aceder. Verifique os dados ou registe uma nova conta se ainda não o fez.');
+        addToast('Falha ao aceder. Verifique os dados.', 'error');
       }
     }, 1000);
   };
