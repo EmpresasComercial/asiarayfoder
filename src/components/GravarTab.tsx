@@ -3,6 +3,11 @@ import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { Task, TaskStatus } from '../types';
 
+import transformacaoIcon from '../../assets/task.transformacao.png';
+import searchIcon from '../../assets/task-search.png';
+import completedIcon from '../../assets/task-completed-64.png';
+import failedIcon from '../../assets/icon-task-failed.png';
+
 export const GravarTab: React.FC = () => {
   const { tasks, submitTaskProof, approvePendingTasks } = useApp();
   const [activeSegment, setActiveSegment] = useState<TaskStatus>('andamento');
@@ -222,35 +227,19 @@ export const GravarTab: React.FC = () => {
             >
               <div className="mb-1">
                 {seg.iconType === 'transformacao' && (
-                  <svg className="w-[20px] h-[20px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="5" y="4" width="14" height="15" rx="1.5" stroke={isActive ? "#f35a5a" : "#3182ce"} strokeWidth="1.8" />
-                    <line x1="8" y1="2" x2="8" y2="5" stroke={isActive ? "#f35a5a" : "#3182ce"} strokeWidth="1.8" />
-                    <line x1="16" y1="2" x2="16" y2="5" stroke={isActive ? "#f35a5a" : "#3182ce"} strokeWidth="1.8" />
-                    <circle cx="12" cy="12" r="2.5" stroke={isActive ? "#f35a5a" : "#3182ce"} strokeWidth="1.8" />
-                  </svg>
+                  <img src={transformacaoIcon} alt={seg.label} className="w-[20px] h-[20px] object-contain" />
                 )}
 
                 {seg.iconType === 'naorevisto' && (
-                  <svg className="w-[20px] h-[20px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="5" y="4" width="14" height="16" rx="1.5" stroke={isActive ? "#f35a5a" : "#f56565"} strokeWidth="1.8" />
-                    <circle cx="12" cy="11.5" r="2.5" stroke={isActive ? "#f35a5a" : "#f56565"} strokeWidth="1.8" />
-                    <line x1="14" y1="13.5" x2="16.5" y2="16" stroke={isActive ? "#f35a5a" : "#f56565"} strokeWidth="1.8" strokeLinecap="round" />
-                  </svg>
+                  <img src={searchIcon} alt={seg.label} className="w-[20px] h-[20px] object-contain" />
                 )}
 
                 {seg.iconType === 'terminado' && (
-                  <svg className="w-[20px] h-[20px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="12" cy="12" r="9" stroke={isActive ? "#f35a5a" : "#319795"} strokeWidth="1.8" />
-                    <path d="M8.5 12.5l2 2 4.5-4.5" stroke={isActive ? "#f35a5a" : "#319795"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <img src={completedIcon} alt={seg.label} className="w-[20px] h-[20px] object-contain" />
                 )}
 
                 {seg.iconType === 'falhou' && (
-                  <svg className="w-[20px] h-[20px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="5" y="4" width="14" height="16" rx="1.5" stroke={isActive ? "#f35a5a" : "#f56565"} strokeWidth="1.8" />
-                    <line x1="9.5" y1="9.5" x2="14.5" y2="14.5" stroke={isActive ? "#f35a5a" : "#f56565"} strokeWidth="1.8" strokeLinecap="round" />
-                    <line x1="14.5" y1="9.5" x2="9.5" y2="14.5" stroke={isActive ? "#f35a5a" : "#f56565"} strokeWidth="1.8" strokeLinecap="round" />
-                  </svg>
+                  <img src={failedIcon} alt={seg.label} className="w-[20px] h-[20px] object-contain" />
                 )}
               </div>
               <span className={`text-[9.5px] tracking-tight transition-colors leading-none ${isActive ? 'text-[#f35a5a] font-semibold' : 'text-gray-500 font-medium'}`}>
