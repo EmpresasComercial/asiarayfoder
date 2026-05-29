@@ -12,6 +12,14 @@ import {
 } from './MeuModals';
 import { MyInfoModal } from './MyInfoModal';
 
+import inviteIcon from '../../assets/icons8-invite team48.png';
+import teamIcon from '../../assets/icons8-relatorio-equipet-48.png';
+import bankIcon from '../../assets/icons8-adicionar-banco-58.png';
+import rechargeIcon from '../../assets/icons8-registro-de-deposito-48.png';
+import withdrawIcon from '../../assets/icons8-withdrawal record-100.png';
+import receiptsIcon from '../../assets/icons8-card-withdrawal-48.png';
+import infoIcon from '../../assets/icons8-password-login-48.png';
+
 export const MeuTab: React.FC = () => {
   const { user, stats, logout, resetAll } = useApp();
   const navigate = useNavigate();
@@ -281,7 +289,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <Gift size={26} fill="#facc15" className="text-[#eab308]" strokeWidth={1} />
+              <img src={inviteIcon} alt="convidar amigos" className="w-[26px] h-[26px] object-contain" />
             </div>
             <span className="text-[11px] font-normal text-red-500">convidar amigos</span>
           </div>
@@ -292,7 +300,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <Layers size={26} fill="#bfdbfe" className="text-[#3b82f6]" strokeWidth={1} />
+              <img src={teamIcon} alt="relatório da equipa" className="w-[26px] h-[26px] object-contain" />
             </div>
             <span className="text-[11px] font-normal text-neutral-500">relatório da equipa</span>
           </div>
@@ -314,7 +322,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <UserCheck size={26} fill="#bae6fd" className="text-[#0284c7]" strokeWidth={1} />
+              <img src={infoIcon} alt="a minha informação" className="w-[26px] h-[26px] object-contain" />
             </div>
             <span className="text-[11px] font-normal text-neutral-500">a minha informação</span>
           </div>
@@ -336,7 +344,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <Receipt size={26} className="text-neutral-700" strokeWidth={1.5} />
+              <img src={receiptsIcon} alt="registo de receitas" className="w-[26px] h-[26px] object-contain" />
             </div>
             <span className="text-[11px] font-normal text-neutral-500">registo de receitas</span>
           </div>
@@ -347,7 +355,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <Coins size={26} fill="#fcd34d" className="text-[#d97706]" strokeWidth={1} />
+              <img src={rechargeIcon} alt="recarregar o registo" className="w-[26px] h-[26px] object-contain" />
             </div>
             <span className="text-[11px] font-normal text-neutral-500">recarregar o registo</span>
           </div>
@@ -358,7 +366,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <Wallet2 size={26} className="text-[#f59e0b]" strokeWidth={1.5} />
+              <img src={withdrawIcon} alt="registo de retirada" className="w-[26px] h-[26px] object-contain" />
             </div>
             <span className="text-[11px] font-normal text-neutral-500">registo de retirada</span>
           </div>
@@ -380,7 +388,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <Landmark size={26} fill="#0f172a" className="text-[#0f172a]" strokeWidth={1.5} />
+              <img src={bankIcon} alt="Associar conta" className="w-[26px] h-[26px] object-contain" />
             </div>
             <span className="text-[11px] font-normal text-neutral-500">Associar conta</span>
           </div>
