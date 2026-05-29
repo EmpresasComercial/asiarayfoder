@@ -212,7 +212,7 @@ export const MeuTab: React.FC = () => {
         <button 
           id="sub-invite-friends"
           onClick={() => navigate('/retirar')}
-          className="flex-1 text-center font-normal text-slate-600 bg-transparent border-r border-white/50 text-[12px] h-full flex items-center justify-center relative"
+          className="flex-1 text-center font-normal text-red-600 bg-transparent border-r border-white/50 text-[12px] h-full flex items-center justify-center relative"
         >
           {/* subtle background icon */}
           <div className="absolute left-6 text-white/30">
@@ -220,13 +220,13 @@ export const MeuTab: React.FC = () => {
               <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
             </svg>
           </div>
-          <span className="relative z-10">Reivindicar</span>
+          <span className="relative z-10 text-red-600">Reivindicar</span>
         </button>
         {/* Right Tab Folder style */}
         <button 
           id="sub-make-money"
           onClick={() => { setWalletTab('recharge'); setIsWalletOpen(true); }}
-          className="flex-1 text-center font-normal text-slate-600 bg-transparent text-[12px] h-full flex items-center justify-center relative"
+          className="flex-1 text-center font-normal text-green-600 bg-transparent text-[12px] h-full flex items-center justify-center relative"
         >
           {/* subtle background icon */}
           <div className="absolute left-6 text-white/30">
@@ -235,7 +235,7 @@ export const MeuTab: React.FC = () => {
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.5 1.32c.563.643 1.485 1.076 2.343 1.24V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.5-1.32c-.563-.643-1.485-1.076-2.343-1.24V5z" clipRule="evenodd" />
             </svg>
           </div>
-          <span className="relative z-10">Recarregar</span>
+          <span className="relative z-10 text-green-600">Recarregar</span>
         </button>
       </div>
 

@@ -68,18 +68,21 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
     setActiveSubPage('none');
   };
 
-  const handleSaveBank = () => {
+  const handleSaveBank = async () => {
     if (!account || !holder) {
       alert('Erro: Titular e IBAN são campos obrigatórios.');
       return;
     }
-    showLoading('A processar e cryptografar os dados do IBAN...');
-    setTimeout(() => {
-      updateBankInfo(bank, account, holder);
+    showLoading('A processar e gravar os dados bancários...');
+    try {
+      await updateBankInfo(bank, account, holder);
       hideLoading();
       addToast('Sucesso: Conta bancária vinculada para levantamentos.', 'success');
       setActiveSubPage('none');
-    }, 1300);
+    } catch (err) {
+      hideLoading();
+      addToast('Erro: Não foi possível gravar os dados.', 'error');
+    }
   };
 
   const handleDeleteAccount = () => {

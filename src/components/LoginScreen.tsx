@@ -54,16 +54,15 @@ export const LoginScreen: React.FC = () => {
 
     showLoading('Criando e registando a sua conta Asiaray...');
 
-    setTimeout(() => {
+    (async () => {
       try {
-        registerUser(phone, senha, convite);
-        addToast('Conta registrada com sucesso!', 'success');
+        await registerUser(phone, senha, convite);
       } catch (err) {
-        addToast('Erro ao registrar conta.', 'error');
+        // O próprio registerUser já mostra toast de erro com a mensagem do banco
       } finally {
         hideLoading();
       }
-    }, 1200);
+    })();
   };
 
   const handleSubmitLogin = (e: React.FormEvent) => {
@@ -80,15 +79,17 @@ export const LoginScreen: React.FC = () => {
 
     showLoading('A validar credenciais de conta...');
 
-    setTimeout(() => {
-      const ok = login(phone, senha);
-      hideLoading();
-      if (ok) {
-        addToast('Conectado com sucesso!', 'success');
-      } else {
-        addToast('Falha ao aceder. Verifique os dados.', 'error');
+    (async () => {
+      try {
+        const ok = await login(phone, senha);
+        // O próprio login já trata a exibição de toasts de erro ou sucesso baseados no banco/Supabase.
+        // O login do Supabase Auth retorna erro "Invalid login credentials" se as credenciais forem inválidas.
+      } catch (err) {
+        // Tratado no AppContext
+      } finally {
+        hideLoading();
       }
-    }, 1000);
+    })();
   };
 
   return (

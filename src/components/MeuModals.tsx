@@ -62,21 +62,24 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const [account, setAccount] = useState(user.bankAccount || '');
   const [holder, setHolder] = useState(user.holderName || '');
 
-  const handleSave = (e?: React.FormEvent) => {
+  const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!account || !holder) {
       alert('Erro: Titular e IBAN são campos obrigatórios.');
       return;
     }
     
-    showLoading('A processar e cryptografar os dados do IBAN...');
+    showLoading('A processar e gravar os dados bancários...');
     
-    setTimeout(() => {
-      updateBankInfo(bank, account, holder);
+    try {
+      await updateBankInfo(bank, account, holder);
       hideLoading();
       alert('Sucesso: Conta bancária vinculada para levantamentos.');
       onClose();
-    }, 1300);
+    } catch (err) {
+      hideLoading();
+      alert('Erro: Não foi possível gravar os dados. Tente novamente.');
+    }
   };
 
   const banksList = [
@@ -210,7 +213,7 @@ const GoldCoinIcon: React.FC = () => (
   </svg>
 );
 
-// 3-A. CURRENCY CONVERTER MODAL (USD → KZ at fixed rate 1,125 KZ/USD)
+// 3-A. CURRENCY CONVERTER MODAL (USD → KZ at fixed rate 805 KZ/USD)
 export const CurrencyConverterModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
   const { stats, convertUsdToKz, setIsFullScreenActive } = useApp();
   const [usdInput, setUsdInput] = useState<string>('');
@@ -225,7 +228,7 @@ export const CurrencyConverterModal: React.FC<{ isOpen: boolean; onClose: () => 
 
   if (!isOpen) return null;
 
-  const RATE = 1125;
+  const RATE = 805;
   const usdVal = parseFloat(usdInput) || 0;
   const kzPreview = usdVal * RATE;
 
@@ -313,7 +316,7 @@ export const CurrencyConverterModal: React.FC<{ isOpen: boolean; onClose: () => 
             <div>
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Taxa fixa aplicada</div>
               <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] font-sans border-t border-gray-200">
-                1 USD = 1.125 KZ. A conversão é creditada imediatamente na sua Moeda de Ouro após confirmação.
+                1 USD = 805 KZ. A conversão é creditada imediatamente na sua Moeda de Ouro após confirmação.
               </div>
             </div>
           </div>

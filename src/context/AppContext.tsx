@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Task, UserProfile, FinancialStats, LogRecord, TeamReferral, TaskType } from '../types';
+import { supabase, getAccessToken, GATEWAY_URL } from '../lib/supabase';
 
 export interface AlertConfig {
   message: string;
@@ -25,7 +26,7 @@ interface AppContextProps {
   team: TeamReferral[];
   login: (phone: string, pin: string) => boolean;
   logout: () => void;
-  registerUser: (phone: string, pin: string, inviteCode: string) => void;
+  registerUser: (phone: string, pin: string, inviteCode: string) => Promise<void>;
   claimTask: (taskId: string) => boolean;
   submitTaskProof: (taskId: string, proofUrl: string) => void;
   approvePendingTasks: () => void;
@@ -257,67 +258,178 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('asiaray_team', JSON.stringify(team));
   }, [isLoggedIn, user, stats, tasks, logs, team]);
 
-  // Auth: Mock credential validation
-  const login = (phone: string, pin: string): boolean => {
-    // Basic verification: accept anything or precalculated if demo account
+  // Load real-time financial stats from Database via Gateway (OP: 102)
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const fetchFinancialStats = async () => {
+      try {
+        const sessionStr = localStorage.getItem('sb-fycskldchqqqohgvioal-auth-token');
+        if (!sessionStr) return;
+        const session = JSON.parse(sessionStr);
+        const token = session?.access_token;
+        if (!token) return;
+
+        const url = `https://fycskldchqqqohgvioal.supabase.co/functions/v1/gateway`;
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            op: 102,
+            data: {}
+          })
+        });
+
+        if (resp.ok) {
+          const resData = await resp.json();
+          if (resData?.success && resData?.result) {
+            const r = resData.result;
+            setStats(prev => ({
+              ...prev,
+              balance: Number(r.balance) || prev.balance,
+              incomeYesterday: Number(r.income_yesterday) || 0,
+              incomeToday: Number(r.income_today) || 0,
+              incomeThisWeek: Number(r.income_this_week) || 0,
+              incomeThisMonth: Number(r.income_this_month) || 0,
+              incomeLastMonth: Number(r.income_last_month) || 0,
+              incomeTotal: Number(r.income_total) || 0,
+              completedTodayCount: Number(r.completed_today_count) || 0,
+              unfinishedCount: Number(r.unfinished_count) || 0
+            }));
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao buscar estatísticas financeiras:', err);
+      }
+    };
+
+    fetchFinancialStats();
+    // Opcional: Atualiza a cada 30 segundos
+    const interval = setInterval(fetchFinancialStats, 30000);
+    return () => clearInterval(interval);
+  }, [isLoggedIn]);
+
+  // Auth: Login real via Supabase Auth
+  const login = async (phone: string, pin: string): Promise<boolean> => {
     const cleanPhone = phone.replace(/[^0-9]/g, '');
-    let existingUser = { ...user };
-    
-    if (cleanPhone === '244922342885') {
-      // Demo login
-      setIsLoggedIn(true);
-      return true;
-    } else if (cleanPhone.length >= 9) {
-      existingUser = {
+    const email = `${cleanPhone}@user.com`;
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password: pin
+      });
+      if (error) throw new Error(error.message);
+      if (!data.session || !data.user) throw new Error('Sessão não criada');
+
+      // Buscar perfil real do utilizador via gateway OP 101
+      const token = data.session.access_token;
+      let profileData: any = null;
+      try {
+        const resp = await fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ op: 101, data: {} })
+        });
+        if (resp.ok) {
+          const res = await resp.json();
+          if (res?.success) profileData = res.result;
+        }
+      } catch (_) { /* perfil será carregado depois */ }
+
+      const loggedUser: UserProfile = {
         phone: cleanPhone,
-        id: String(Math.floor(10000 + Math.random() * 90000)),
-        level: 'WS0',
-        creditScore: 85, // bom rating initial
-        inviteCode: String(Math.floor(100000 + Math.random() * 900000)),
-        bankName: '',
-        bankAccount: '',
-        holderName: ''
+        id: profileData?.id || data.user.id,
+        level: profileData?.level || 'WS0',
+        creditScore: profileData?.credit_score ?? 85,
+        inviteCode: profileData?.invite_code || '',
+        bankName: profileData?.bank_name || '',
+        bankAccount: profileData?.bank_account || '',
+        holderName: profileData?.holder_name || ''
       };
-      setUser(existingUser);
+      setUser(loggedUser);
       setIsLoggedIn(true);
       return true;
+    } catch (e) {
+      addToast((e as Error).message, 'error');
+      return false;
     }
-    return false;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setIsLoggedIn(false);
   };
 
-  const registerUser = (phone: string, pin: string, inviteCode: string) => {
+  // Registro real via Supabase Auth — triggers do banco fazem o resto
+  const registerUser = async (phone: string, pin: string, inviteCode: string): Promise<void> => {
     const cleanPhone = phone.replace(/[^0-9]/g, '');
-    const newUser: UserProfile = {
-      phone: cleanPhone || '244999111222',
-      id: String(Math.floor(10000 + Math.random() * 90000)),
-      level: 'WS0',
-      creditScore: 80,
-      inviteCode: inviteCode || '931242',
-      bankName: '',
-      bankAccount: '',
-      holderName: ''
-    };
-    setUser(newUser);
-    // Restart stats for new users
-    setStats({
-      balance: 1000.00, // starting bonus!
-      balanceUSDT: 0.000,
-      incomeYesterday: 0,
-      incomeToday: 0,
-      incomeThisWeek: 0,
-      incomeThisMonth: 0,
-      incomeLastMonth: 0,
-      incomeTotal: 0,
-      completedTodayCount: 0,
-      unfinishedCount: 3
+    const email = `${cleanPhone}@user.com`;
+
+    // 1. Cadastro no Supabase Auth (signUp)
+    // Os triggers do banco (handle_new_user, credita_bonus_cadastro_limitado, generate_invite_code)
+    // são acionados automaticamente após a criação em auth.users
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password: pin,
+      options: {
+        data: {
+          phone: cleanPhone,
+          invite_code_used: inviteCode || ''
+        }
+      }
     });
-    // Reset all tasks to available status
-    setTasks(INITIAL_TASKS.map(t => ({ ...t, status: 'disponivel' })));
-    setIsLoggedIn(true);
+
+    if (error) {
+      addToast(error.message, 'error');
+      throw new Error(error.message);
+    }
+
+    if (!data.user) {
+      addToast('Erro ao criar conta.', 'error');
+      throw new Error('Erro ao criar conta.');
+    }
+
+    // 2. Se retornou sessão, o utilizador já está autenticado
+    if (data.session) {
+      // Buscar perfil criado pelo trigger via gateway OP 101
+      const token = data.session.access_token;
+      let profileData: any = null;
+      try {
+        // Pequeno delay para dar tempo ao trigger executar
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        const resp = await fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ op: 101, data: {} })
+        });
+        if (resp.ok) {
+          const res = await resp.json();
+          if (res?.success) profileData = res.result;
+        }
+      } catch (_) { /* perfil será carregado depois */ }
+
+      const newUser: UserProfile = {
+        phone: cleanPhone,
+        id: profileData?.id || data.user.id,
+        level: profileData?.level || 'WS0',
+        creditScore: profileData?.credit_score ?? 80,
+        inviteCode: profileData?.invite_code || '',
+        bankName: profileData?.bank_name || '',
+        bankAccount: profileData?.bank_account || '',
+        holderName: profileData?.holder_name || ''
+      };
+      setUser(newUser);
+      setIsLoggedIn(true);
+    }
   };
 
   // Claim (Join) task
@@ -498,7 +610,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (stats.balanceUSDT < usdAmount) {
       return { success: false, error: 'Saldo USDT insuficiente para esta conversão.' };
     }
-    const RATE = 1125; // 1 USD = 1,125 KZ (fixed exchange fee)
+    const RATE = 805; // 1 USD = 805 KZ (fixed exchange fee)
     const kzReceived = usdAmount * RATE;
     const newLog: LogRecord = {
       id: 'cvt_' + String(Math.floor(10000 + Math.random() * 90000)),
@@ -506,7 +618,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       amount: kzReceived,
       date: new Date().toISOString().replace('T', ' ').slice(0, 16),
       status: 'aprovado',
-      details: `Conversão ${usdAmount.toFixed(2)} USD → ${kzReceived.toLocaleString('pt-AO')} KZ (taxa 1,125 KZ/USD)`
+      details: `Conversão ${usdAmount.toFixed(2)} USD → ${kzReceived.toLocaleString('pt-AO')} KZ (taxa 805 KZ/USD)`
     };
     setStats(prev => ({
       ...prev,
@@ -518,13 +630,46 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Update bank
-  const updateBankInfo = (bankName: string, bankAccount: string, holderName: string) => {
+  // Atualiza banco via gateway OP 412 (add_bank_account)
+  const updateBankInfo = async (bankName: string, bankAccount: string, holderName: string) => {
+    // Atualizar estado local imediatamente
     setUser(prev => ({
       ...prev,
       bankName,
       bankAccount,
       holderName
     }));
+
+    // Enviar para o backend via gateway
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        addToast('Sessão expirada. Faça login novamente.', 'error');
+        return;
+      }
+      const resp = await fetch(GATEWAY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          op: 412,
+          data: {
+            bank_name: bankName,
+            holder_name: holderName,
+            iban: bankAccount
+          }
+        })
+      });
+      const resData = await resp.json();
+      if (!resp.ok || !resData.success) {
+        throw new Error(resData.error || 'Erro ao gravar dados bancários');
+      }
+    } catch (err) {
+      console.error('Erro ao salvar banco no backend:', err);
+      addToast((err as Error).message, 'error');
+    }
   };
 
   // Upgrade membership level

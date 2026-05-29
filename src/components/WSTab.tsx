@@ -122,7 +122,7 @@ export const WSTab: React.FC = () => {
 
   // Render navigation to Payment Subviews
   if (selectedTierForPayment) {
-    const usdtAmount = (selectedTierForPayment.price / 430).toFixed(1);
+    const usdtAmount = (selectedTierForPayment.price / 805).toFixed(1);
 
     if (selectedMethod) {
       const ibanMap: Record<string, string> = {
