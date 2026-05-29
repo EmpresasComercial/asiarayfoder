@@ -19,6 +19,9 @@ import rechargeIcon from '../../assets/icons8-registro-de-deposito-48.png';
 import withdrawIcon from '../../assets/icons8-withdrawal record-100.png';
 import receiptsIcon from '../../assets/icons8-card-withdrawal-48.png';
 import infoIcon from '../../assets/icons8-password-login-48.png';
+import deveLerIcon from '../../assets/icons8-deve-ler-64.png';
+import downloadAppIcon from '../../assets/icons8-download-da-aplicacao-64.png';
+import terminarSessaoIcon from '../../assets/icons8-terminar-sessao-64.png';
 
 export const MeuTab: React.FC = () => {
   const { user, stats, logout, resetAll } = useApp();
@@ -311,7 +314,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <div className="bg-[#f97316] text-white rounded-[4px] h-[22px] w-[22px] flex items-center justify-center font-bold text-sm">?</div>
+              <img src={deveLerIcon} alt="deve ler" className="w-[26px] h-[26px] object-contain" />
             </div>
             <span className="text-[11px] font-normal text-neutral-500">deve ler</span>
           </div>
@@ -377,7 +380,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <Download size={26} className="text-[#3b82f6]" strokeWidth={1.5} />
+              <img src={downloadAppIcon} alt="download da aplicação" className="w-[26px] h-[26px] object-contain" />
             </div>
             <span className="text-[11px] font-normal text-neutral-500">download da aplicação</span>
           </div>
@@ -399,7 +402,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <LogOut size={26} className="text-[#f97316]" strokeWidth={2} />
+              <img src={terminarSessaoIcon} alt="Terminar sessão" className="w-[26px] h-[26px] object-contain" />
             </div>
             <span className="text-[11px] font-normal text-neutral-500">Terminar sessão</span>
           </div>

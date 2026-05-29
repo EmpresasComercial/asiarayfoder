@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { User, Lock, Shield, ArrowRightLeft, Headphones } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import logoImg from '../../assets/logo.asiaarys.png';
 
 export const LoginScreen: React.FC = () => {
   const { login, registerUser, showLoading, hideLoading, addToast } = useApp();
@@ -12,14 +12,11 @@ export const LoginScreen: React.FC = () => {
   
   const [phone, setPhone] = useState<string>('');
   const [senha, setSenha] = useState<string>('');
-  const [convite, setConvite] = useState<string>('931242'); // default invite code
+  const [convite, setConvite] = useState<string>('931242');
   const [verificacao, setVerificacao] = useState<string>('');
   
   const [captchaText, setCaptchaText] = useState<string>('FyPAE');
-  const [validationError, setValidationError] = useState<string>('');
-  const [successMsg, setSuccessMsg] = useState<string>('');
 
-  // Generates randomized authentic security captcha codes
   const generateCaptcha = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
     let text = '';
@@ -35,8 +32,6 @@ export const LoginScreen: React.FC = () => {
 
   const handleSubmitCadastro = (e: React.FormEvent) => {
     e.preventDefault();
-    setValidationError('');
-    setSuccessMsg('');
 
     if (!phone) {
       addToast('Por favor, informe seu número de telefone.', 'warning');
@@ -73,8 +68,6 @@ export const LoginScreen: React.FC = () => {
 
   const handleSubmitLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setValidationError('');
-    setSuccessMsg('');
 
     if (!phone) {
       addToast('Por favor, informe seu número de telefone.', 'warning');
@@ -100,163 +93,100 @@ export const LoginScreen: React.FC = () => {
 
   return (
     <div 
-      className="relative min-h-screen w-full flex flex-col items-center justify-center p-4 select-none overflow-hidden gradient-bg"
+      className="min-h-screen w-full bg-white flex flex-col font-sans animate-fadeIn"
       id="auth-screen-root"
     >
-      {/* 
-        High-fidelity realistic Airplane Background Overlays matching the original image!
-        Includes dynamic stylized airliners hovering in the background with realistic cockpit/turbine outlines.
-      */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden select-none opacity-45 z-0">
-        
-        {/* Top-Left Jet Airliner */}
-        <svg className="absolute top-[3%] left-[2%] w-[42%] max-w-[400px] h-auto text-slate-800/10" viewBox="0 0 400 200" fill="currentColor">
-          <path d="M50,120 L150,110 L280,40 L300,43 L210,112 L350,115 C370,116 390,125 390,135 C390,145 370,148 350,148 L220,150 L260,190 L240,195 L170,151 L50,155 C30,155 10,145 10,135 C10,125 30,120 50,120 Z" />
-          <ellipse cx="160" cy="140" rx="15" ry="5" fill="rgba(255,255,255,0.2)" />
-          <ellipse cx="200" cy="140" rx="12" ry="4" fill="rgba(255,255,255,0.2)" />
-        </svg>
+      {/* Logo */}
+      <div className="flex items-center justify-center py-6 bg-white border-b border-gray-100 select-none">
+        <img src={logoImg} alt="Asiaray Group" className="h-[80px] object-contain" />
       </div>
 
-      {/* Main card box */}
-      <div 
-        className="w-full max-w-[382px] z-10"
-        id="auth-card-border-outer"
-      >
-        <div 
-          className="bg-[#0f172a]/40 backdrop-blur-md rounded-[10px] p-5 flex flex-col items-stretch space-y-3.5"
-          id="auth-card-body-inner"
-        >
-          {/* App title header inside auth */}
-          <div className="text-center pt-1 pb-1">
-            <h1 className="text-2xl font-black text-slate-800 uppercase tracking-widest leading-none font-sans drop-shadow-[0_0_15px_rgba(20,255,236,0.6)]">
-              Asiaray Group
-            </h1>
-            <p className="text-[10px] text-slate-300 font-bold uppercase tracking-widest mt-1">
-              {currentView === 'cadastro' ? 'Registo de Nova Conta' : 'Aceder ao Escritório'}
-            </p>
-          </div>
+      {/* Content */}
+      <div className="flex-1 p-3 space-y-4 bg-white overflow-y-auto">
 
-          {/* Validation alerts rendering elegantly inside the card */}
-          {validationError && (
-            <div className="text-[11.5px] bg-red-50 text-red-650 px-3 py-2 rounded-sm border border-red-200/90 font-medium tracking-tight">
-              ⚠️ {validationError}
-            </div>
-          )}
-
-          {successMsg && (
-            <div className="text-[11.5px] bg-emerald-50 text-emerald-700 px-3 py-2 rounded-sm border border-emerald-200 font-medium tracking-tight">
-              ✓ {successMsg}
-            </div>
-          )}
-
-          {/* 
-            FORM VIEW CONTROLLERS 
-            1. Registration view matches the original image.
-            2. Login view is optimized and aligned in identical fashion.
-          */}
-          {currentView === 'cadastro' ? (
-              <form onSubmit={handleSubmitCadastro}
-                className="space-y-3 flex flex-col"
-                id="form-cadastro-asiaray"
-              >
-                {/* Input 1: Phone Element */}
-                <div className="relative bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
-                  <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
-                    <User size={16} className="text-[#0d7377] mr-1.5" />
-                    <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
-                    <span className="ml-1 text-slate-800 font-bold">+ Mobile</span>
-                  </div>
+        {currentView === 'cadastro' ? (
+          <form onSubmit={handleSubmitCadastro} className="space-y-4" id="form-cadastro-asiaray">
+            
+            {/* Input fields box */}
+            <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
+              
+              {/* Phone */}
+              <div className="border-b border-gray-200">
+                <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Número de Telefone</div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
                   <input 
                     id="cadastro-phone-field"
                     type="tel" 
                     placeholder="9XXXXXXXX"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\s+/g, ''))}
-                    className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
+                    className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans"
                   />
                 </div>
+              </div>
 
-                {/* Input 2: Senha (Password) */}
-                <div className="relative bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
-                  <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
-                    <Lock size={16} className="text-[#0d7377] mr-1.5" />
-                    <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
-                  </div>
+              {/* Senha */}
+              <div className="border-b border-gray-200">
+                <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Senha</div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
                   <input 
                     id="cadastro-senha-field"
                     type="password" 
                     placeholder="Senha"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
-                    className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
+                    className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans"
                   />
                 </div>
+              </div>
 
-                {/* Input 3: Invitation Code (Código do convite) */}
-                <div className="relative bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
-                  <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
-                    <Lock size={16} className="text-[#0d7377] mr-1.5" />
-                    <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
-                  </div>
+              {/* Código do convite */}
+              <div className="border-b border-gray-200">
+                <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Código do Convite</div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
                   <input 
                     id="cadastro-invitation-field"
                     type="text" 
                     placeholder="Código do convite"
                     value={convite}
                     onChange={(e) => setConvite(e.target.value)}
-                    className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
+                    className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans"
                   />
                 </div>
+              </div>
 
-                {/* Input 4: Captcha Verification Code Block (Unified inside a single row to match layout perfectly) */}
-                <div className="relative bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
-                  <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
-                    <Shield size={16} className="text-[#0d7377] mr-1.5" />
-                    <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
-                  </div>
+              {/* Código de verificação */}
+              <div>
+                <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Código de Verificação</div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 flex items-center gap-2">
                   <input 
                     id="cadastro-verificacao-field"
                     type="text" 
                     placeholder="Código de verificação"
                     value={verificacao}
                     onChange={(e) => setVerificacao(e.target.value.replace(/\s+/g, ''))}
-                    className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13px] font-bold focus:outline-none placeholder-slate-500"
+                    className="bg-transparent border-none outline-none flex-1 text-neutral-800 text-[12px] font-sans"
                   />
-                  
-                  {/* Vertical divider */}
-                  <span className="text-slate-800/20 font-light mx-2 select-none">|</span>
-
-                  {/* 
-                    Simulated Wavy Green Custom Captcha, built via high-fidelity SVGs 
-                    to look completely real in every aspect! Clicking it re-rolls code.
-                  */}
                   <div 
                     onClick={generateCaptcha}
-                    className="w-[100px] shrink-0 bg-[#f1f5f9] rounded-[4px] border border-neutral-300/60 h-[34px] relative overflow-hidden flex items-center justify-center cursor-pointer select-none group"
+                    className="w-[90px] shrink-0 bg-white rounded-[3px] border border-gray-300 h-[28px] relative overflow-hidden flex items-center justify-center cursor-pointer select-none"
                     title="Toque para reconfigurar código"
                     id="cadastro-verification-captcha-box"
                   >
-                    {/* Wavy lines layers */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-                      <rect width="100%" height="100%" fill="#f1f5f9" />
-                      {/* Organic wave paths */}
-                      <path d="M-10,30 Q30,12 60,34 T130,15" stroke="#4caf50" strokeWidth="1.2" fill="none" opacity="0.4" />
-                      <path d="M-20,15 Q25,40 70,18 T140,35" stroke="#2e7d32" strokeWidth="1.6" fill="none" opacity="0.65" />
-                      <path d="M0,24 Q45,8 85,28 T150,20" stroke="#81c784" strokeWidth="1.0" fill="none" opacity="0.5" />
-                      <path d="M-5,10 C40,40 60,-10 120,25" stroke="#1b5e20" strokeWidth="1.5" fill="none" opacity="0.4" />
+                      <rect width="100%" height="100%" fill="#f9fafb" />
+                      <path d="M-10,20 Q30,8 60,24 T130,10" stroke="#4caf50" strokeWidth="1" fill="none" opacity="0.4" />
+                      <path d="M-20,10 Q25,30 70,12 T140,25" stroke="#2e7d32" strokeWidth="1.2" fill="none" opacity="0.5" />
                     </svg>
-
-                    {/* Highly authentic rotated captcha lettering */}
-                    <div className="relative font-mono text-[15px] font-black text-[#2e7d32] tracking-wider flex items-center justify-center gap-[3px] select-none uppercase">
+                    <div className="relative font-mono text-[13px] font-bold text-[#2e7d32] tracking-wider flex items-center justify-center gap-[2px] select-none uppercase">
                       {captchaText.split('').map((char, index) => {
-                        const rot = (index % 2 === 0 ? 1 : -1) * (15 + index * 4);
-                        const transY = (index % 3 === 0 ? -2 : index % 3 === 1 ? 3 : 0);
+                        const rot = (index % 2 === 0 ? 1 : -1) * (10 + index * 3);
                         return (
                           <span 
                             key={index}
                             style={{ 
                               display: 'inline-block',
-                              transform: `rotate(${rot}deg) translateY(${transY}px)` 
+                              transform: `rotate(${rot}deg)` 
                             }}
                           >
                             {char}
@@ -266,105 +196,86 @@ export const LoginScreen: React.FC = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
 
-                {/* Primary Teal Action Buttons conforming exactly to the Image Layout! */}
-                <div className="pt-2.5 space-y-3 flex flex-col">
-                  {/* Submit Registration button */}
-                  <button 
-                    id="submit-register-action-btn"
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-[#0d7377] to-[#14ffec] text-[#0f172a] font-bold h-[48px] rounded-[8px] tracking-wide text-[14px] transition-all cursor-pointer hover:shadow-[0_0_20px_rgba(20,255,236,0.5)] hover:scale-[1.02]"
-                  >
-                    Registar
-                  </button>
-
-                  {/* Switch to login mode button */}
-                  <button 
-                    id="toggle-to-login-view-btn"
-                    type="button"
-                    onClick={() => {
-                      navigate('/login');
-                      setValidationError('');
-                      setSuccessMsg('');
-                    }}
-                    className="w-full glass text-slate-800 font-bold h-[48px] rounded-[8px] tracking-wide text-[14px] transition-all cursor-pointer hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:bg-slate-100"
-                  >
-                    Login
-                  </button>
-                </div>
-
-              </form>
-            ) : (
-              /* LOGIN TAB VIEW (Renders when switched) */
-              <form onSubmit={handleSubmitLogin}
-                className="space-y-3.5 flex flex-col"
-                id="form-login-asiaray"
+            {/* Buttons */}
+            <div className="flex flex-col items-center justify-center gap-3 select-none">
+              <button
+                id="submit-register-action-btn"
+                type="submit"
+                className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2.5 px-6 rounded-sm cursor-pointer transition-colors w-full text-center uppercase tracking-wide"
               >
-                {/* Input 1: Phone */}
-                <div className="relative bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
-                  <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
-                    <User size={16} className="text-[#0d7377] mr-1.5" />
-                    <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
-                    <span className="ml-1 text-slate-800 font-bold">+ Mobile</span>
-                  </div>
+                Registar
+              </button>
+              <button 
+                id="toggle-to-login-view-btn"
+                type="button"
+                onClick={() => navigate('/login')}
+                className="bg-white hover:bg-gray-50 text-[#0a52a3] font-bold text-[12px] py-2.5 px-6 rounded-sm cursor-pointer transition-colors w-full text-center border border-gray-200"
+              >
+                Já tenho conta — Login
+              </button>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmitLogin} className="space-y-4" id="form-login-asiaray">
+            
+            {/* Input fields box */}
+            <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
+
+              {/* Phone */}
+              <div className="border-b border-gray-200">
+                <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Número de Telefone</div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
                   <input 
                     id="login-phone-field"
                     type="tel" 
                     placeholder="Seu telemóvel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\s+/g, ''))}
-                    className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
+                    className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans"
                   />
                 </div>
+              </div>
 
-                {/* Input 2: Senha (Password) */}
-                <div className="relative bg-white/80 rounded-[8px] h-[48px] flex items-center px-3 transition-all">
-                  <div className="flex items-center text-slate-300 shrink-0 font-sans text-[13.5px]">
-                    <Lock size={16} className="text-[#0d7377] mr-1.5" />
-                    <span className="text-slate-800/20 font-light mx-1 select-none">|</span>
-                  </div>
+              {/* Senha */}
+              <div>
+                <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Senha</div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
                   <input 
                     id="login-senha-field"
                     type="password" 
                     placeholder="Sua senha de acesso"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
-                    className="flex-1 min-w-0 bg-transparent pl-3 text-slate-800 font-sans text-[13.5px] font-bold focus:outline-none placeholder-slate-500"
+                    className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans"
                   />
                 </div>
+              </div>
+            </div>
 
-                {/* Action buttons (Styled identically for clean consistency) */}
-                <div className="pt-2 px-0.5 space-y-3 flex flex-col">
-                  {/* Primary Login Button */}
-                  <button 
-                    id="submit-login-action-btn"
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-[#0d7377] to-[#14ffec] text-[#0f172a] font-bold h-[48px] rounded-[8px] tracking-wide text-[14px] transition-all cursor-pointer hover:shadow-[0_0_20px_rgba(20,255,236,0.5)] hover:scale-[1.02]"
-                  >
-                    Login
-                  </button>
-
-                  {/* Switch to register mode button */}
-                  <button 
-                    id="toggle-to-cadastro-view-btn"
-                    type="button"
-                    onClick={() => {
-                      navigate('/register');
-                      setValidationError('');
-                      setSuccessMsg('');
-                    }}
-                    className="w-full glass text-slate-800 font-bold h-[48px] rounded-[8px] tracking-wide text-[14px] transition-all cursor-pointer hover:shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:bg-slate-100"
-                  >
-                    Não tem conta? Registar
-                  </button>
-                </div>
-              </form>
-            )}
-
-        </div>
+            {/* Buttons */}
+            <div className="flex flex-col items-center justify-center gap-3 select-none">
+              <button 
+                id="submit-login-action-btn"
+                type="submit"
+                className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2.5 px-6 rounded-sm cursor-pointer transition-colors w-full text-center uppercase tracking-wide"
+              >
+                Login
+              </button>
+              <button 
+                id="toggle-to-cadastro-view-btn"
+                type="button"
+                onClick={() => navigate('/register')}
+                className="bg-white hover:bg-gray-50 text-[#0a52a3] font-bold text-[12px] py-2.5 px-6 rounded-sm cursor-pointer transition-colors w-full text-center border border-gray-200"
+              >
+                Não tem conta? Registar
+              </button>
+            </div>
+          </form>
+        )}
       </div>
-
-
     </div>
   );
 };

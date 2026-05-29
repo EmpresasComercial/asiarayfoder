@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'motion/react';
+import spinnerImg from '../../assets/icons8-spinner-24.apng.png';
 
 export const CustomSpinner: React.FC = () => {
   const { isLoading, loadingMessage } = useApp();
@@ -24,42 +25,10 @@ export const CustomSpinner: React.FC = () => {
             className="bg-white/90 backdrop-blur-md rounded-2xl p-6 shadow-2xl border border-neutral-100/50 flex flex-col items-center gap-4 max-w-[210px] w-full text-center"
             id="global-spinner-box"
           >
-            {/* Highly customized rotating gradient spinner loader ring */}
-            <div className="relative h-12 w-12 flex items-center justify-center">
-              {/* Outer glowing pulsing background layer */}
-              <div className="absolute inset-0 rounded-full bg-indigo-500/10 animate-pulse" />
-              
-              {/* Spinning SVG ring */}
-              <svg 
-                className="animate-spin h-10 w-10 text-indigo-600" 
-                xmlns="http://www.w3.org/2000/svg" 
-                fill="none" 
-                viewBox="0 0 24 24"
-              >
-                <circle 
-                  className="opacity-20" 
-                  cx="12" 
-                  cy="12" 
-                  r="10" 
-                  stroke="currentColor" 
-                  strokeWidth="3.5"
-                />
-                <path 
-                  className="opacity-100" 
-                  fill="currentColor" 
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-            </div>
-
-            {/* Spinner Status Wording */}
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[13.5px] font-black text-slate-800 tracking-wide font-sans leading-none uppercase">
-                {loadingMessage && loadingMessage.toLowerCase().includes('process') ? 'Processando' : 'Carregando'}
-              </span>
-              <p className="text-[11px] font-semibold text-zinc-500 font-sans tracking-wide leading-relaxed mt-1">
-                {loadingMessage || 'Aguarde um momento...'}
-              </p>
+            {/* Simple spinner with thin 'Wait...' text */}
+            <div className="flex flex-col items-center gap-2">
+              <img src={spinnerImg} alt="Loading" className="h-10 w-10 animate-spin" />
+              <span className="text-sm font-light text-slate-800">Wait...</span>
             </div>
           </motion.div>
         </motion.div>

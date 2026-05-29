@@ -11,6 +11,7 @@ import { CustomAlert } from './components/CustomAlert';
 import { CustomToast } from './components/CustomToast';
 import { CustomSpinner } from './components/CustomSpinner';
 import { Home, Shield, Sparkles, ClipboardCheck, User, Headphones } from 'lucide-react';
+import supportIcon from '../assets/icons8-support-fluente64.png';
 import { TaskType } from './types';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
@@ -258,49 +259,23 @@ function MainAppLayout() {
                 {/* Quick floating chatbot action to talk to helpline (Draggable) */}
                 {!isFullScreenActive && (
                   <div className="fixed inset-0 max-w-md mx-auto pointer-events-none z-40">
-                    <button 
-                      id="quick-support-btn"
-                      className={`pointer-events-auto w-[52px] h-[52px] rounded-full bg-[#111827] border border-gray-800 flex items-center justify-center shadow-xl transition-transform duration-100 cursor-pointer select-none active:scale-95 ${supportPos ? 'absolute' : 'absolute bottom-[84px] right-4'}`}
-                      style={{ 
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
-                        ...(supportPos ? { left: `${supportPos.x}px`, top: `${supportPos.y}px` } : {}),
-                        touchAction: 'none'
-                      }}
-                      onMouseDown={handleMouseDown}
-                      onTouchStart={handleTouchStart}
-                      onTouchMove={handleTouchMove}
-                      onTouchEnd={handleTouchEnd}
-                      onClick={handleSupportClick}
-                    >
-                      {/* Beautiful premium custom glowing headset icon */}
-                      <svg 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        className="h-[28px] w-[28px]" 
-                        viewBox="0 0 24 24" 
-                        fill="none"
-                      >
-                        <path 
-                          d="M3 12c0-4.97 4.03-9 9-9s9 4.03 9 9v3.5c0 1.38-1.12 2.5-2.5 2.5H16.5c-1.38 0-2.5-1.12-2.5-2.5V12c0-1.66-1.34-3-3-3s-3 1.34-3 3v3.5c0 1.38-1.12 2.5-2.5 2.5H5c-1.38 0-2.5-1.12-2.5-2.5V12z" 
-                          stroke="url(#headsetGlow)" 
-                          strokeWidth={2}
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                        />
-                        <path 
-                          d="M21 15.5c0 1.93-1.57 3.5-3.5 3.5H16" 
-                          stroke="#14ffec" 
-                          strokeWidth={1.8} 
-                          strokeLinecap="round" 
-                        />
-                        <defs>
-                          <linearGradient id="headsetGlow" x1="3" y1="3" x2="21" y2="18" gradientUnits="userSpaceOnUse">
-                            <stop offset="0%" stopColor="#14ffec" />
-                            <stop offset="50%" stopColor="#0d7377" />
-                            <stop offset="100%" stopColor="#14ffec" />
-                          </linearGradient>
-                        </defs>
-                      </svg>
-                    </button>
+                      <img
+                        id="quick-support-btn"
+                        src={supportIcon}
+                        alt="Support"
+                        className={`pointer-events-auto ${supportPos ? 'absolute' : 'absolute bottom-[84px] right-4'} h-[36px] w-[36px] object-contain animate-float`}
+                        style={{
+                          ...(supportPos ? { left: `${supportPos.x}px`, top: `${supportPos.y}px` } : {}),
+                          touchAction: 'none',
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                        }}
+                        onMouseDown={handleMouseDown}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                        onClick={handleSupportClick}
+                      />
                   </div>
                 )}
 
