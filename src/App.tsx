@@ -255,7 +255,7 @@ function MainAppLayout() {
                 <main id="main-scroll-area" className="flex-1 overflow-y-auto bg-transparent no-scrollbar p-2">
                   {renderActiveTabContent()}
                 </main>
-
+ 
                 {/* Quick floating chatbot action to talk to helpline (Draggable) */}
                 {!isFullScreenActive && (
                   <div className="fixed inset-0 max-w-md mx-auto pointer-events-none z-40">
@@ -278,7 +278,7 @@ function MainAppLayout() {
                       />
                   </div>
                 )}
-
+ 
                 {/* Footer sticky navigations */}
                 {!isFullScreenActive && (
                   <footer className="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass-nav py-2.5 px-2 flex justify-around items-center text-center z-50 rounded-t-2xl pb-4">
@@ -292,7 +292,7 @@ function MainAppLayout() {
                       <Home size={20} className={activeTab === 'inicial' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
                       <span className="text-[10px] tracking-tight">Início</span>
                     </button>
-
+ 
                     {/* Tab 2: ws */}
                     <button
                       id="btn-nav-ws"
@@ -302,7 +302,7 @@ function MainAppLayout() {
                       <Shield size={20} className={activeTab === 'ws' ? 'stroke-[2.5] text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]' : 'stroke-[1.5]'} />
                       <span className="text-[10px] tracking-tight">WS</span>
                     </button>
-
+ 
                     {/* Tab 3: tarefa */}
                     <button
                       id="btn-nav-tarefa"
@@ -312,7 +312,7 @@ function MainAppLayout() {
                       <Sparkles size={20} className={activeTab === 'tarefa' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
                       <span className="text-[10px] tracking-tight font-bold">Tarefa</span>
                     </button>
-
+ 
                     {/* Tab 4: Gravar */}
                     <button
                       id="btn-nav-gravar"
@@ -322,7 +322,7 @@ function MainAppLayout() {
                       <ClipboardCheck size={20} className={activeTab === 'gravar' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
                       <span className="text-[10px] tracking-tight">Gravar</span>
                     </button>
-
+ 
                     {/* Tab 5: meu */}
                     <button
                       id="btn-nav-meu"
@@ -332,37 +332,37 @@ function MainAppLayout() {
                       <User size={20} className={activeTab === 'meu' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
                       <span className="text-[10px] tracking-tight">Meu</span>
                     </button>
-
+ 
                   </footer>
                 )}
-
+ 
                 {/* Pop-up Notice / Anúncio de Início */}
                 {isNoticeVisible && (
                   <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center px-6 font-sans animate-fadeIn">
                     <div className="relative w-full max-w-[360px]">
-
+ 
                       {/* Outer amber gradient card */}
                       <div className="bg-gradient-to-b from-[#fde68a] to-[#fbbf24] rounded-2xl pt-3 pb-5 px-4 shadow-2xl">
-
+ 
                         {/* Countdown row */}
                         <div className="text-center text-gray-700 text-[12px] font-semibold mb-2 select-none">
                           Shut down after {noticeCountdown} seconds
                         </div>
-
+ 
                         {/* ~Notice~ title row */}
                         <div className="flex items-center justify-center gap-2 mb-3 select-none">
                           <span className="text-xl">💧🍂</span>
                           <span className="text-[22px] font-black text-gray-800 tracking-wider">~Notice~</span>
                           <span className="text-xl">🍃💠</span>
                         </div>
-
+ 
                         {/* White inner card */}
                         <div className="bg-white rounded-xl px-4 py-4 text-[13px] text-gray-700 leading-[1.65] text-left font-normal max-h-[230px] overflow-y-auto no-scrollbar shadow-sm">
                           Documento n.º 20230501701: Relativamente ao apoio total da empresa à rápida expansão do mercado angolano, a primeira decisão é: convidar outras pessoas para trabalhar, podendo o convidante como gestor obter um bónus de 10% do seguinte salário do empregado. Exemplo: O seu equipe tem 100 pessoas, todos no WS5, quanto dinheiro você pode ganhar todos os dias com isso.
                         </div>
-
+ 
                       </div>
-
+ 
                       {/* Orange X close button — top-right outside card, exactly as in screenshot */}
                       <button
                         onClick={() => setIsNoticeVisible(false)}
@@ -373,14 +373,14 @@ function MainAppLayout() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
-
+ 
                     </div>
                   </div>
                 )}
-
+ 
               </div>
             ) : (
-              <Navigate to="/login" replace />
+              <Navigate to="/register" replace />
             )
           } 
         />
