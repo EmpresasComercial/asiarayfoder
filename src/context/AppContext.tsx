@@ -380,7 +380,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       options: {
         data: {
           phone: cleanPhone,
-          invite_code_used: inviteCode || ''
+          referred_by: inviteCode || ''
         }
       }
     });
