@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { 
   BankModal, WalletModal, InviteModal, TeamReportModal, 
-  RulesModal, DailyDeclarationModal, LedgerLogsModal 
+  RulesModal, DailyDeclarationModal, LedgerLogsModal, CurrencyConverterModal
 } from './MeuModals';
 import { MyInfoModal } from './MyInfoModal';
 
@@ -27,6 +27,7 @@ export const MeuTab: React.FC = () => {
   const [isChartOpen, setIsChartOpen] = useState(false);
   const [isLedgerOpen, setIsLedgerOpen] = useState(false);
   const [isMyInfoOpen, setIsMyInfoOpen] = useState(false);
+  const [isConverterOpen, setIsConverterOpen] = useState(false);
   const [ledgerType, setLedgerType] = useState<'receita' | 'recarga' | 'retirada'>('receita');
 
   const copyInviteCode = () => {
@@ -183,10 +184,10 @@ export const MeuTab: React.FC = () => {
             </div>
           </div>
 
-          {/* Carteira button */}
+          {/* Carteira button → opens Currency Converter */}
           <button 
             id="carteira-click-wallet"
-            onClick={() => { setWalletTab('recharge'); setIsWalletOpen(true); }}
+            onClick={() => setIsConverterOpen(true)}
             className="bg-[#3b4758] text-white py-1.5 px-4 rounded-full text-[11px] z-10 cursor-pointer font-sans h-8"
           >
             Carteira
@@ -413,6 +414,7 @@ export const MeuTab: React.FC = () => {
       <DailyDeclarationModal isOpen={isChartOpen} onClose={() => setIsChartOpen(false)} />
       <LedgerLogsModal isOpen={isLedgerOpen} onClose={() => setIsLedgerOpen(false)} type={ledgerType} />
       <MyInfoModal isOpen={isMyInfoOpen} onClose={() => setIsMyInfoOpen(false)} onOpenBank={() => setIsBankOpen(true)} />
+      <CurrencyConverterModal isOpen={isConverterOpen} onClose={() => setIsConverterOpen(false)} />
 
     </div>
   );

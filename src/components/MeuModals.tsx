@@ -210,6 +210,129 @@ const GoldCoinIcon: React.FC = () => (
   </svg>
 );
 
+// 3-A. CURRENCY CONVERTER MODAL (USD → KZ at fixed rate 1,125 KZ/USD)
+export const CurrencyConverterModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+  const { stats, convertUsdToKz, setIsFullScreenActive } = useApp();
+  const [usdInput, setUsdInput] = useState<string>('');
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setIsFullScreenActive(true);
+      setUsdInput('');
+    }
+    return () => setIsFullScreenActive(false);
+  }, [isOpen, setIsFullScreenActive]);
+
+  if (!isOpen) return null;
+
+  const RATE = 1125;
+  const usdVal = parseFloat(usdInput) || 0;
+  const kzPreview = usdVal * RATE;
+
+  const handleConvert = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (usdVal <= 0) {
+      alert('Erro: Indique um valor válido para converter.');
+      return;
+    }
+    if (usdVal > stats.balanceUSDT) {
+      alert('Erro: Saldo USDT insuficiente para esta conversão.');
+      return;
+    }
+    const result = convertUsdToKz(usdVal);
+    if (result.success) {
+      alert(`Sucesso: Conversão efectuada. +${(result.kzReceived || 0).toLocaleString('pt-AO')} KZ creditados na sua carteira.`);
+      onClose();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[50] bg-[#f5f5f5] flex flex-col font-sans animate-fadeIn" id="currency-converter-modal">
+      {/* Header */}
+      <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 select-none" style={{ height: '48px' }}>
+        <button
+          id="converter-back-btn"
+          onClick={onClose}
+          className="text-neutral-500 hover:text-neutral-800 select-none cursor-pointer focus:outline-none flex items-center p-1"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px] text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <span className="text-[15px] font-bold text-neutral-850 tracking-tight text-center flex-1 translate-x-[-10px]">Carteira</span>
+        <div className="w-6"></div>
+      </div>
+
+      <div className="flex-1 p-3 space-y-4 bg-white overflow-y-auto">
+        <form onSubmit={handleConvert} className="space-y-4">
+
+          <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
+            <div className="bg-white py-2.5 px-2 border-b border-gray-200 text-center text-[#e1251b] font-bold text-[12px]">
+              Converter USD para Kwanza
+            </div>
+
+            {/* Saldo USDT */}
+            <div className="border-b border-gray-200">
+              <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Saldo disponível (USDT)</div>
+              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 font-bold font-mono">
+                {stats.balanceUSDT.toFixed(3)} USD
+              </div>
+            </div>
+
+            {/* Input USD */}
+            <div className="border-b border-gray-200">
+              <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Valor a converter (USD)</div>
+              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
+                <input
+                  id="usd-convert-input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={usdInput}
+                  onChange={e => setUsdInput(e.target.value)}
+                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold"
+                />
+              </div>
+            </div>
+
+            {/* KZ Preview */}
+            <div>
+              <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Receberá em Kwanza (KZ)</div>
+              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 font-bold font-mono">
+                {usdVal > 0 ? kzPreview.toLocaleString('pt-AO') : '0'} KZ
+              </div>
+            </div>
+          </div>
+
+          {/* Taxa info */}
+          <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
+            <div className="bg-white py-2.5 px-2 border-b border-gray-200 text-center text-[#e1251b] font-bold text-[12px]">
+              Taxa de Intercâmbio
+            </div>
+            <div>
+              <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Taxa fixa aplicada</div>
+              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] font-sans border-t border-gray-200">
+                1 USD = 1.125 KZ. A conversão é creditada imediatamente na sua Moeda de Ouro após confirmação.
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center justify-center pt-2 select-none">
+            <button
+              id="converter-confirm-btn"
+              type="submit"
+              className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2 px-6 rounded-sm cursor-pointer transition-colors w-full text-center uppercase tracking-wide"
+            >
+              Confirmar Conversão
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 // 3. RECHARGE AND WITHDRAWAL MODAL ("Carteira" / Transações)
 interface WalletModalProps extends ModalProps {
   initialTab?: 'recharge' | 'withdraw';

@@ -31,6 +31,7 @@ interface AppContextProps {
   approvePendingTasks: () => void;
   addRecharge: (amount: number, txId: string) => void;
   addWithdrawal: (amount: number) => { success: boolean; error?: string };
+  convertUsdToKz: (usdAmount: number) => { success: boolean; kzReceived?: number; error?: string };
   updateBankInfo: (bankName: string, bankAccount: string, holderName: string) => void;
   upgradeMembership: (level: string, cost: number) => boolean;
   increaseCreditScore: (points: number) => void;
@@ -489,6 +490,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { success: true };
   };
 
+  // Convert USDT balance to KZ at fixed rate 1 USD = 1,125 KZ
+  const convertUsdToKz = (usdAmount: number) => {
+    if (usdAmount <= 0) {
+      return { success: false, error: 'Indique um valor válido para converter.' };
+    }
+    if (stats.balanceUSDT < usdAmount) {
+      return { success: false, error: 'Saldo USDT insuficiente para esta conversão.' };
+    }
+    const RATE = 1125; // 1 USD = 1,125 KZ (fixed exchange fee)
+    const kzReceived = usdAmount * RATE;
+    const newLog: LogRecord = {
+      id: 'cvt_' + String(Math.floor(10000 + Math.random() * 90000)),
+      type: 'recarga',
+      amount: kzReceived,
+      date: new Date().toISOString().replace('T', ' ').slice(0, 16),
+      status: 'aprovado',
+      details: `Conversão ${usdAmount.toFixed(2)} USD → ${kzReceived.toLocaleString('pt-AO')} KZ (taxa 1,125 KZ/USD)`
+    };
+    setStats(prev => ({
+      ...prev,
+      balanceUSDT: parseFloat((prev.balanceUSDT - usdAmount).toFixed(3)),
+      balance: prev.balance + kzReceived
+    }));
+    setLogs(prev => [newLog, ...prev]);
+    return { success: true, kzReceived };
+  };
+
   // Update bank
   const updateBankInfo = (bankName: string, bankAccount: string, holderName: string) => {
     setUser(prev => ({
@@ -571,6 +599,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       approvePendingTasks,
       addRecharge,
       addWithdrawal,
+      convertUsdToKz,
       updateBankInfo,
       upgradeMembership,
       increaseCreditScore,
