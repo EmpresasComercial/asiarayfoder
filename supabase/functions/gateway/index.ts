@@ -94,7 +94,7 @@ serve(async (req) => {
       return json(405, { success: false, error: "Método não permitido" });
     }
 
-    const supabase = createClient(
+    const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
@@ -110,7 +110,7 @@ serve(async (req) => {
 
     assertTokenFresh(token);
 
-    const { data: userData, error: userError } = await supabase.auth.getUser(token);
+    const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
     if (userError || !userData?.user) {
       return json(401, { success: false, error: "Token inválido" });
     }
@@ -119,6 +119,19 @@ serve(async (req) => {
     const userRole = String(
       user.app_metadata?.role ?? user.user_metadata?.role ?? "user",
     ).toLowerCase();
+
+    // Create a user-scoped client so that auth.uid() evaluates correctly in Postgres!
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      }
+    );
 
     const raw = await req.text();
     if (!raw || raw.length > MAX_BODY_BYTES) {
