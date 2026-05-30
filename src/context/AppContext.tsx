@@ -260,61 +260,104 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [isLoggedIn, user, stats, tasks, logs, team]);
 
   // Load real-time financial stats from Database via Gateway (OP: 102)
+  const fetchFinancialStats = async () => {
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+
+      const resp = await fetch(GATEWAY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          op: 102,
+          data: {}
+        })
+      });
+
+      if (resp.ok) {
+        const resData = await resp.json();
+        if (resData?.success && resData?.result) {
+          const rawResult = resData.result;
+          const r = Array.isArray(rawResult) ? rawResult[0] : rawResult;
+          if (r) {
+            const parseNum = (val: any, fallback: number = 0) => {
+              const n = Number(val);
+              return isNaN(n) ? fallback : n;
+            };
+            setStats(prev => ({
+              ...prev,
+              balance: r.balance !== undefined && r.balance !== null ? parseNum(r.balance, prev.balance) : prev.balance,
+              incomeYesterday: parseNum(r.income_yesterday, 0),
+              incomeToday: parseNum(r.income_today, 0),
+              incomeThisWeek: parseNum(r.income_this_week, 0),
+              incomeThisMonth: parseNum(r.income_this_month, 0),
+              incomeLastMonth: parseNum(r.income_last_month, 0),
+              incomeTotal: parseNum(r.income_total, 0),
+              completedTodayCount: parseNum(r.completed_today_count, 0),
+              unfinishedCount: parseNum(r.unfinished_count, 0)
+            }));
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao buscar estatísticas financeiras:', err);
+    }
+  };
+
   useEffect(() => {
     if (!isLoggedIn) return;
 
-    const fetchFinancialStats = async () => {
-      try {
-        const token = await getAccessToken();
-        if (!token) return;
-
-        const resp = await fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            op: 102,
-            data: {}
-          })
-        });
-
-        if (resp.ok) {
-          const resData = await resp.json();
-          if (resData?.success && resData?.result) {
-            const rawResult = resData.result;
-            const r = Array.isArray(rawResult) ? rawResult[0] : rawResult;
-            if (r) {
-              const parseNum = (val: any, fallback: number = 0) => {
-                const n = Number(val);
-                return isNaN(n) ? fallback : n;
-              };
-              setStats(prev => ({
-                ...prev,
-                balance: r.balance !== undefined && r.balance !== null ? parseNum(r.balance, prev.balance) : prev.balance,
-                incomeYesterday: parseNum(r.income_yesterday, 0),
-                incomeToday: parseNum(r.income_today, 0),
-                incomeThisWeek: parseNum(r.income_this_week, 0),
-                incomeThisMonth: parseNum(r.income_this_month, 0),
-                incomeLastMonth: parseNum(r.income_last_month, 0),
-                incomeTotal: parseNum(r.income_total, 0),
-                completedTodayCount: parseNum(r.completed_today_count, 0),
-                unfinishedCount: parseNum(r.unfinished_count, 0)
-              }));
-            }
-          }
-        }
-      } catch (err) {
-        console.error('Erro ao buscar estatísticas financeiras:', err);
-      }
-    };
-
     fetchFinancialStats();
-    // Opcional: Atualiza a cada 30 segundos
+    // Opcional: Atualiza a cada 30 segundos como fallback secundário
     const interval = setInterval(fetchFinancialStats, 30000);
     return () => clearInterval(interval);
   }, [isLoggedIn]);
+
+  // Setup Supabase Realtime subscriptions for profiles and tarefas_diarias
+  useEffect(() => {
+    if (!isLoggedIn || !user?.id) return;
+
+    const channel = supabase
+      .channel(`realtime_db_changes_${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Realtime profile change:', payload);
+          refreshUserProfile();
+          fetchFinancialStats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'tarefas_diarias',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Realtime tarefa change:', payload);
+          refreshUserProfile();
+          fetchFinancialStats();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime subscription status:', status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isLoggedIn, user?.id]);
 
   // Auth: Login real via Supabase Auth
   const login = async (phone: string, pin: string): Promise<boolean> => {
