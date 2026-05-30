@@ -33,7 +33,7 @@ interface AppContextProps {
   approvePendingTasks: () => void;
   addRecharge: (amount: number, txId: string) => void;
   addWithdrawal: (amount: number) => { success: boolean; error?: string };
-  convertUsdToKz: (usdAmount: number) => { success: boolean; kzReceived?: number; error?: string };
+  convertUsdToKz: (usdAmount: number) => Promise<{ success: boolean; message: string }>;
   updateBankInfo: (bankName: string, bankAccount: string, holderName: string) => void;
   upgradeMembership: (level: string, cost: number, productId?: string) => Promise<boolean>;
   increaseCreditScore: (points: number) => void;
@@ -679,31 +679,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return { success: true };
   };
 
-  // Convert USDT balance to KZ at fixed rate 1 USD = 1,125 KZ
-  const convertUsdToKz = (usdAmount: number) => {
-    if (usdAmount <= 0) {
-      return { success: false, error: 'Indique um valor válido para converter.' };
+  // Convert USDT balance to KZ via Gateway OP 310 calling transfer_reproducao_to_balance
+  const convertUsdToKz = async (usdAmount: number): Promise<{ success: boolean; message: string }> => {
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        return { success: false, message: 'Sessão expirada. Faça login novamente.' };
+      }
+
+      const resp = await fetch(GATEWAY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          op: 310,
+          data: { amount_usd: usdAmount }
+        })
+      });
+
+      if (resp.ok) {
+        const resData = await resp.json();
+        if (resData?.success && resData?.result) {
+          const r = resData.result;
+          if (r.success) {
+            // Refresh stats and profile in real-time
+            await refreshUserProfile();
+            await fetchFinancialStats();
+          }
+          return { success: r.success, message: r.message };
+        } else {
+          return { success: false, message: resData?.error || 'Erro ao converter saldo.' };
+        }
+      } else {
+        const errData = await resp.json().catch(() => ({}));
+        return { success: false, message: errData?.error || 'Falha na comunicação com o servidor.' };
+      }
+    } catch (err) {
+      console.error('Erro na conversão:', err);
+      return { success: false, message: 'Erro de rede. Tente novamente mais tarde.' };
     }
-    if (stats.balanceUSDT < usdAmount) {
-      return { success: false, error: 'Saldo USDT insuficiente para esta conversão.' };
-    }
-    const RATE = 805; // 1 USD = 805 KZ (fixed exchange fee)
-    const kzReceived = usdAmount * RATE;
-    const newLog: LogRecord = {
-      id: 'cvt_' + String(Math.floor(10000 + Math.random() * 90000)),
-      type: 'recarga',
-      amount: kzReceived,
-      date: new Date().toISOString().replace('T', ' ').slice(0, 16),
-      status: 'aprovado',
-      details: `Conversão ${usdAmount.toFixed(2)} USD → ${kzReceived.toLocaleString('pt-AO')} KZ (taxa 805 KZ/USD)`
-    };
-    setStats(prev => ({
-      ...prev,
-      balanceUSDT: parseFloat((prev.balanceUSDT - usdAmount).toFixed(3)),
-      balance: prev.balance + kzReceived
-    }));
-    setLogs(prev => [newLog, ...prev]);
-    return { success: true, kzReceived };
   };
 
   // Update bank

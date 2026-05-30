@@ -232,19 +232,11 @@ export const CurrencyConverterModal: React.FC<{ isOpen: boolean; onClose: () => 
   const usdVal = parseFloat(usdInput) || 0;
   const kzPreview = usdVal * RATE;
 
-  const handleConvert = (e: React.FormEvent) => {
+  const handleConvert = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (usdVal <= 0) {
-      alert('Erro: Indique um valor válido para converter.');
-      return;
-    }
-    if (usdVal > stats.balanceUSDT) {
-      alert('Erro: Saldo USDT insuficiente para esta conversão.');
-      return;
-    }
-    const result = convertUsdToKz(usdVal);
+    const result = await convertUsdToKz(usdVal);
+    alert(result.message);
     if (result.success) {
-      alert(`Sucesso: Conversão efectuada. +${(result.kzReceived || 0).toLocaleString('pt-AO')} KZ creditados na sua carteira.`);
       onClose();
     }
   };

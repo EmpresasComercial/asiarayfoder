@@ -14,6 +14,7 @@ const OP_RULES: Record<number, OperationRule> = {
   205: { name: "create_deposit_request", roles: ["user"] },
   206: { name: "create_usdt_deposit", roles: ["user"] },
   309: { name: "request_withdrawal", roles: ["user"] },
+  310: { name: "transfer_reproducao_to_balance", roles: ["user"] },
   412: { name: "add_bank_account", roles: ["user"] },
   413: { name: "update_bank_account", roles: ["user"] },
   414: { name: "delete_client_bank", roles: ["user"] },
@@ -240,7 +241,18 @@ serve(async (req) => {
         if (error) throw error;
         result = data;
         break;
+      case 310: {
+        if (!mustBePositiveNumber(payload.amount_usd)) {
+          return json(400, { success: false, error: "Dados de conversão inválidos" });
+        }
+        const { data, error } = await supabase.rpc("transfer_reproducao_to_balance", {
+          p_amount_usd: Number(payload.amount_usd),
+        });
+        if (error) throw error;
+        result = data;
+        break;
       }
+
 
       case 412: {
         if (
