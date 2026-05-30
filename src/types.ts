@@ -1,4 +1,4 @@
-export type TaskType = 'Amazon' | 'Facebook' | 'YouTube';
+export type TaskType = 'Tiktok' | 'Facebook' | 'Whatsapp' | 'outros';
 
 export type TaskStatus = 'disponivel' | 'andamento' | 'revisao' | 'concluido' | 'falhado';
 
@@ -24,6 +24,7 @@ export interface UserProfile {
   bankName: string;
   bankAccount: string;
   holderName: string;
+  name?: string; // Real name of the user
 }
 
 export interface FinancialStats {

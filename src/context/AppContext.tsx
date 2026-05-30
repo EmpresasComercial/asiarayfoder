@@ -27,6 +27,7 @@ interface AppContextProps {
   login: (phone: string, pin: string) => boolean;
   logout: () => void;
   registerUser: (phone: string, pin: string, inviteCode: string) => Promise<void>;
+  refreshUserProfile: () => Promise<void>;
   claimTask: (taskId: string) => boolean;
   submitTaskProof: (taskId: string, proofUrl: string) => void;
   approvePendingTasks: () => void;
@@ -34,7 +35,7 @@ interface AppContextProps {
   addWithdrawal: (amount: number) => { success: boolean; error?: string };
   convertUsdToKz: (usdAmount: number) => { success: boolean; kzReceived?: number; error?: string };
   updateBankInfo: (bankName: string, bankAccount: string, holderName: string) => void;
-  upgradeMembership: (level: string, cost: number) => boolean;
+  upgradeMembership: (level: string, cost: number, productId?: string) => Promise<boolean>;
   increaseCreditScore: (points: number) => void;
   resetAll: () => void;
   showAlert: (message: string, title?: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
@@ -57,38 +58,38 @@ const AppContext = createContext<AppContextProps | undefined>(undefined);
 const INITIAL_TASKS: Task[] = [
   // WS0 Tasks - Free (Membro de Teste)
   { id: 't0_1', title: 'Curtir Post do Facebook', type: 'Facebook', reward: 100, requiredLevel: 'WS0', desc: 'Curta e comente na publicação indicada para receber a recompensa diária de iniciante.', status: 'disponivel' },
-  { id: 't0_2', title: 'Seguir Canal do YouTube', type: 'YouTube', reward: 100, requiredLevel: 'WS0', desc: 'Inscreva-se no canal do parceiro e ative as notificações.', status: 'disponivel' },
-  { id: 't0_3', title: 'Avaliar Produto Amazónia', type: 'Amazon', reward: 100, requiredLevel: 'WS0', desc: 'Dê 5 estrelas ao produto listado no carrinho da Amazon parceira.', status: 'disponivel' },
+  { id: 't0_2', title: 'Seguir Canal do YouTube', type: 'Whatsapp', reward: 100, requiredLevel: 'WS0', desc: 'Inscreva-se no canal do parceiro e ative as notificações.', status: 'disponivel' },
+  { id: 't0_3', title: 'Avaliar Produto Amazónia', type: 'Tiktok', reward: 100, requiredLevel: 'WS0', desc: 'Dê 5 estrelas ao produto listado no carrinho da Amazon parceira.', status: 'disponivel' },
   
   // WS1 Tasks
   { id: 't1_1', title: 'Seguir Página Facebook Premium', type: 'Facebook', reward: 450, requiredLevel: 'WS1', desc: 'Siga a página da marca parceira de cosméticos e compartilhe uma postagem pública.', status: 'disponivel' },
-  { id: 't1_2', title: 'Vídeo Promocional YouTube AS', type: 'YouTube', reward: 450, requiredLevel: 'WS1', desc: 'Assista a 2 minutos deste anúncio de produto e curta.', status: 'disponivel' },
-  { id: 't1_3', title: 'Adicionar Item ao Carrinho Amazon', type: 'Amazon', reward: 450, requiredLevel: 'WS1', desc: 'Adicione ao seu carrinho de interesse e tire um print screen.', status: 'disponivel' },
-  { id: 't1_4', title: 'Avaliação Positiva de Loja Amazon', type: 'Amazon', reward: 450, requiredLevel: 'WS1', desc: 'Deixe um feedback positivo na loja do vendedor verificado.', status: 'disponivel' },
+  { id: 't1_2', title: 'Vídeo Promocional YouTube AS', type: 'Whatsapp', reward: 450, requiredLevel: 'WS1', desc: 'Assista a 2 minutos deste anúncio de produto e curta.', status: 'disponivel' },
+  { id: 't1_3', title: 'Adicionar Item ao Carrinho Amazon', type: 'Tiktok', reward: 450, requiredLevel: 'WS1', desc: 'Adicione ao seu carrinho de interesse e tire um print screen.', status: 'disponivel' },
+  { id: 't1_4', title: 'Avaliação Positiva de Loja Amazon', type: 'Tiktok', reward: 450, requiredLevel: 'WS1', desc: 'Deixe um feedback positivo na loja do vendedor verificado.', status: 'disponivel' },
   { id: 't1_5', title: 'Compartilhar Post de Evento FB', type: 'Facebook', reward: 450, requiredLevel: 'WS1', desc: 'Publique o link do evento parceiro em seu perfil social publicamente.', status: 'disponivel' },
 
   // WS2 Tasks (User matches this in image!)
-  { id: 't2_1', title: 'Avaliar Gadget de Alta Tecnologia', type: 'Amazon', reward: 1150, requiredLevel: 'WS2', desc: 'Escreva um comentário curto e objetivo de 5 estrelas sobre o fone de ouvido de última geração.', status: 'disponivel' },
+  { id: 't2_1', title: 'Avaliar Gadget de Alta Tecnologia', type: 'Tiktok', reward: 1150, requiredLevel: 'WS2', desc: 'Escreva um comentário curto e objetivo de 5 estrelas sobre o fone de ouvido de última geração.', status: 'disponivel' },
   { id: 't2_2', title: 'Fazer Compartilhamento Viral FB', type: 'Facebook', reward: 1150, requiredLevel: 'WS2', desc: 'Compartilhe o anúncio oficial do aplicativo com texto recomendado e tire screenshot.', status: 'disponivel' },
-  { id: 't2_3', title: 'Subir Review Vídeo YouTube', type: 'YouTube', reward: 1150, requiredLevel: 'WS2', desc: 'Dê feedback em vídeo comentado, curta e comente na live stream oficial.', status: 'disponivel' },
+  { id: 't2_3', title: 'Subir Review Vídeo YouTube', type: 'Whatsapp', reward: 1150, requiredLevel: 'WS2', desc: 'Dê feedback em vídeo comentado, curta e comente na live stream oficial.', status: 'disponivel' },
   { id: 't2_4', title: 'Comentário em Post no Facebook', type: 'Facebook', reward: 1150, requiredLevel: 'WS2', desc: 'Escreva um comentário focado nas vantagens da marca parceira de vestuários.', status: 'disponivel' },
-  { id: 't2_5', title: 'Visualizar Shorts de Viagem YT', type: 'YouTube', reward: 1150, requiredLevel: 'WS2', desc: 'Assista a 3 shorts seguidos de nossa rede de entretenimento parceira e favorite.', status: 'disponivel' },
-  { id: 't2_6', title: 'Check-in de Compras de Moda Amazon', type: 'Amazon', reward: 1150, requiredLevel: 'WS2', desc: 'Visite a vitrine de vestuário e clique em simular interesse para validar cupom.', status: 'disponivel' },
-  { id: 't2_7', title: 'Inscrição em Canal de Finanças YT', type: 'YouTube', reward: 1150, requiredLevel: 'WS2', desc: 'Inscreva-se no canal financeiro parceiro e curta o último vídeo publicado.', status: 'disponivel' },
+  { id: 't2_5', title: 'Visualizar Shorts de Viagem YT', type: 'Whatsapp', reward: 1150, requiredLevel: 'WS2', desc: 'Assista a 3 shorts seguidos de nossa rede de entretenimento parceira e favorite.', status: 'disponivel' },
+  { id: 't2_6', title: 'Check-in de Compras de Moda Amazon', type: 'Tiktok', reward: 1150, requiredLevel: 'WS2', desc: 'Visite a vitrine de vestuário e clique em simular interesse para validar cupom.', status: 'disponivel' },
+  { id: 't2_7', title: 'Inscrição em Canal de Finanças YT', type: 'Whatsapp', reward: 1150, requiredLevel: 'WS2', desc: 'Inscreva-se no canal financeiro parceiro e curta o último vídeo publicado.', status: 'disponivel' },
   { id: 't2_8', title: 'Engajamento no Grupo de FB', type: 'Facebook', reward: 1150, requiredLevel: 'WS2', desc: 'Faça um post construtivo em grupo público parceiro sobre oportunidades de home-office.', status: 'disponivel' },
 
   // WS3 Tasks
-  { id: 't3_1', title: 'Avaliação de Notebook Gamer Amazon', type: 'Amazon', reward: 3200, requiredLevel: 'WS3', desc: 'Revisão profissional simulada de produto premium com descrição técnica de compra.', status: 'disponivel' },
-  { id: 't3_2', title: 'Campanha de Divulgação YouTube', type: 'YouTube', reward: 3200, requiredLevel: 'WS3', desc: 'Assista ao vídeo corporativo de inovação tecnológica de 10 min e valide código oculto.', status: 'disponivel' },
+  { id: 't3_1', title: 'Avaliação de Notebook Gamer Amazon', type: 'Tiktok', reward: 3200, requiredLevel: 'WS3', desc: 'Revisão profissional simulada de produto premium com descrição técnica de compra.', status: 'disponivel' },
+  { id: 't3_2', title: 'Campanha de Divulgação YouTube', type: 'Whatsapp', reward: 3200, requiredLevel: 'WS3', desc: 'Assista ao vídeo corporativo de inovação tecnológica de 10 min e valide código oculto.', status: 'disponivel' },
   { id: 't3_3', title: 'Compartilhamento em Grupo FB', type: 'Facebook', reward: 3200, requiredLevel: 'WS3', desc: 'Compartilhe em 5 grupos de classificados locais o banner de recrutamento.', status: 'disponivel' },
 
   // WS4 Tasks
-  { id: 't4_1', title: 'Promoção de Dropshipping Amazon', type: 'Amazon', reward: 10000, requiredLevel: 'WS4', desc: 'Divulgue o portfólio de fornecedores globais de alto giro no mercado regional.', status: 'disponivel' },
-  { id: 't4_2', title: 'Vídeo Patrocinado de Investimento YT', type: 'YouTube', reward: 10000, requiredLevel: 'WS4', desc: 'Engaje na campanha oficial da corretora internacional com curtida, comentário e compartilhamento.', status: 'disponivel' },
+  { id: 't4_1', title: 'Promoção de Dropshipping Amazon', type: 'Tiktok', reward: 10000, requiredLevel: 'WS4', desc: 'Divulgue o portfólio de fornecedores globais de alto giro no mercado regional.', status: 'disponivel' },
+  { id: 't4_2', title: 'Vídeo Patrocinado de Investimento YT', type: 'Whatsapp', reward: 10000, requiredLevel: 'WS4', desc: 'Engaje na campanha oficial da corretora internacional com curtida, comentário e compartilhamento.', status: 'disponivel' },
 
   // WS5 Tasks
-  { id: 't5_1', title: 'Parceria de Mídia Estruturada YT', type: 'YouTube', reward: 35000, requiredLevel: 'WS5', desc: 'Geração de visualizações orgânicas patrocinadas por parceiros multilaterais de anúncios.', status: 'disponivel' },
-  { id: 't5_2', title: 'Promoção de Marca Principal Amazon', type: 'Amazon', reward: 35000, requiredLevel: 'WS5', desc: 'Classificação máxima e divulgação do hub principal de eletrônicos no e-commerce.', status: 'disponivel' }
+  { id: 't5_1', title: 'Parceria de Mídia Estruturada YT', type: 'Whatsapp', reward: 35000, requiredLevel: 'WS5', desc: 'Geração de visualizações orgânicas patrocinadas por parceiros multilaterais de anúncios.', status: 'disponivel' },
+  { id: 't5_2', title: 'Promoção de Marca Principal Amazon', type: 'Tiktok', reward: 35000, requiredLevel: 'WS5', desc: 'Classificação máxima e divulgação do hub principal de eletrônicos no e-commerce.', status: 'disponivel' }
 ];
 
 const INITIAL_STATS: FinancialStats = {
@@ -338,21 +339,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
         if (resp.ok) {
           const res = await resp.json();
-          if (res?.success) profileData = res.result;
+          if (res?.success) {
+            const raw = res.result;
+            profileData = Array.isArray(raw) ? raw[0] : raw;
+          }
         }
       } catch (_) { /* perfil será carregado depois */ }
 
       const loggedUser: UserProfile = {
-        phone: cleanPhone,
+        phone: profileData?.phone || cleanPhone,
         id: profileData?.id || data.user.id,
-        level: profileData?.level || 'WS0',
-        creditScore: profileData?.credit_score ?? 85,
+        level: 'WS0',
+        creditScore: 85,
         inviteCode: profileData?.invite_code || '',
-        bankName: profileData?.bank_name || '',
-        bankAccount: profileData?.bank_account || '',
-        holderName: profileData?.holder_name || ''
+        bankName: '',
+        bankAccount: '',
+        holderName: ''
       };
       setUser(loggedUser);
+      // Set real balances from profile
+      if (profileData) {
+        setStats(prev => ({
+          ...prev,
+          balance: Number(profileData.balance) ?? prev.balance,
+          balanceUSDT: Number(profileData.balance_correte) ?? prev.balanceUSDT,
+        }));
+      }
       setIsLoggedIn(true);
       return true;
     } catch (e) {
@@ -413,21 +425,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
         if (resp.ok) {
           const res = await resp.json();
-          if (res?.success) profileData = res.result;
+          if (res?.success) {
+            const raw = res.result;
+            profileData = Array.isArray(raw) ? raw[0] : raw;
+          }
         }
       } catch (_) { /* perfil será carregado depois */ }
 
       const newUser: UserProfile = {
-        phone: cleanPhone,
+        phone: profileData?.phone || cleanPhone,
         id: profileData?.id || data.user.id,
-        level: profileData?.level || 'WS0',
-        creditScore: profileData?.credit_score ?? 80,
+        level: 'WS0',
+        creditScore: 80,
         inviteCode: profileData?.invite_code || '',
-        bankName: profileData?.bank_name || '',
-        bankAccount: profileData?.bank_account || '',
-        holderName: profileData?.holder_name || ''
+        bankName: '',
+        bankAccount: '',
+        holderName: ''
       };
       setUser(newUser);
+      // Set real balances from profile
+      if (profileData) {
+        setStats(prev => ({
+          ...prev,
+          balance: Number(profileData.balance) ?? prev.balance,
+          balanceUSDT: Number(profileData.balance_correte) ?? prev.balanceUSDT,
+        }));
+      }
       setIsLoggedIn(true);
     }
   };
@@ -672,8 +695,86 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // Refresh user profile from backend (gateway op 101 → get_user_profile)
+  // Returns: id, phone, balance, invite_code, balance_correte
+  const refreshUserProfile = async () => {
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      const resp = await fetch(GATEWAY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ op: 101, data: {} })
+      });
+      if (resp.ok) {
+        const res = await resp.json();
+        if (res?.success && res?.result) {
+          // result can be an array (RETURNS TABLE) or single object
+          const p = Array.isArray(res.result) ? res.result[0] : res.result;
+          if (!p) return;
+
+          // Update user profile fields
+          setUser(prev => ({
+            ...prev,
+            phone: p.phone || prev.phone,
+            id: p.id || prev.id,
+            inviteCode: p.invite_code || prev.inviteCode,
+          }));
+
+          // Update financial stats with real balance from profiles.balance
+          // and USDT balance from tarefas_diarias.balance_correte
+          setStats(prev => ({
+            ...prev,
+            balance: Number(p.balance) ?? prev.balance,
+            balanceUSDT: Number(p.balance_correte) ?? prev.balanceUSDT,
+          }));
+        }
+      }
+    } catch (e) {
+      console.error('Failed to refresh user profile', e);
+    }
+  };
+
   // Upgrade membership level
-  const upgradeMembership = (level: string, cost: number): boolean => {
+  const upgradeMembership = async (level: string, cost: number, productId?: string): Promise<boolean> => {
+    if (productId) {
+      try {
+        const token = await getAccessToken();
+        if (!token) return false;
+        
+        const resp = await fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            op: 511,
+            data: { product_id: productId }
+          })
+        });
+        
+        if (resp.ok) {
+          const res = await resp.json();
+          if (res?.success && res.result?.success) {
+            addToast(res.result?.message || 'Ativação realizada com sucesso!', 'success');
+            await refreshUserProfile();
+            return true;
+          } else {
+            addToast(res?.error || res?.result?.message || 'Falha na ativação', 'error');
+            return false;
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao ativar VIP no backend:', err);
+        addToast('Erro ao processar ativação.', 'error');
+        return false;
+      }
+    }
+
     if (stats.balance < cost) {
       return false;
     }
@@ -739,6 +840,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       login,
       logout,
       registerUser,
+      refreshUserProfile,
       claimTask,
       submitTaskProof,
       approvePendingTasks,

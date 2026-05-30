@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
 import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { Task, TaskStatus } from '../types';
@@ -15,6 +16,38 @@ export const GravarTab: React.FC = () => {
   // Track expanded task detail blocks
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<string>('');
+
+  
+
+  // New state for posts from post_tarefas_user
+  const [posts, setPosts] = useState<any[]>([]);
+
+  // Fetch posts via gateway on component mount
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        const token = await getAccessToken();
+        if (!token) return;
+        const resp = await fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ op: 513, data: {} })
+        });
+        if (resp.ok) {
+          const res = await resp.json();
+          if (res?.success && Array.isArray(res.result)) {
+            setPosts(res.result);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading posts:', err);
+      }
+    };
+    loadPosts();
+  }, []);
 
   const segments = [
     { status: 'andamento' as TaskStatus, label: 'Transformação', iconType: 'transformacao' },
@@ -415,6 +448,24 @@ export const GravarTab: React.FC = () => {
           })
         )}
       </div>
+
+{/* Posts Section */}
+<div className="mt-4 p-4 bg-white rounded shadow">
+  <h3 className="text-lg font-semibold mb-2">Posts</h3>
+  {posts.length === 0 ? (
+    <p className="text-sm text-gray-500">Nenhum post encontrado</p>
+  ) : (
+    posts.map((p) => (
+      <div key={p.id} className="border-b py-2">
+        <p><strong>ID:</strong> {p.id}</p>
+        <p><strong>Whatsapp:</strong> {p.link_whatsap}</p>
+        <p><strong>Facebook:</strong> {p.link_facebook}</p>
+        <p><strong>Tik tok:</strong> {p.link_tiktok}</p>
+        <p><strong>Criado em:</strong> {p.data_criada}</p>
+      </div>
+    ))
+  )}
+</div>
 
     </div>
   );

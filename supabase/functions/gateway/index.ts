@@ -18,6 +18,8 @@ const OP_RULES: Record<number, OperationRule> = {
   413: { name: "update_bank_account", roles: ["user"] },
   414: { name: "delete_client_bank", roles: ["user"] },
   511: { name: "purchase_product", roles: ["user"] },
+  512: { name: "get_active_products", roles: ["user"] },
+  513: { name: "get_user_posts", roles: ["user"] },
   701: { name: "redeem_gift_code", roles: ["user"] },
   801: { name: "submit_verification", roles: ["user"] },
 };
@@ -276,6 +278,20 @@ serve(async (req) => {
           p_product_id: String(payload.product_id).trim(),
         });
 
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
+      case 512: {
+        const { data, error } = await supabase.rpc("get_active_products");
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
+      case 513: {
+        const { data, error } = await supabase.rpc("get_user_posts");
         if (error) throw error;
         result = data;
         break;

@@ -11,31 +11,29 @@ interface TaskTabProps {
 
 // High-fidelity Inline SVGs for the Category Selection Header from image
 
-const YouTubeWordmark: React.FC = () => (
+const WhatsappWordmark: React.FC = () => (
   <div className="flex flex-col items-center select-none pt-0.5">
     <div className="flex items-center justify-center h-8">
       <svg className="h-[21px] shrink-0" viewBox="0 0 120 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Play Icon */}
-        <path d="M26.3 3.4C29.4 3.4 32.2 4.2 32.2 4.2C32.2 4.2 34.8 4.4 36.3 5.4C37.2 6.1 37.5 7.6 37.5 7.6C37.5 7.6 37.8 9.9 37.8 12.3V14.4C37.8 16.8 37.5 19.1 37.5 19.1C37.5 19.1 37.2 20.6 36.3 21.3C34.8 22.3 32.2 22.5 32.2 22.5C32.2 22.5 29.4 23.3 26.3 23.3H11.7C8.6 23.3 5.8 22.5 5.8 22.5C5.8 22.5 3.2 22.3 1.7 21.3C0.8 20.6 0.5 19.1 0.5 19.1C0.5 19.1 0.2 16.8 0.2 14.4V12.3C0.2 9.9 0.5 7.6 0.5 7.6C0.5 7.6 0.8 6.1 1.7 5.4C3.2 4.4 5.8 4.2 5.8 4.2C5.8 4.2 8.6 3.4 11.7 3.4H26.3Z" fill="#FF0000" />
-        <polygon points="15.2,8.8 24.3,13.7 15.2,18.7" fill="white" />
-        {/* 'YouTube' Letters */}
-        <text x="43" y="19" fill="#000000" fontSize="17.2" fontWeight="950" fontFamily="sans-serif" letterSpacing="-0.6">YouTube</text>
+        <path d="M14 0C6.27 0 0 6.27 0 14C0 17.07 1 19.92 2.68 22.3L0.9 27.9L6.7 26.2C8.98 27.53 11.4 28 14 28C21.73 28 28 21.73 28 14C28 6.27 21.73 0 14 0Z" fill="#25D366" />
+        <path d="M21.5 19.1C21.1 20.2 19.6 21 18.3 21C17.3 21 16 20.7 14.5 20.1C11.5 18.8 8.9 16 8.3 15.3C7.6 14.4 6 12.3 6 9.8C6 7.3 7.3 6.1 7.8 5.6C8.3 5.1 9.1 4.9 9.6 4.9C9.8 4.9 10 4.9 10.2 5C10.5 5.1 10.7 5.1 11 5.8C11.3 6.6 12 8.3 12.1 8.5C12.2 8.7 12.3 9 12.1 9.3C12 9.6 11.9 9.8 11.6 10.1C11.4 10.3 11.1 10.7 10.9 10.9C10.7 11.1 10.4 11.3 10.7 11.8C11 12.3 11.7 13.5 12.8 14.4C14.2 15.6 15.3 16 15.8 16.2C16.3 16.4 16.6 16.4 16.9 16.1C17.2 15.8 17.7 15.2 18.1 14.6C18.4 14.1 18.8 14.2 19.3 14.4C19.8 14.6 21.3 15.3 21.6 15.5C21.9 15.6 22.1 15.8 22.2 16.1C22.2 16.4 22.2 17.6 21.5 19.1Z" fill="white" />
+        <text x="35" y="20" fill="#000000" fontSize="18" fontWeight="bold" fontFamily="sans-serif">Whatsapp</text>
       </svg>
     </div>
-    <span className="text-[12px] font-semibold text-zinc-500 mt-1 select-none font-sans">YouTube</span>
+    <span className="text-[12px] font-semibold text-zinc-500 mt-1 select-none font-sans">Whatsapp</span>
   </div>
 );
 
-const AmazonLogo: React.FC = () => (
+const TiktokLogo: React.FC = () => (
   <div className="flex flex-col items-center select-none pt-0.5">
-    <div className="flex flex-col items-center justify-center h-8">
-      <span className="font-sans font-black text-[18px] text-zinc-900 leading-none tracking-tight">amazon</span>
-      <svg className="w-[48px] h-[7px] mt-[1.2px]" viewBox="0 0 49 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M2 1C12 7 36 7 47 1" stroke="#FF9900" strokeWidth="2.8" strokeLinecap="round" />
-        <path d="M43.5 1.5C44 2.5 45 4.5 47 5C45.5 5.5 44 6.5 43 8.5" stroke="#FF9900" strokeWidth="2.2" strokeLinecap="round" />
+    <div className="flex items-center justify-center h-8">
+      <svg className="h-[21px] shrink-0" viewBox="0 0 100 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 2C16 2 16.5 6 22 6V10C19 10 16 8.5 16 8.5V18.5C16 22.6 12.6 26 8.5 26C4.4 26 1 22.6 1 18.5C1 14.4 4.4 11 8.5 11C9.2 11 9.8 11.1 10.4 11.3V15.5C9.8 15.2 9.2 15 8.5 15C6.6 15 5 16.6 5 18.5C5 20.4 6.6 22 8.5 22C10.4 22 12 20.4 12 18.5V2H16Z" fill="#000000" />
+        <path d="M16 2C16 2 16.5 6 22 6V10C19 10 16 8.5 16 8.5V18.5C16 22.6 12.6 26 8.5 26C4.4 26 1 22.6 1 18.5C1 14.4 4.4 11 8.5 11C9.2 11 9.8 11.1 10.4 11.3V15.5C9.8 15.2 9.2 15 8.5 15C6.6 15 5 16.6 5 18.5C5 20.4 6.6 22 8.5 22C10.4 22 12 20.4 12 18.5V2H16Z" stroke="#00f2fe" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+        <text x="30" y="20" fill="#000000" fontSize="18" fontWeight="bold" fontFamily="sans-serif">Tik tok</text>
       </svg>
     </div>
-    <span className="text-[12px] font-semibold text-zinc-500 mt-1 select-none font-sans">Amazónia</span>
+    <span className="text-[12px] font-semibold text-zinc-500 mt-1 select-none font-sans">Tik tok</span>
   </div>
 );
 
@@ -52,33 +50,30 @@ const FacebookLogo: React.FC = () => (
 );
 
 const CardLeftLogo: React.FC<{ type: TaskType }> = ({ type }) => {
-  if (type === 'YouTube') {
+  if (type === 'Whatsapp') {
     return (
       <div className="flex flex-col items-center justify-center shrink-0 w-[84px] p-2 bg-slate-50 border-r border-zinc-150 select-none">
-        <span className="text-[11px] text-zinc-400 font-sans mb-1.5 font-bold">YouTube</span>
-        <svg className="h-[20px] w-[38px]" viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="40" height="24" rx="6" fill="#FF0000" />
-          <polygon points="16,7 26,12 16,17" fill="white" />
+        <span className="text-[11px] text-zinc-400 font-sans mb-1.5 font-bold">Whatsapp</span>
+        <svg className="h-[24px] w-[24px]" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 0C6.27 0 0 6.27 0 14C0 17.07 1 19.92 2.68 22.3L0.9 27.9L6.7 26.2C8.98 27.53 11.4 28 14 28C21.73 28 28 21.73 28 14C28 6.27 21.73 0 14 0Z" fill="#25D366" />
+          <path d="M21.5 19.1C21.1 20.2 19.6 21 18.3 21C17.3 21 16 20.7 14.5 20.1C11.5 18.8 8.9 16 8.3 15.3C7.6 14.4 6 12.3 6 9.8C6 7.3 7.3 6.1 7.8 5.6C8.3 5.1 9.1 4.9 9.6 4.9C9.8 4.9 10 4.9 10.2 5C10.5 5.1 10.7 5.1 11 5.8C11.3 6.6 12 8.3 12.1 8.5C12.2 8.7 12.3 9 12.1 9.3C12 9.6 11.9 9.8 11.6 10.1C11.4 10.3 11.1 10.7 10.9 10.9C10.7 11.1 10.4 11.3 10.7 11.8C11 12.3 11.7 13.5 12.8 14.4C14.2 15.6 15.3 16 15.8 16.2C16.3 16.4 16.6 16.4 16.9 16.1C17.2 15.8 17.7 15.2 18.1 14.6C18.4 14.1 18.8 14.2 19.3 14.4C19.8 14.6 21.3 15.3 21.6 15.5C21.9 15.6 22.1 15.8 22.2 16.1C22.2 16.4 22.2 17.6 21.5 19.1Z" fill="white" />
         </svg>
       </div>
     );
   }
-  if (type === 'Amazon') {
+  if (type === 'Tiktok') {
     return (
       <div className="flex flex-col items-center justify-center shrink-0 w-[84px] p-2 bg-slate-50 border-r border-zinc-150 select-none">
-        <span className="text-[11px] text-zinc-400 font-sans mb-1.5 font-bold">YouTube</span>
-        <div className="flex flex-col items-center">
-          <span className="font-extrabold text-[12.5px] text-zinc-950 leading-none">amazon</span>
-          <svg className="w-[30px] h-[5px] mt-[1.5px]" viewBox="0 0 49 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 1C12 7 36 7 47 1" stroke="#FF9900" strokeWidth="3" strokeLinecap="round" />
-          </svg>
-        </div>
+        <span className="text-[11px] text-zinc-400 font-sans mb-1.5 font-bold">Tik tok</span>
+        <svg className="h-[24px] w-[24px]" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 2C16 2 16.5 6 22 6V10C19 10 16 8.5 16 8.5V18.5C16 22.6 12.6 26 8.5 26C4.4 26 1 22.6 1 18.5C1 14.4 4.4 11 8.5 11C9.2 11 9.8 11.1 10.4 11.3V15.5C9.8 15.2 9.2 15 8.5 15C6.6 15 5 16.6 5 18.5C5 20.4 6.6 22 8.5 22C10.4 22 12 20.4 12 18.5V2H16Z" fill="#000000" />
+        </svg>
       </div>
     );
   }
   return (
     <div className="flex flex-col items-center justify-center shrink-0 w-[84px] p-2 bg-slate-50 border-r border-zinc-150 select-none">
-      <span className="text-[11px] text-zinc-400 font-sans mb-1.5 font-bold">YouTube</span>
+      <span className="text-[11px] text-zinc-400 font-sans mb-1.5 font-bold">Facebook</span>
       <svg className="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="24" height="24" rx="4" fill="#1877F2" />
         <path d="M16 8.5H14.5C13.8 8.5 13.5 8.9 13.5 9.6V11H16L15.5 13H13.5V19.5H11V13H9.5V11H11V9.5C11 7.6 12.1 6.5 14 6.5C14.9 6.5 15.6 6.6 16 6.7V8.5Z" fill="white" />
@@ -126,26 +121,26 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
       {/* 1. Header Channel Selector Category from Image */}
       <div className="bg-white grid grid-cols-3 border-b border-zinc-200 shadow-xs px-3 py-3 gap-2" id="tasks-filter-selection-grid">
         
-        {/* YouTube Selector */}
+        {/* Whatsapp Selector */}
         <div 
-          onClick={() => setSelectedCategory('YouTube')}
+          onClick={() => setSelectedCategory('Whatsapp')}
           className={`cursor-pointer pb-2 flex flex-col items-center justify-center transition-all ${
-            selectedCategory === 'YouTube' ? 'border-b-[3px] border-red-500 scale-[1.02]' : 'opacity-65 hover:opacity-100'
+            selectedCategory === 'Whatsapp' ? 'border-b-[3px] border-green-500 scale-[1.02]' : 'opacity-65 hover:opacity-100'
           }`}
-          id="tab-btn-youtube"
+          id="tab-btn-whatsapp"
         >
-          <YouTubeWordmark />
+          <WhatsappWordmark />
         </div>
 
-        {/* Amazon/Amazónia Selector */}
+        {/* Tiktok Selector */}
         <div 
-          onClick={() => setSelectedCategory('Amazon')}
+          onClick={() => setSelectedCategory('Tiktok')}
           className={`cursor-pointer pb-2 flex flex-col items-center justify-center transition-all ${
-            selectedCategory === 'Amazon' ? 'border-b-[3px] border-yellow-500 scale-[1.02]' : 'opacity-65 hover:opacity-100'
+            selectedCategory === 'Tiktok' ? 'border-b-[3px] border-black scale-[1.02]' : 'opacity-65 hover:opacity-100'
           }`}
-          id="tab-btn-amazon"
+          id="tab-btn-tiktok"
         >
-          <AmazonLogo />
+          <TiktokLogo />
         </div>
 
         {/* Facebook Selector */}

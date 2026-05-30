@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Crown, Sparkles, ShieldCheck, Check, ArrowUpRight, User } from 'lucide-react';
 import { motion } from 'motion/react';
+import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
 
 // Custom high-fidelity credit card SVG resembling a standard blue bank card with golden chip
 const BlueCardIcon: React.FC = () => (
@@ -43,6 +44,34 @@ export const WSTab: React.FC = () => {
   const [usdtFileName, setUsdtFileName] = useState<string>('');
   const [orderId, setOrderId] = useState<string>('');
 
+  const [dbProducts, setDbProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const token = await getAccessToken();
+        if (!token) return;
+        const resp = await fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ op: 512, data: {} })
+        });
+        if (resp.ok) {
+          const res = await resp.json();
+          if (res?.success && Array.isArray(res.result)) {
+            setDbProducts(res.result);
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao buscar produtos:', err);
+      }
+    };
+    loadProducts();
+  }, []);
+
   React.useEffect(() => {
     if (selectedTierForPayment) {
       setIsFullScreenActive(true);
@@ -54,7 +83,7 @@ export const WSTab: React.FC = () => {
     };
   }, [selectedTierForPayment, setIsFullScreenActive]);
 
-  const tiers = [
+  const staticTiers = [
     {
       level: 'WS0',
       name: 'Membro de Teste',
@@ -117,6 +146,24 @@ export const WSTab: React.FC = () => {
     }
   ];
 
+  const tiers = staticTiers.map(t => {
+    const dbP = dbProducts.find(p => p.name === t.level);
+    if (dbP) {
+      return {
+        ...t,
+        dbId: dbP.id,
+        price: Number(dbP.price),
+        dailyTasks: Number(dbP.tarefa_por_dia) || t.dailyTasks,
+        payPerTask: Number(dbP.daily_income) || t.payPerTask,
+        link_whatsap: dbP.link_whatsap,
+        link_facebook: dbP.link_facebook,
+        link_tiktok: dbP.link_tiktok,
+        limite_tarefa_por_dia: dbP.limite_tarefa_por_dia ? Number(dbP.limite_tarefa_por_dia) : undefined
+      };
+    }
+    return t;
+  });
+
   // Get current user's VIP config details
   const currentTier = tiers.find(t => t.level === user.level) || tiers[2];
 
@@ -136,7 +183,7 @@ export const WSTab: React.FC = () => {
 
       const currentAddress = ibanMap[selectedMethod] || ibanMap['BAI'];
 
-      const handleConfirmPayment = () => {
+      const handleConfirmPayment = async () => {
         if (!usdtFileName) {
           alert("Por favor, selecione e envie o comprovativo clicando no botão 'Credenciais'.");
           return;
@@ -151,7 +198,7 @@ export const WSTab: React.FC = () => {
 
           const amtKwanza = Math.round(amt * 430);
           addRecharge(amtKwanza, `Cobrança Moeda Digital USDT TRC20 [Pedido: ${orderId}]`);
-          const success = upgradeMembership(selectedTierForPayment.level, selectedTierForPayment.price);
+          const success = await upgradeMembership(selectedTierForPayment.level, selectedTierForPayment.price, selectedTierForPayment.dbId);
 
           if (success) {
             alert(`Sucesso! Recarga de ${amt} USDT (${amtKwanza.toLocaleString('pt-AO')} KZ) submetida. Conta atualizada para ${selectedTierForPayment.level}.`);
@@ -159,11 +206,11 @@ export const WSTab: React.FC = () => {
             setSelectedMethod(null);
             setUsdtFileName('');
           } else {
-            alert('Erro Técnico: Falha na atribuição de nível VIP no servidor.');
+            alert('Falha na ativação: Verifique seu saldo ou contate o suporte.');
           }
         } else {
           addRecharge(selectedTierForPayment.price, `Recarga ${selectedTierForPayment.level} via ${selectedMethod} [Pedido: ${orderId}]`);
-          const success = upgradeMembership(selectedTierForPayment.level, selectedTierForPayment.price);
+          const success = await upgradeMembership(selectedTierForPayment.level, selectedTierForPayment.price, selectedTierForPayment.dbId);
 
           if (success) {
             alert(`Sucesso: Pagamento via ${selectedMethod} registado. Conta estendida para ${selectedTierForPayment.level}.`);
@@ -171,7 +218,7 @@ export const WSTab: React.FC = () => {
             setSelectedMethod(null);
             setUsdtFileName('');
           } else {
-            alert('Erro Técnico: Falha na atribuição de nível VIP no servidor.');
+            alert('Falha na ativação: Verifique seu saldo ou contate o suporte.');
           }
         }
       };

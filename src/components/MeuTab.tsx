@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { 
@@ -24,7 +24,11 @@ import downloadAppIcon from '../../assets/icons8-download-da-aplicacao-64.png';
 import terminarSessaoIcon from '../../assets/icons8-terminar-sessao-64.png';
 
 export const MeuTab: React.FC = () => {
-  const { user, stats, logout, resetAll } = useApp();
+  const { user, stats, logout, resetAll, refreshUserProfile } = useApp();
+  useEffect(() => {
+    // Fetch latest user profile info when the tab loads
+    refreshUserProfile();
+  }, []);
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
@@ -163,8 +167,7 @@ export const MeuTab: React.FC = () => {
         </div>
         
         <div className="text-[10px] text-neutral-600 font-sans flex items-center justify-center gap-1 mt-1 z-10 select-none" id="profile-codes-cue">
-          <span className="font-normal">ID:{user.id || '13793'}</span>
-          <span className="font-normal ml-1">Código de convite:{user.inviteCode || '931242'}</span>
+          <span className="font-normal">Código de convite:{user.inviteCode || '931242'}</span>
           <button
             id="inv-code-copy-meu"
             onClick={copyInviteCode}

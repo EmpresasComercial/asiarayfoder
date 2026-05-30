@@ -201,9 +201,9 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
             </div>
           </div>
 
-          {/* Room 3: YouTube with grey bg */}
+          {/* Room 3: Whatsapp with grey bg */}
           <div 
-            onClick={() => handleTaskRoomClick('YouTube')}
+            onClick={() => handleTaskRoomClick('Whatsapp')}
             className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-center h-[76px] bg-[#e2e8f0] relative shadow-none border border-gray-150"
           >
             {/* Top Left Tag */}
@@ -212,7 +212,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
             </div>
             
             <div className="px-1.5 z-10 text-left flex flex-col justify-center h-full pt-2">
-              <div className="text-[12px] font-bold text-gray-850 leading-none">YouTube</div>
+              <div className="text-[12px] font-bold text-gray-850 leading-none">Whatsapp</div>
               <div className="text-[7.5px] text-gray-500 font-medium mt-1 leading-none">download app para ganhar recompensa</div>
             </div>
 
