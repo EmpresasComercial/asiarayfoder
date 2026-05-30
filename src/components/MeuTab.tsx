@@ -295,7 +295,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <img src={inviteIcon} alt="convidar amigos" className="w-[26px] h-[26px] object-contain" />
+              <img src={inviteIcon} alt="convidar amigos" className="w-[26px] h-[26px] object-contain bg-white rounded-full" />
             </div>
             <span className="text-[11px] font-normal text-red-500">convidar amigos</span>
           </div>
