@@ -30,12 +30,19 @@ const OP_RULES: Record<number, OperationRule> = {
 const MAX_BODY_BYTES = 8192;
 const MAX_TOKEN_AGE_SECONDS = 300;
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 function json(status: number, payload: Record<string, unknown>) {
   return new Response(JSON.stringify(payload), {
     status,
     headers: {
       "Content-Type": "application/json",
       "Cache-Control": "no-store",
+      ...corsHeaders
     },
   });
 }
@@ -90,6 +97,10 @@ function assertTokenFresh(token: string) {
 
 serve(async (req) => {
   try {
+    if (req.method === "OPTIONS") {
+      return new Response("ok", { headers: corsHeaders });
+    }
+
     if (req.method !== "POST") {
       return json(405, { success: false, error: "Método não permitido" });
     }
