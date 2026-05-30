@@ -93,16 +93,16 @@ const INITIAL_TASKS: Task[] = [
 ];
 
 const INITIAL_STATS: FinancialStats = {
-  balance: 40380, // matches gold coin image!
-  balanceUSDT: 0.000, // matches TRC_USDT entry
-  incomeYesterday: 2360.00, // Matches "Ontem: +2360.00"
-  incomeToday: 260.00, // Matches "Hoje: 260.00"
-  incomeThisWeek: 18450.00, // Matches "Esta semana: 18450.00"
-  incomeThisMonth: 76620.00, // Matches "Este mês: 76620.00"
-  incomeLastMonth: 47620.00, // Matches "No mês passado: 47620.00"
-  incomeTotal: 128000.00, // Matches "Total das receitas: 128000.00"
-  completedTodayCount: 0, // Matches "Terminado hoje: 0"
-  unfinishedCount: 4 // Matches "Tarefa inacabada: 4"
+  balance: 0,
+  balanceUSDT: 0,
+  incomeYesterday: 0,
+  incomeToday: 0,
+  incomeThisWeek: 0,
+  incomeThisMonth: 0,
+  incomeLastMonth: 0,
+  incomeTotal: 0,
+  completedTodayCount: 0,
+  unfinishedCount: 0
 };
 
 const INITIAL_LOGS: LogRecord[] = [
@@ -265,14 +265,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const fetchFinancialStats = async () => {
       try {
-        const sessionStr = localStorage.getItem('sb-fycskldchqqqohgvioal-auth-token');
-        if (!sessionStr) return;
-        const session = JSON.parse(sessionStr);
-        const token = session?.access_token;
+        const token = await getAccessToken();
         if (!token) return;
 
-        const url = `https://fycskldchqqqohgvioal.supabase.co/functions/v1/gateway`;
-        const resp = await fetch(url, {
+        const resp = await fetch(GATEWAY_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

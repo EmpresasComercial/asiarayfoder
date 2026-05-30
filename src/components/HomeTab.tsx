@@ -70,7 +70,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           <div className="flex flex-col">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Balance (KZ)</span>
             <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
-              {stats.balance > 0 ? stats.balance.toFixed(2) : '40380.00'}
+              {stats.balance.toFixed(2)}
             </span>
           </div>
           
@@ -78,7 +78,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           <div className="flex flex-col border-l border-neutral-100 pl-3">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Ontem (KZ)</span>
             <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
-              {stats.incomeYesterday > 0 ? `+${stats.incomeYesterday.toFixed(2)}` : '+2360.00'}
+              +{stats.incomeYesterday.toFixed(2)}
             </span>
           </div>
           
@@ -86,7 +86,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           <div className="flex flex-col border-l border-neutral-100 pl-3">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Hoje (KZ)</span>
             <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
-              {stats.incomeToday > 0 ? stats.incomeToday.toFixed(2) : '260.00'}
+              {stats.incomeToday.toFixed(2)}
             </span>
           </div>
 
@@ -94,7 +94,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           <div className="flex flex-col">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Esta semana (KZ)</span>
             <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
-              {stats.incomeThisWeek > 0 ? stats.incomeThisWeek.toFixed(2) : '18450.00'}
+              {stats.incomeThisWeek.toFixed(2)}
             </span>
           </div>
           
@@ -102,7 +102,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           <div className="flex flex-col border-l border-neutral-100 pl-3">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Este mês (KZ)</span>
             <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
-              {stats.incomeThisMonth > 0 ? `+${stats.incomeThisMonth.toFixed(2)}` : '+76620.00'}
+              +{stats.incomeThisMonth.toFixed(2)}
             </span>
           </div>
           
@@ -110,7 +110,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           <div className="flex flex-col border-l border-neutral-100 pl-3">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">No mês passado (KZ)</span>
             <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
-              {stats.incomeLastMonth > 0 ? stats.incomeLastMonth.toFixed(2) : '47620.00'}
+              {stats.incomeLastMonth.toFixed(2)}
             </span>
           </div>
 
@@ -118,7 +118,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           <div className="flex flex-col">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Total das receitas (KZ)</span>
             <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
-              {stats.incomeTotal > 0 ? stats.incomeTotal.toFixed(2) : '128000.00'}
+              {stats.incomeTotal.toFixed(2)}
             </span>
           </div>
           
@@ -126,7 +126,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           <div className="flex flex-col border-l border-neutral-100 pl-3">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Terminado hoje</span>
             <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
-              {stats.completedTodayCount > 0 ? stats.completedTodayCount : '0'}
+              {stats.completedTodayCount}
             </span>
           </div>
           
@@ -134,7 +134,7 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           <div className="flex flex-col border-l border-neutral-100 pl-3">
             <span className="text-[10px] text-gray-400 font-medium leading-tight">Tarefa inacabada</span>
             <span className="text-[14px] font-medium text-[#f35a5a] mt-0.5 font-sans leading-none">
-              {stats.unfinishedCount > 0 ? stats.unfinishedCount : '4'}
+              {stats.unfinishedCount}
             </span>
           </div>
 
