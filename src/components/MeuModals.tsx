@@ -714,11 +714,11 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Promotional Banner Image */}
-        <div className="w-full max-w-[340px] mt-8 rounded-[4px] overflow-hidden border border-gray-150 shadow-md">
+        <div className="w-full max-w-[340px] mt-8">
           <img 
             src="/assets/invite_banner.png" 
             alt="Join Us Promotional Banner" 
-            className="w-full h-auto object-cover"
+            className="w-full h-auto object-contain"
           />
         </div>
 
