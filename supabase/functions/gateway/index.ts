@@ -22,6 +22,9 @@ const OP_RULES: Record<number, OperationRule> = {
   513: { name: "get_user_posts", roles: ["user"] },
   701: { name: "redeem_gift_code", roles: ["user"] },
   801: { name: "submit_verification", roles: ["user"] },
+  901: { name: "submit_task_proof", roles: ["user"] },
+  902: { name: "get_daily_limit", roles: ["user"] },
+  903: { name: "count_user_tasks_today", roles: ["user"] },
 };
 
 const MAX_BODY_BYTES = 8192;
@@ -328,6 +331,32 @@ serve(async (req) => {
           p_verso_path: String(payload.verso_path).trim(),
         });
 
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
+      // Daily task operations
+      case 901: {
+        if (!mustBeNonEmptyString(payload.url_imagem)) {
+          return json(400, { success: false, error: "URL da imagem é obrigatória" });
+        }
+        const { data, error } = await supabase.rpc("submit_task_proof", {
+          p_url_imagem: String(payload.url_imagem).trim(),
+          // nao_visto is set to false by default in the RPC
+        });
+        if (error) throw error;
+        result = data;
+        break;
+      }
+      case 902: {
+        const { data, error } = await supabase.rpc("get_daily_limit");
+        if (error) throw error;
+        result = data;
+        break;
+      }
+      case 903: {
+        const { data, error } = await supabase.rpc("count_user_tasks_today");
         if (error) throw error;
         result = data;
         break;
