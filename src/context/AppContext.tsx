@@ -283,19 +283,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (resp.ok) {
           const resData = await resp.json();
           if (resData?.success && resData?.result) {
-            const r = resData.result;
-            setStats(prev => ({
-              ...prev,
-              balance: Number(r.balance) || prev.balance,
-              incomeYesterday: Number(r.income_yesterday) || 0,
-              incomeToday: Number(r.income_today) || 0,
-              incomeThisWeek: Number(r.income_this_week) || 0,
-              incomeThisMonth: Number(r.income_this_month) || 0,
-              incomeLastMonth: Number(r.income_last_month) || 0,
-              incomeTotal: Number(r.income_total) || 0,
-              completedTodayCount: Number(r.completed_today_count) || 0,
-              unfinishedCount: Number(r.unfinished_count) || 0
-            }));
+            const rawResult = resData.result;
+            const r = Array.isArray(rawResult) ? rawResult[0] : rawResult;
+            if (r) {
+              const parseNum = (val: any, fallback: number = 0) => {
+                const n = Number(val);
+                return isNaN(n) ? fallback : n;
+              };
+              setStats(prev => ({
+                ...prev,
+                balance: r.balance !== undefined && r.balance !== null ? parseNum(r.balance, prev.balance) : prev.balance,
+                incomeYesterday: parseNum(r.income_yesterday, 0),
+                incomeToday: parseNum(r.income_today, 0),
+                incomeThisWeek: parseNum(r.income_this_week, 0),
+                incomeThisMonth: parseNum(r.income_this_month, 0),
+                incomeLastMonth: parseNum(r.income_last_month, 0),
+                incomeTotal: parseNum(r.income_total, 0),
+                completedTodayCount: parseNum(r.completed_today_count, 0),
+                unfinishedCount: parseNum(r.unfinished_count, 0)
+              }));
+            }
           }
         }
       } catch (err) {
@@ -355,10 +362,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setUser(loggedUser);
       // Set real balances from profile
       if (profileData) {
+        const parseNum = (val: any, fallback: number = 0) => {
+          const n = Number(val);
+          return isNaN(n) ? fallback : n;
+        };
         setStats(prev => ({
           ...prev,
-          balance: Number(profileData.balance) ?? prev.balance,
-          balanceUSDT: Number(profileData.balance_correte) ?? prev.balanceUSDT,
+          balance: profileData.balance !== undefined && profileData.balance !== null ? parseNum(profileData.balance, prev.balance) : prev.balance,
+          balanceUSDT: profileData.balance_correte !== undefined && profileData.balance_correte !== null ? parseNum(profileData.balance_correte, prev.balanceUSDT) : prev.balanceUSDT,
         }));
       }
       setIsLoggedIn(true);
@@ -441,10 +452,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setUser(newUser);
       // Set real balances from profile
       if (profileData) {
+        const parseNum = (val: any, fallback: number = 0) => {
+          const n = Number(val);
+          return isNaN(n) ? fallback : n;
+        };
         setStats(prev => ({
           ...prev,
-          balance: Number(profileData.balance) ?? prev.balance,
-          balanceUSDT: Number(profileData.balance_correte) ?? prev.balanceUSDT,
+          balance: profileData.balance !== undefined && profileData.balance !== null ? parseNum(profileData.balance, prev.balance) : prev.balance,
+          balanceUSDT: profileData.balance_correte !== undefined && profileData.balance_correte !== null ? parseNum(profileData.balance_correte, prev.balanceUSDT) : prev.balanceUSDT,
         }));
       }
       setIsLoggedIn(true);
@@ -722,10 +737,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
           // Update financial stats with real balance from profiles.balance
           // and USDT balance from tarefas_diarias.balance_correte
+          const parseNum = (val: any, fallback: number = 0) => {
+            const n = Number(val);
+            return isNaN(n) ? fallback : n;
+          };
           setStats(prev => ({
             ...prev,
-            balance: Number(p.balance) ?? prev.balance,
-            balanceUSDT: Number(p.balance_correte) ?? prev.balanceUSDT,
+            balance: p.balance !== undefined && p.balance !== null ? parseNum(p.balance, prev.balance) : prev.balance,
+            balanceUSDT: p.balance_correte !== undefined && p.balance_correte !== null ? parseNum(p.balance_correte, prev.balanceUSDT) : prev.balanceUSDT,
           }));
         }
       }
