@@ -505,10 +505,6 @@ export const WSTab: React.FC = () => {
 
         {/* Dynamic metadata layout styled down to human labels */}
         <div className="mt-2 text-center text-neutral-800 space-y-0.5">
-          <div className="text-[12px] font-mono font-semibold select-all text-neutral-800 tracking-wide">
-            ID:{user.id || '13793'}
-          </div>
-          
           <div className="text-[13px] font-black tracking-widest text-[#1c1c1a]/95 select-all uppercase">
             {user.level}
           </div>

@@ -31,6 +31,7 @@ export const MeuTab: React.FC = () => {
   }, []);
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
 
   // Modal open states
   const [isBankOpen, setIsBankOpen] = useState(false);
@@ -49,6 +50,13 @@ export const MeuTab: React.FC = () => {
     navigator.clipboard.writeText(user.inviteCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const copyId = () => {
+    const idToDisplay = user.idChaveUnica !== undefined ? String(user.idChaveUnica) : user.id;
+    navigator.clipboard.writeText(idToDisplay);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
   };
 
   const handleGridOption = (key: string) => {
@@ -166,20 +174,34 @@ export const MeuTab: React.FC = () => {
           {user.level || 'WS2'}
         </div>
         
-        <div className="text-[10px] text-neutral-600 font-sans flex items-center justify-center gap-1 mt-1 z-10 select-none" id="profile-codes-cue">
-          <span className="font-normal">Código de convite:{user.inviteCode || '931242'}</span>
-          <button
-            id="inv-code-copy-meu"
-            onClick={copyInviteCode}
-            className="bg-[#dcd6cd] text-neutral-800 text-[10px] px-1.5 py-0.5 rounded-[4px] ml-1 cursor-pointer"
-          >
-            {copied ? 'copiado' : 'cópia'}
-          </button>
+        <div className="w-full max-w-[340px] mt-2 px-1.5 flex justify-between items-center gap-2 z-10 select-none text-[10px] text-neutral-600 font-sans" id="profile-codes-cue">
+          <div className="text-left flex-shrink-0 flex items-center gap-1">
+            <span className="font-normal text-neutral-500">
+              ID: <strong className="text-neutral-700">{user.idChaveUnica !== undefined ? user.idChaveUnica : '-'}</strong>
+            </span>
+            <button
+              id="id-chave-copy-btn"
+              onClick={copyId}
+              className="bg-[#dcd6cd] text-neutral-800 text-[10px] px-1.5 py-0.5 rounded-[4px] cursor-pointer"
+            >
+              {copiedId ? 'copiado' : 'cópia'}
+            </button>
+          </div>
+          <div className="text-right flex-1 min-w-0 flex items-center justify-end gap-1">
+            <span className="font-normal text-neutral-500 truncate">Convite: {user.inviteCode || '------'}</span>
+            <button
+              id="inv-code-copy-meu"
+              onClick={copyInviteCode}
+              className="bg-[#dcd6cd] text-neutral-800 text-[10px] px-1.5 py-0.5 rounded-[4px] cursor-pointer flex-shrink-0"
+            >
+              {copied ? 'copiado' : 'cópia'}
+            </button>
+          </div>
         </div>
 
         {/* Gold & USDT Wallet Card */}
         <div 
-          className="w-[340px] bg-[#242d38] text-slate-800 rounded-[14px] p-4 mt-4 relative flex items-center justify-between z-10 mx-auto"
+          className="w-full max-w-[340px] bg-[#242d38] text-slate-800 rounded-[14px] p-4 mt-4 relative flex items-center justify-between z-10 mx-auto"
           id="meu-gold-coin-box"
         >
           <div className="flex-1 grid grid-cols-2 text-left font-sans items-center">
@@ -322,15 +344,15 @@ export const MeuTab: React.FC = () => {
             <span className="text-[11px] font-normal text-neutral-500">deve ler</span>
           </div>
 
-          {/* Tile 4: a minha informação */}
+          {/* Tile 4: Config conta */}
           <div 
             onClick={() => handleGridOption('info')}
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <img src={infoIcon} alt="a minha informação" className="w-[26px] h-[26px] object-contain" />
+              <img src={infoIcon} alt="Config conta" className="w-[26px] h-[26px] object-contain" />
             </div>
-            <span className="text-[11px] font-normal text-neutral-500">a minha informação</span>
+            <span className="text-[11px] font-normal text-neutral-500">Config conta</span>
           </div>
 
           {/* Tile 5: declaração diária */}
