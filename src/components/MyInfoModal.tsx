@@ -378,28 +378,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
       {/* Scrollable Rows Container */}
       <div className="flex-1 overflow-y-auto bg-white select-none">
         
-        {/* Row 1: Imagem do perfil */}
-        <div 
-          onClick={() => alert('Para alterar a imagem do perfil do canal, use o painel VIP ou entre em contacto com o suporte.')}
-          className="flex items-center justify-between py-4.5 px-4 cursor-pointer hover:bg-neutral-50 border-b border-slate-100"
-          id="row-img-perfil"
-        >
-          <div className="flex items-center gap-3">
-            <div className="h-6 w-6 rounded-full bg-[#f6ad55] flex items-center justify-center border border-[#dd6b20]/30">
-              <span className="h-2 w-2 bg-emerald-400 rounded-full"></span>
-            </div>
-            <span className="text-[13.5px] font-normal text-[#2d3748]">Imagem do perfil</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="h-10 w-10 rounded-full bg-[#e2e8f0] flex items-center justify-center border border-white overflow-hidden text-neutral-400">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 translate-y-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        {/* Row 2: Informação: (Mobile Number) */}
+        {/* Row 1: Informação: (Mobile Number) */}
         <div 
           onClick={() => alert(`Número verificado com o código do país: +${user.phone}`)}
           className="flex items-center justify-between py-4.5 px-4 cursor-pointer hover:bg-neutral-50 border-b border-slate-100"
