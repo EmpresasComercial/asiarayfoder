@@ -390,13 +390,12 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
         <div className="space-y-3">
           {rechargeStep === 'amount' && (
             <div className="space-y-4">
-              {/* Input box styled exactly like Bank linkage card */}
-              <div className="border border-gray-200 bg-white rounded-sm overflow-hidden shadow-xs">
+              <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
                 <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Montante a Recarregar (KZ)</div>
-                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-2.5 text-[12px] border-t border-gray-200">
+                <div className="bg-[#f5f5f5] px-3 py-3 border-t border-gray-200">
                   <input 
                     type="number" 
-                    placeholder="Introduza o valor do recarga"
+                    placeholder="Introduza o valor da recarga"
                     value={rechargeAmt === 0 ? '' : rechargeAmt}
                     onChange={(e) => setRechargeAmt(Number(e.target.value))}
                     className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold placeholder-neutral-400"
@@ -404,34 +403,34 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                 </div>
               </div>
 
-              {/* Suggested values */}
               <div className="grid grid-cols-3 gap-2">
                 {[10000, 20000, 50000, 100000, 150000, 300000].map(val => (
                   <button
                     key={val}
                     type="button"
                     onClick={() => setRechargeAmt(val)}
-                    className={`py-2.5 px-1 text-center font-extrabold rounded-sm border text-[11px] cursor-pointer transition-all ${rechargeAmt === val ? 'bg-[#1e88e5] border-[#1e88e5] text-white' : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
+                    className={`py-2.5 px-1 text-center font-bold rounded-sm border text-[11px] cursor-pointer transition-all ${rechargeAmt === val ? 'bg-[#1e88e5] border-[#1e88e5] text-white' : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
                   >
                     {val.toLocaleString('pt-AO')} KZ
                   </button>
                 ))}
               </div>
 
-              {/* Continuar button */}
-              <button
-                type="button"
-                onClick={() => {
-                  if (rechargeAmt <= 0) {
-                    alert('Por favor, introduza um valor de recarga válido.');
-                    return;
-                  }
-                  setRechargeStep('method');
-                }}
-                className="w-full bg-[#1e88e5] hover:bg-[#1565c0] text-white font-bold py-3 rounded-lg text-[13px] uppercase tracking-wider shadow-sm transition-colors cursor-pointer border-none outline-none mt-2"
-              >
-                Continuar
-              </button>
+              <div className="flex flex-col items-center justify-center pt-2 select-none">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (rechargeAmt <= 0) {
+                      alert('Por favor, introduza um valor de recarga válido.');
+                      return;
+                    }
+                    setRechargeStep('method');
+                  }}
+                  className="w-full bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-3 rounded-sm uppercase tracking-wide transition-colors cursor-pointer border-none outline-none"
+                >
+                  Continuar
+                </button>
+              </div>
             </div>
           )}
 
