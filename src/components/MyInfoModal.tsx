@@ -161,90 +161,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
     );
   }
 
-  // 2. RENDERING SUB-PAGE: Informação pessoal
-  if (activeSubPage === 'personalInfo') {
-    return (
-      <div className="fixed inset-0 z-[50] bg-[#f5f5f5] flex flex-col font-sans animate-fadeIn">
-        <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 select-none" style={{ height: '48px' }}>
-          <button 
-            onClick={() => setActiveSubPage('none')} 
-            className="text-neutral-500 hover:text-neutral-800 select-none cursor-pointer focus:outline-none flex items-center p-1"
-            id="personal-back-btn"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px] text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <span className="text-[15px] font-bold text-neutral-850 tracking-tight text-center flex-1 translate-x-[-10px]">Informação pessoal</span>
-          <div className="w-6"></div>
-        </div>
-
-        <div className="flex-1 p-3 space-y-4 bg-white overflow-y-auto">
-          {/* Box 1: Inputs */}
-          <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
-            <div className="bg-white py-2.5 px-2 border-b border-gray-200 text-center text-[#e1251b] font-bold text-[12px]">
-              Editar Informações de Identidade do Protocolo
-            </div>
-
-            {/* Nome Real Completo */}
-            <div className="border-b border-gray-200">
-              <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Nome Real Completo</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
-                <input 
-                  type="text"
-                  placeholder="Introduza o seu nome real de ID"
-                  value={realName}
-                  onChange={(e) => setRealName(e.target.value)}
-                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold"
-                />
-              </div>
-            </div>
-
-            {/* Apelido VIP */}
-            <div>
-              <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Apelido VIP</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
-                <input 
-                  type="text"
-                  placeholder="Iniciais da Conta"
-                  value={nickName}
-                  onChange={(e) => setNickName(e.target.value)}
-                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Box 2: Info */}
-          <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
-            <div className="bg-white py-2.5 px-2 border-b border-gray-200 text-center text-[#e1251b] font-bold text-[12px]">
-              Directrizes de Proteção de Identidade
-            </div>
-
-            <div>
-              <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Nível de Segurança</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] font-sans border-t border-gray-200">
-                Criptografia local AES-256 ativa
-              </div>
-            </div>
-          </div>
-
-          {/* Box 3: Button */}
-          <div className="flex flex-col items-center justify-center pt-2 select-none">
-            <button
-              type="button"
-              onClick={handleSavePersonalInfo}
-              className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2 px-6 rounded-sm cursor-pointer transition-colors w-full text-center uppercase tracking-wide"
-            >
-              Confirmar
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // 3. RENDERING SUB-PAGE: Alterar a senha de Login
+  // 2. RENDERING SUB-PAGE: Alterar a senha de Login
   if (activeSubPage === 'loginPassword') {
     return (
       <div className="fixed inset-0 z-[50] bg-[#f5f5f5] flex flex-col font-sans animate-fadeIn">
@@ -258,7 +175,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <span className="text-[15px] font-bold text-neutral-850 tracking-tight text-center flex-1 translate-x-[-10px]">Alterar a senha de Login</span>
+          <span className="text-[15px] font-normal text-neutral-850 tracking-tight text-center flex-1 translate-x-[-10px]">Alterar a senha de Login</span>
           <div className="w-6"></div>
         </div>
 
@@ -360,12 +277,8 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         </div>
 
         <div className="flex-1 p-3 space-y-4 bg-white overflow-y-auto">
-          {/* Box 1: Inputs */}
+          {/* Inputs */}
           <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
-            <div className="bg-white py-2.5 px-2 border-b border-gray-200 text-center text-[#e1251b] font-bold text-[12px]">
-              Definir código de segurança de levantamentos
-            </div>
-
             {/* PIN Antigo */}
             <div className="border-b border-gray-200">
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Código PIN Antigo (4 dígitos)</div>
@@ -376,7 +289,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
                   placeholder="PIN Antigo"
                   value={oldPassword}
                   onChange={(e) => setOldPassword(e.target.value)}
-                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest text-center"
+                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
                 />
               </div>
             </div>
@@ -391,7 +304,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
                   placeholder="Novo PIN"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest text-center"
+                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
                 />
               </div>
             </div>
@@ -406,18 +319,14 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
                   placeholder="Confirmar PIN"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest text-center"
+                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
                 />
               </div>
             </div>
           </div>
 
-          {/* Box 2: Info */}
+          {/* Info */}
           <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
-            <div className="bg-white py-2.5 px-2 border-b border-gray-200 text-center text-[#e1251b] font-bold text-[12px]">
-              Utilização do PIN
-            </div>
-
             <div>
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Onde é necessário?</div>
               <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] font-sans border-t border-gray-200">
@@ -458,7 +367,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <div className="w-full text-center text-[15.5px] font-bold text-[#1a202c]">
+        <div className="w-full text-center text-[15.5px] font-normal text-[#1a202c]">
           Configurações
         </div>
       </div>
@@ -476,7 +385,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
             <div className="h-6 w-6 rounded-full bg-[#f6ad55] flex items-center justify-center border border-[#dd6b20]/30">
               <span className="h-2 w-2 bg-emerald-400 rounded-full"></span>
             </div>
-            <span className="text-[13.5px] font-medium text-[#2d3748]">Imagem do perfil</span>
+            <span className="text-[13.5px] font-normal text-[#2d3748]">Imagem do perfil</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="h-10 w-10 rounded-full bg-[#e2e8f0] flex items-center justify-center border border-white overflow-hidden text-neutral-400">
@@ -497,9 +406,9 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
             <div className="h-6 w-6 rounded-sm bg-[#4299e1] flex items-center justify-center text-slate-800">
               <Smartphone size={13} strokeWidth={2.5} />
             </div>
-            <span className="text-[13.5px] font-medium text-[#2d3748]">Informação:</span>
+            <span className="text-[13.5px] font-normal text-[#2d3748]">Informação:</span>
           </div>
-          <div className="text-[13px] font-medium text-neutral-500 font-mono pr-1 select-text">
+          <div className="text-[13px] font-normal text-neutral-500 font-mono pr-1 select-text">
             {user.phone || '244922342885'}
           </div>
         </div>
@@ -514,7 +423,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
             <div className="h-6 w-6 rounded-full bg-[#fc8181] flex items-center justify-center text-slate-800">
               <UserCircle size={14} />
             </div>
-            <span className="text-[13.5px] font-medium text-[#2d3748]">Informação de retirada</span>
+            <span className="text-[13.5px] font-normal text-[#2d3748]">Informação de retirada</span>
           </div>
           <div className="text-neutral-300">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -523,27 +432,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
           </div>
         </div>
 
-        {/* Row 4: Informação pessoal */}
-        <div 
-          onClick={() => setActiveSubPage('personalInfo')}
-          className="flex items-center justify-between py-4.5 px-4 cursor-pointer hover:bg-neutral-50 border-b border-slate-100"
-          id="row-pessoal-info"
-        >
-          <div className="flex items-center gap-3">
-            <div className="h-6 w-6 rounded-full bg-[#ecc94b] flex items-center justify-center text-slate-800">
-              <Shield size={13} strokeWidth={2.5} />
-            </div>
-            <span className="text-[13.5px] font-medium text-[#2d3748]">Informação pessoal</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-neutral-400">
-            <span className="text-xs text-neutral-400 font-medium font-mono">{user.holderName || 'WS2 Titular'}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Row 5: Alterar a senha de Login */}
+        {/* Row 4: Alterar a senha de Login */}
         <div 
           onClick={() => setActiveSubPage('loginPassword')}
           className="flex items-center justify-between py-4.5 px-4 cursor-pointer hover:bg-neutral-50 border-b border-slate-100"
@@ -553,7 +442,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
             <div className="h-6 w-6 rounded-sm bg-[#718096] flex items-center justify-center text-slate-800">
               <Lock size={12} strokeWidth={2.5} />
             </div>
-            <span className="text-[13.5px] font-medium text-[#2d3748]">Alterar a senha de Login</span>
+            <span className="text-[13.5px] font-normal text-[#2d3748]">Alterar a senha de Login</span>
           </div>
           <div>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -572,7 +461,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
             <div className="h-6 w-6 rounded-full bg-[#3182ce] flex items-center justify-center text-slate-800">
               <Key size={12} strokeWidth={2.5} />
             </div>
-            <span className="text-[13.5px] font-medium text-[#2d3748]">Gravar/ Alterar a Senha de Pagamento</span>
+            <span className="text-[13.5px] font-normal text-[#2d3748]">Gravar/ Alterar a Senha de Pagamento</span>
           </div>
           <div>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

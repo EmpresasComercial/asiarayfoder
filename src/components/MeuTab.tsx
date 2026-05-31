@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { 
   Bell, Settings, User, Copy, ClipboardList, Wallet, Sparkles, 
-  Gift, Layers, HelpCircle, UserCheck, BarChart3, Receipt, 
+  Gift, Layers, HelpCircle, UserCheck, Receipt, 
   Coins, Wallet2, Download, Landmark, LogOut, Check, Headphones, Award
 } from 'lucide-react';
 import { 
@@ -22,6 +22,7 @@ import infoIcon from '../../assets/icons8-password-login-48.png';
 import deveLerIcon from '../../assets/icons8-deve-ler-64.png';
 import downloadAppIcon from '../../assets/icons8-download-da-aplicacao-64.png';
 import terminarSessaoIcon from '../../assets/icons8-terminar-sessao-64.png';
+import dailyDeclarationIcon from '../../assets/icons8-tether-64.png';
 
 export const MeuTab: React.FC = () => {
   const { user, stats, logout, resetAll, refreshUserProfile } = useApp();
@@ -361,7 +362,7 @@ export const MeuTab: React.FC = () => {
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"
           >
             <div className="h-[30px] flex items-center justify-center">
-              <BarChart3 size={26} className="text-[#ea580c]" strokeWidth={2} />
+              <img src={dailyDeclarationIcon} alt="declaração diária" className="w-[26px] h-[26px] object-contain" />
             </div>
             <span className="text-[11px] font-normal text-neutral-500">declaração diária</span>
           </div>
@@ -410,7 +411,7 @@ export const MeuTab: React.FC = () => {
             <span className="text-[11px] font-normal text-neutral-500">download da aplicação</span>
           </div>
 
-          {/* Tile 10: Banco associado (Adicionar conta / Associar conta) */}
+          {/* Tile 10: Gravar cartão (Adicionar conta / Associar conta) */}
           <div 
             onClick={() => handleGridOption('bank')}
             className="py-5 px-1 text-center cursor-pointer flex flex-col justify-center items-center gap-2 h-[100px] select-none"

@@ -400,7 +400,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         inviteCode: profileData?.invite_code || '',
         bankName: '',
         bankAccount: '',
-        holderName: ''
+        holderName: '',
+        idChaveUnica: profileData?.id_chave_unica ?? undefined
       };
       setUser(loggedUser);
       // Set real balances from profile
@@ -490,7 +491,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         inviteCode: profileData?.invite_code || '',
         bankName: '',
         bankAccount: '',
-        holderName: ''
+        holderName: '',
+        idChaveUnica: profileData?.id_chave_unica ?? undefined
       };
       setUser(newUser);
       // Set real balances from profile
@@ -792,6 +794,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             phone: p.phone || prev.phone,
             id: p.id || prev.id,
             inviteCode: p.invite_code || prev.inviteCode,
+            idChaveUnica: p.id_chave_unica ?? prev.idChaveUnica,
           }));
 
           // Update financial stats with real balance from profiles.balance

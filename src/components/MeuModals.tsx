@@ -46,7 +46,7 @@ const ModalBase: React.FC<ModalProps & { children: React.ReactNode }> = ({ isOpe
   );
 };
 
-// 2. BANK MODAL ("Banco associado")
+// 2. BANK MODAL ("Gravar cartão")
 export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const { user, updateBankInfo, showLoading, hideLoading, setIsFullScreenActive } = useApp();
 
@@ -106,17 +106,13 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <span className="text-[15px] font-bold text-neutral-850 tracking-tight text-center flex-1 translate-x-[-10px]">Banco Associado</span>
+        <span className="text-[15px] font-bold text-neutral-850 tracking-tight text-center flex-1 translate-x-[-10px]">Gravar cartão</span>
         <div className="w-6"></div>
       </div>
 
       <div className="flex-1 p-3 space-y-4 bg-white overflow-y-auto">
         <form onSubmit={handleSave} className="space-y-4">
           <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
-            <div className="bg-white py-2.5 px-2 border-b border-gray-200 text-center text-[#e1251b] font-bold text-[12px]">
-              Associe a sua Conta Bancária
-            </div>
-
             {/* Instituição Bancária */}
             <div className="border-b border-gray-200">
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Instituição Bancária</div>
@@ -163,9 +159,6 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
-            <div className="bg-white py-2.5 px-2 border-b border-gray-200 text-center text-[#e1251b] font-bold text-[12px]">
-              Aviso de Segurança
-            </div>
             <div>
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Instruções</div>
               <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] font-sans border-t border-gray-200">
@@ -179,7 +172,7 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               type="submit"
               className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2 px-6 rounded-sm cursor-pointer transition-colors w-full text-center uppercase tracking-wide"
             >
-              Gravar Cartão Bancário
+              Gravar
             </button>
           </div>
         </form>
@@ -262,9 +255,6 @@ export const CurrencyConverterModal: React.FC<{ isOpen: boolean; onClose: () => 
         <form onSubmit={handleConvert} className="space-y-4">
 
           <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
-            <div className="bg-white py-2.5 px-2 border-b border-gray-200 text-center text-[#e1251b] font-bold text-[12px]">
-              Converter USD para Kwanza
-            </div>
 
             {/* Saldo USDT */}
             <div className="border-b border-gray-200">

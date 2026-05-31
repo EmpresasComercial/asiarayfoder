@@ -25,6 +25,7 @@ export interface UserProfile {
   bankAccount: string;
   holderName: string;
   name?: string; // Real name of the user
+  idChaveUnica?: number; // Unique 4-digit identifier
 }
 
 export interface FinancialStats {
