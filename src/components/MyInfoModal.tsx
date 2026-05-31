@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { X, Lock, Key, Trash2, Smartphone, Shield, User, Wallet, UserCircle, Edit3 } from 'lucide-react';
+import { X, Trash2, Shield, User, Wallet, Edit3 } from 'lucide-react';
+import passwordLoginIcon from '../../assets/icons8-password-login-48.png';
+import cardWithdrawalIcon from '../../assets/icons8-card-withdrawal-48.png';
+import passwordRetiradaIcon from '../../assets/icons8-password-retirada-update-48.png';
 
 interface MyInfoModalProps {
   isOpen: boolean;
@@ -403,8 +406,8 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
           id="row-info-num"
         >
           <div className="flex items-center gap-3">
-            <div className="h-6 w-6 rounded-sm bg-[#4299e1] flex items-center justify-center text-slate-800">
-              <Smartphone size={13} strokeWidth={2.5} />
+            <div className="h-6 w-6 flex items-center justify-center">
+              <img src={passwordLoginIcon} alt="Informação" className="w-full h-full object-contain" />
             </div>
             <span className="text-[13.5px] font-normal text-[#2d3748]">Informação:</span>
           </div>
@@ -420,8 +423,8 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
           id="row-retira-info"
         >
           <div className="flex items-center gap-3">
-            <div className="h-6 w-6 rounded-full bg-[#fc8181] flex items-center justify-center text-slate-800">
-              <UserCircle size={14} />
+            <div className="h-6 w-6 flex items-center justify-center">
+              <img src={cardWithdrawalIcon} alt="Informação de retirada" className="w-full h-full object-contain" />
             </div>
             <span className="text-[13.5px] font-normal text-[#2d3748]">Informação de retirada</span>
           </div>
@@ -439,8 +442,8 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
           id="row-alt-pass"
         >
           <div className="flex items-center gap-3">
-            <div className="h-6 w-6 rounded-sm bg-[#718096] flex items-center justify-center text-slate-800">
-              <Lock size={12} strokeWidth={2.5} />
+            <div className="h-6 w-6 flex items-center justify-center">
+              <img src={passwordLoginIcon} alt="Alterar a senha de Login" className="w-full h-full object-contain" />
             </div>
             <span className="text-[13.5px] font-normal text-[#2d3748]">Alterar a senha de Login</span>
           </div>
@@ -458,8 +461,8 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
           id="row-alt-pay-pass"
         >
           <div className="flex items-center gap-3">
-            <div className="h-6 w-6 rounded-full bg-[#3182ce] flex items-center justify-center text-slate-800">
-              <Key size={12} strokeWidth={2.5} />
+            <div className="h-6 w-6 flex items-center justify-center">
+              <img src={passwordRetiradaIcon} alt="Gravar/ Alterar a Senha de Pagamento" className="w-full h-full object-contain" />
             </div>
             <span className="text-[13.5px] font-normal text-[#2d3748]">Gravar/ Alterar a Senha de Pagamento</span>
           </div>
