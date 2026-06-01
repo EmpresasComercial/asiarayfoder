@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { X, Trash2, Shield, User, Wallet, Edit3 } from 'lucide-react';
-import passwordLoginIcon from '../../assets/icons8-password-login-48.png';
-import cardWithdrawalIcon from '../../assets/icons8-card-withdrawal-48.png';
-import passwordRetiradaIcon from '../../assets/icons8-password-retirada-update-48.png';
+import { X, Trash2, Shield, User, Wallet, Edit3, Lock, CreditCard } from 'lucide-react';
 
 interface MyInfoModalProps {
   isOpen: boolean;
@@ -12,15 +9,21 @@ interface MyInfoModalProps {
 }
 
 export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => {
-  const { user, logout, resetAll, addToast, updateBankInfo, showLoading, hideLoading, setIsFullScreenActive } = useApp();
+  const { user, logout, resetAll, addToast, updateBankInfo, updateUserPaymentPin, showLoading, hideLoading, setIsFullScreenActive } = useApp();
   
-  // Sub-page state: 'none' (main menu), 'withdrawInfo', 'personalInfo', 'loginPassword', 'payPassword'
-  const [activeSubPage, setActiveSubPage] = useState<'none' | 'withdrawInfo' | 'personalInfo' | 'loginPassword' | 'payPassword'>('none');
+  // Sub-page state: 'none' (main menu), 'withdrawInfo', 'personalInfo', 'loginPassword', 'payPasswordCreate', 'payPasswordChange'
+  const [activeSubPage, setActiveSubPage] = useState<'none' | 'withdrawInfo' | 'personalInfo' | 'loginPassword' | 'payPasswordCreate' | 'payPasswordChange'>('none');
   
   // Password inputs
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  const resetPasswordInputs = () => {
+    setOldPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  };
   
   // Personal Info inputs
   const [realName, setRealName] = useState(user.holderName || '');
@@ -42,24 +45,88 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
 
   if (!isOpen) return null;
 
-  const handlePasswordReset = (type: 'login' | 'payment') => {
-    if (!newPassword || !confirmPassword) {
-      alert('Por favor preencha todos os campos.');
+  const handlePasswordReset = (type: 'login' | 'paymentCreate' | 'paymentChange') => {
+    const isValidPin = (pin: string) => /^\d{4}$/.test(pin);
+
+    if (type === 'login') {
+      if (!newPassword || !confirmPassword) {
+        alert('Por favor preencha todos os campos.');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        alert('A nova senha e a confirmação não coincidem.');
+        return;
+      }
+
+      addToast('A processar segurança de chaves AES-256...', 'info');
+      setTimeout(() => {
+        addToast('Senha de Login alterada com sucesso!', 'success');
+        resetPasswordInputs();
+        setActiveSubPage('none');
+      }, 1200);
       return;
     }
-    if (newPassword !== confirmPassword) {
-      alert('A nova senha e a confirmação não coincidem.');
+
+    if (type === 'paymentCreate') {
+      if (!newPassword || !confirmPassword) {
+        alert('Por favor preencha todos os campos.');
+        return;
+      }
+      if (!isValidPin(newPassword)) {
+        alert('O PIN deve conter exatamente 4 dígitos numéricos.');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        alert('O PIN e a confirmação não coincidem.');
+        return;
+      }
+
+      updateUserPaymentPin(newPassword);
+      addToast('A processar segurança de chaves AES-256...', 'info');
+      setTimeout(() => {
+        addToast('Senha de pagamento gravada com sucesso!', 'success');
+        resetPasswordInputs();
+        setActiveSubPage('none');
+      }, 1200);
       return;
     }
-    
-    addToast('A processar segurança de chaves AES-256...', 'info');
-    setTimeout(() => {
-      addToast(`Senha de ${type === 'login' ? 'Login' : 'Pagamento'} alterada com sucesso!`, 'success');
-      setOldPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setActiveSubPage('none');
-    }, 1200);
+
+    if (type === 'paymentChange') {
+      if (!oldPassword || !newPassword || !confirmPassword) {
+        alert('Por favor preencha todos os campos.');
+        return;
+      }
+      if (!user.paymentPin) {
+        alert('Nenhuma senha de pagamento cadastrada. Use Gravar senha de pagamento.');
+        setActiveSubPage('payPasswordCreate');
+        resetPasswordInputs();
+        return;
+      }
+      if (!isValidPin(oldPassword)) {
+        alert('O PIN antigo deve conter exatamente 4 dígitos numéricos.');
+        return;
+      }
+      if (!isValidPin(newPassword)) {
+        alert('O novo PIN deve conter exatamente 4 dígitos numéricos.');
+        return;
+      }
+      if (oldPassword !== user.paymentPin) {
+        alert('O PIN antigo informado não corresponde ao PIN atual.');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        alert('O novo PIN e a confirmação não coincidem.');
+        return;
+      }
+
+      updateUserPaymentPin(newPassword);
+      addToast('A processar segurança de chaves AES-256...', 'info');
+      setTimeout(() => {
+        addToast('Senha de pagamento alterada com sucesso!', 'success');
+        resetPasswordInputs();
+        setActiveSubPage('none');
+      }, 1200);
+    }
   };
 
   const handleSavePersonalInfo = () => {
@@ -262,73 +329,80 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
   }
 
   // 4. RENDERING SUB-PAGE: Gravar/ Alterar a Senha de Pagamento
-  if (activeSubPage === 'payPassword') {
+  if (activeSubPage === 'payPasswordCreate' || activeSubPage === 'payPasswordChange') {
+    const isCreateMode = activeSubPage === 'payPasswordCreate';
+    const title = isCreateMode ? 'Gravar senha' : 'Alterar senha';
     return (
       <div className="fixed inset-0 z-[50] bg-[#f5f5f5] flex flex-col font-sans animate-fadeIn">
         <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 select-none" style={{ height: '48px' }}>
           <button 
-            onClick={() => setActiveSubPage('none')} 
+            onClick={() => { resetPasswordInputs(); setActiveSubPage('none'); }}
             className="text-neutral-500 hover:text-neutral-800 select-none cursor-pointer focus:outline-none flex items-center p-1"
-            id="pay-pass-back-btn"
+            id={isCreateMode ? 'save-pass-back-btn' : 'change-pass-back-btn'}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-[20px] w-[20px] text-neutral-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <span className="text-[15px] font-bold text-neutral-850 tracking-tight text-center flex-1 translate-x-[-10px]">Senha de pagamento</span>
+          <span className="text-[15px] font-bold text-neutral-850 tracking-tight text-center flex-1 translate-x-[-10px]">
+            {title}
+          </span>
           <div className="w-6"></div>
         </div>
 
         <div className="flex-1 p-3 space-y-4 bg-white overflow-y-auto">
-          {/* Inputs */}
           <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
-            {/* PIN Antigo */}
-            <div className="border-b border-gray-200">
-              <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Código PIN Antigo (4 dígitos)</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
-                <input 
-                  type="password"
-                  maxLength={4}
-                  placeholder="PIN Antigo"
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
-                />
+            {!isCreateMode && (
+              <div className="border-b border-gray-200">
+                <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Código PIN Antigo (4 dígitos)</div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
+                  <input 
+                    type="password"
+                    inputMode="numeric"
+                    pattern="\d*"
+                    maxLength={4}
+                    placeholder="PIN Antigo"
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value.replace(/[^0-9]/g, ''))}
+                    className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Novo PIN */}
-            <div className="border-b border-gray-200">
+            <div className={isCreateMode ? '' : 'border-b border-gray-200'}>
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Novo PIN de 4 dígitos</div>
               <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
                 <input 
                   type="password"
+                  inputMode="numeric"
+                  pattern="\d*"
                   maxLength={4}
                   placeholder="Novo PIN"
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  onChange={(e) => setNewPassword(e.target.value.replace(/[^0-9]/g, ''))}
                   className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
                 />
               </div>
             </div>
 
-            {/* Confirmar PIN */}
             <div>
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Confirmar Novo PIN</div>
               <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
                 <input 
                   type="password"
+                  inputMode="numeric"
+                  pattern="\d*"
                   maxLength={4}
                   placeholder="Confirmar PIN"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => setConfirmPassword(e.target.value.replace(/[^0-9]/g, ''))}
                   className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
                 />
               </div>
             </div>
           </div>
 
-          {/* Info */}
           <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
             <div>
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Onde é necessário?</div>
@@ -338,11 +412,10 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
             </div>
           </div>
 
-          {/* Box 3: Button */}
           <div className="flex flex-col items-center justify-center pt-2 select-none">
             <button
               type="button"
-              onClick={() => handlePasswordReset('payment')}
+              onClick={() => handlePasswordReset(isCreateMode ? 'paymentCreate' : 'paymentChange')}
               className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2 px-6 rounded-sm cursor-pointer transition-colors w-full text-center uppercase tracking-wide"
             >
               Confirmar
@@ -386,7 +459,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         >
           <div className="flex items-center gap-3">
             <div className="h-6 w-6 flex items-center justify-center">
-              <img src={passwordLoginIcon} alt="Informação" className="w-full h-full object-contain" />
+              <User className="h-5 w-5 text-slate-600" />
             </div>
             <span className="text-[13.5px] font-normal text-[#2d3748]">Informação:</span>
           </div>
@@ -403,7 +476,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         >
           <div className="flex items-center gap-3">
             <div className="h-6 w-6 flex items-center justify-center">
-              <img src={cardWithdrawalIcon} alt="Informação de retirada" className="w-full h-full object-contain" />
+              <CreditCard className="h-5 w-5 text-slate-600" />
             </div>
             <span className="text-[13.5px] font-normal text-[#2d3748]">Informação de retirada</span>
           </div>
@@ -422,7 +495,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         >
           <div className="flex items-center gap-3">
             <div className="h-6 w-6 flex items-center justify-center">
-              <img src={passwordLoginIcon} alt="Alterar a senha de Login" className="w-full h-full object-contain" />
+              <Lock className="h-5 w-5 text-slate-600" />
             </div>
             <span className="text-[13.5px] font-normal text-[#2d3748]">Alterar a senha de Login</span>
           </div>
@@ -433,17 +506,42 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
           </div>
         </div>
 
-        {/* Row 6: Gravar/ Alterar a Senha de Pagamento */}
+        {/* Row 5: Gravar senha de pagamento */}
         <div 
-          onClick={() => setActiveSubPage('payPassword')}
+          onClick={() => {
+            resetPasswordInputs();
+            setActiveSubPage('payPasswordCreate');
+          }}
           className="flex items-center justify-between py-4.5 px-4 cursor-pointer hover:bg-neutral-50 border-b border-slate-100"
-          id="row-alt-pay-pass"
+          id="row-save-pay-pass"
         >
           <div className="flex items-center gap-3">
             <div className="h-6 w-6 flex items-center justify-center">
-              <img src={passwordRetiradaIcon} alt="Gravar/ Alterar a Senha de Pagamento" className="w-full h-full object-contain" />
+              <Shield className="h-5 w-5 text-slate-600" />
             </div>
-            <span className="text-[13.5px] font-normal text-[#2d3748]">Gravar/ Alterar a Senha de Pagamento</span>
+            <span className="text-[13.5px] font-normal text-[#2d3748]">Gravar senha de pagamento</span>
+          </div>
+          <div>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Row 6: Alterar senha de pagamento */}
+        <div 
+          onClick={() => {
+            resetPasswordInputs();
+            setActiveSubPage('payPasswordChange');
+          }}
+          className="flex items-center justify-between py-4.5 px-4 cursor-pointer hover:bg-neutral-50 border-b border-slate-100"
+          id="row-change-pay-pass"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-6 w-6 flex items-center justify-center">
+              <Shield className="h-5 w-5 text-slate-600" />
+            </div>
+            <span className="text-[13.5px] font-normal text-[#2d3748]">Alterar senha de pagamento</span>
           </div>
           <div>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

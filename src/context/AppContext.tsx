@@ -37,6 +37,7 @@ interface AppContextProps {
   updateBankInfo: (bankName: string, bankAccount: string, holderName: string) => void;
   upgradeMembership: (level: string, cost: number, productId?: string) => Promise<boolean>;
   increaseCreditScore: (points: number) => void;
+  updateUserPaymentPin: (newPin?: string) => void;
   resetAll: () => void;
   showAlert: (message: string, title?: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
   showConfirm: (message: string, onConfirm: () => void, title?: string) => void;
@@ -221,7 +222,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       inviteCode: '931242',
       bankName: 'BAI (Banco Angolano de Investimentos)',
       bankAccount: 'RIB004000009570177510185',
-      holderName: 'Mateus Santos'
+      holderName: 'Mateus Santos',
+      paymentPin: undefined
     };
   });
 
@@ -401,6 +403,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bankName: '',
         bankAccount: '',
         holderName: '',
+        paymentPin: profileData?.payment_pin ?? undefined,
         idChaveUnica: profileData?.id_chave_unica ?? undefined
       };
       setUser(loggedUser);
@@ -492,6 +495,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bankName: '',
         bankAccount: '',
         holderName: '',
+        paymentPin: profileData?.payment_pin ?? undefined,
         idChaveUnica: profileData?.id_chave_unica ?? undefined
       };
       setUser(newUser);
@@ -887,6 +891,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
+  const updateUserPaymentPin = (newPin?: string) => {
+    setUser(prev => ({
+      ...prev,
+      paymentPin: newPin
+    }));
+  };
 
   const resetAll = () => {
     setIsLoggedIn(true);
@@ -898,7 +908,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       inviteCode: '931242',
       bankName: 'BAI (Banco Angolano de Investimentos)',
       bankAccount: 'AO06 0040 0000 9312 4224 1018 3',
-      holderName: 'Mateus Santos'
+      holderName: 'Mateus Santos',
+      paymentPin: undefined
     });
     setStats(INITIAL_STATS);
     setTasks(INITIAL_TASKS.map(t => ({ ...t, status: 'disponivel' })));
@@ -927,6 +938,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       updateBankInfo,
       upgradeMembership,
       increaseCreditScore,
+      updateUserPaymentPin,
       resetAll,
       showAlert,
       showConfirm,

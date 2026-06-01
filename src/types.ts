@@ -24,6 +24,7 @@ export interface UserProfile {
   bankName: string;
   bankAccount: string;
   holderName: string;
+  paymentPin?: string;
   name?: string; // Real name of the user
   idChaveUnica?: number; // Unique 4-digit identifier
 }
