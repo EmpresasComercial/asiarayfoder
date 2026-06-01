@@ -347,7 +347,6 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
   const [ibanCopied, setIbanCopied] = useState(false);
   const [usdtCopied, setUsdtCopied] = useState(false);
 
-  const IBAN = 'A086 8886 1145 9312 4224 5813 7';
   const USDT_ADDR = 'TQdoJo3s13AtTPY1NZsnxrnLdLwJFSCqT1';
 
   React.useEffect(() => {
@@ -358,8 +357,36 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
     };
   }, [filePreview]);
 
-  const copyIBAN = () => { navigator.clipboard.writeText(IBAN); setIbanCopied(true); setTimeout(() => setIbanCopied(false), 2000); };
+  const ibanMap: Record<string, string> = {
+    BIC: 'AO06 0005 0622 9312 4210 1785 4',
+    BFA: 'AO06 0006 1145 9312 4224 5013 7',
+    Atlântico: 'AO06 0055 3514 9312 4211 4058 9',
+    BCI: 'AO06 0009 0081 9312 4235 1251 2',
+    BAI: 'AO06 0005 0000 1579 1775 1010 5',
+  };
+
+  const currentAddress = selectedMethod === 'USDT-TRC20' ? USDT_ADDR : ibanMap[selectedMethod];
+  const tipoValue = selectedMethod === 'USDT-TRC20' ? 'USDT' : 'BANCO';
+  const walletLabel = selectedMethod === 'USDT-TRC20' ? 'Número da carteira' : 'Número do IBAN';
+  const requisitoValue = selectedMethod === 'USDT-TRC20' ? (rechargeAmt / 430).toFixed(2) : `${rechargeAmt.toLocaleString('pt-AO')} KZ`;
+
+  const copyCurrentAddress = () => {
+    navigator.clipboard.writeText(currentAddress);
+    setIbanCopied(true);
+    setTimeout(() => setIbanCopied(false), 2000);
+  };
   const copyUSDT = () => { navigator.clipboard.writeText(USDT_ADDR); setUsdtCopied(true); setTimeout(() => setUsdtCopied(false), 2000); };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (filePreview) {
+      URL.revokeObjectURL(filePreview);
+    }
+    setSelectedFile(file);
+    setFileLabel(file.name);
+    setFilePreview(URL.createObjectURL(file));
+  };
 
   const handleRecharge = (e: React.FormEvent) => {
     e.preventDefault();
@@ -403,7 +430,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
           </svg>
         </button>
         <span className="font-bold text-[15px] text-slate-800 tracking-tight text-center flex-1 translate-x-[-10px]">
-          {rechargeStep === 'instructions' && selectedMethod === 'USDT-TRC20' ? 'Cobrança da moeda digital' : 'Recarregar'}
+          {rechargeStep === 'instructions' ? 'Detalhes de Gateway' : rechargeStep === 'method' ? 'Metódos pagamentos' : 'Recarregar'}
         </span>
       </div>
 
@@ -467,13 +494,14 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                   const isUSDT = methodName === 'USDT-TRC20';
                   const usdtVal = (rechargeAmt / 430).toFixed(1);
                   return (
-                    <div
+                    <button
                       key={methodName}
+                      type="button"
                       onClick={() => {
                         setSelectedMethod(methodName as any);
                         setRechargeStep('instructions');
                       }}
-                      className="py-3.5 flex items-center justify-between hover:bg-neutral-50/50 cursor-pointer transition-colors"
+                      className="w-full text-left py-3.5 flex items-center justify-between hover:bg-neutral-50/50 cursor-pointer transition-colors"
                       id={`payment-method-row-${idx}`}
                     >
                       <div className="flex items-center gap-4 select-none">
@@ -485,15 +513,9 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                         <span className="text-[13px] font-semibold text-stone-700 tracking-wide">{methodName}</span>
                       </div>
                       <div className="flex items-center text-neutral-400 text-xs font-semibold">
-                        {isUSDT ? (
-                          <span className="text-[12px] font-semibold text-stone-600 pr-1 tracking-tight">
-                            {usdtVal}USDT&gt;
-                          </span>
-                        ) : (
-                          <span className="text-[12px] font-semibold text-neutral-400 pr-1 tracking-tight">&gt;</span>
-                        )}
+                        <span className="text-[12px] font-semibold text-neutral-400 pr-1 tracking-tight">&gt;</span>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -501,159 +523,115 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
           )}
 
           {rechargeStep === 'instructions' && (
-            <div className="space-y-3">
-              {selectedMethod !== 'USDT-TRC20' ? (
-                <form onSubmit={handleRecharge} className="space-y-3">
-                  {/* NÍVEL ALVO card */}
-                  <div className="bg-white rounded-xl p-4 border border-neutral-200 shadow-sm">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-[10px] font-bold text-neutral-400 tracking-widest">NÍVEL ALVO</span>
-                      <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">WS3</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <p className="text-[9px] font-bold text-neutral-400 mb-1">VALOR DO RECARGA</p>
-                        <p className="text-[17px] font-black text-slate-800">{rechargeAmt.toLocaleString('pt-AO')} KZ</p>
-                      </div>
-                      <div>
-                        <p className="text-[9px] font-bold text-neutral-400 mb-1">EQUIVALENTE EM USDT</p>
-                        <p className="text-[17px] font-black text-indigo-600">{(rechargeAmt / 430).toFixed(1)} USDT</p>
-                      </div>
-                    </div>
-                  </div>
+            <form onSubmit={handleRecharge} className="space-y-3">
+              <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
+                <div className="bg-white py-2.5 px-2 border-b border-gray-200 text-center text-[#e1251b] font-bold text-[12px]">
+                  Por favor, transfira fundos manualmente para a seguinte conta
+                </div>
 
-                  {/* INSTRUÇÕES card */}
-                  <div className="bg-white rounded-xl p-4 border border-dashed border-indigo-300 space-y-2 shadow-sm">
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-                      <span className="text-[11px] font-black text-indigo-700 tracking-wider">INSTRUÇÕES PARA DEPÓSITO</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-neutral-400">Banco de Destino:</span>
-                      <span className="font-extrabold text-slate-800">{selectedMethod}</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-neutral-400">Titular da Conta:</span>
-                      <span className="font-extrabold text-slate-800">Asiaray Angola Media Lda.</span>
-                    </div>
-                    <div className="bg-[#f1f5f9] rounded-xl p-3 flex justify-between items-center mt-2">
-                      <div>
-                        <p className="text-[9px] font-bold text-neutral-400 mb-1">NÚMERO DO IBAN OFICIAL</p>
-                        <p className="text-[13px] font-extrabold text-slate-800 font-mono">
-                          {selectedMethod === 'BIC' ? 'AO06 0004 0000 1234 5678 1012 3' :
-                           selectedMethod === 'BFA' ? 'AO86 8886 1145 9312 4224 5813 7' :
-                           selectedMethod === 'Atlântico' ? 'AO06 0055 0000 8765 4321 1015 6' :
-                           selectedMethod === 'BCI' ? 'AO06 0005 0000 9999 8888 1019 1' :
-                           'AO06 0040 0000 9312 4224 1018 3'}
-                        </p>
-                      </div>
-                      <button type="button" 
-                        onClick={() => {
-                          const currentIban = selectedMethod === 'BIC' ? 'AO06 0004 0000 1234 5678 1012 3' :
-                           selectedMethod === 'BFA' ? 'AO86 8886 1145 9312 4224 5813 7' :
-                           selectedMethod === 'Atlântico' ? 'AO06 0055 0000 8765 4321 1015 6' :
-                           selectedMethod === 'BCI' ? 'AO06 0005 0000 9999 8888 1019 1' :
-                           'AO06 0040 0000 9312 4224 1018 3';
-                          navigator.clipboard.writeText(currentIban);
-                          setIbanCopied(true);
-                          setTimeout(() => setIbanCopied(false), 2000);
-                        }}
-                        className="bg-slate-200 text-blue-500 text-[10px] font-black px-3 py-1 rounded-full cursor-pointer border-none outline-none"
-                      >
-                        {ibanCopied ? 'COPIADO' : 'COPIAR'}
-                      </button>
-                    </div>
+                <div className="border-b border-gray-200">
+                  <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Tipo</div>
+                  <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] font-mono border-t border-gray-200">
+                    {tipoValue}
                   </div>
+                </div>
 
-                  {/* COMPROVATIVO card */}
-                  <div className="bg-white rounded-xl p-4 border border-neutral-200 space-y-3 shadow-sm">
-                    <p className="text-[10px] font-bold text-neutral-400 tracking-widest">COMPROVATIVO DE TRANSFERÊNCIA</p>
-                    <div className="relative">
-                      <textarea maxLength={100} value={comprovativo} onChange={e => setComprovativo(e.target.value)}
-                        placeholder="Se desejar, adicione uma mensagem de verificação para auditoria"
-                        className="w-full text-xs border border-neutral-200 rounded-lg p-3 h-20 resize-none focus:outline-none placeholder-neutral-400" />
-                      <span className="absolute bottom-2 right-2 text-[9px] text-neutral-400">{comprovativo.length}/100</span>
+                <div className="border-b border-gray-200">
+                  <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Nome do banco</div>
+                  <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] font-mono border-t border-gray-200">
+                    {selectedMethod}
+                  </div>
+                </div>
+
+                <div className="border-b border-gray-200">
+                  <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Nome de conta de fundos</div>
+                  <div className="bg-[#f5f5f5] text-gray-600 px-3 py-1.5 text-[11px] font-mono border-t border-gray-200 break-all select-all">
+                    Asiarays grupo mídia lda
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">{walletLabel}</div>
+                  <div className="bg-[#f5f5f5] border-t border-gray-200 flex items-center justify-between">
+                    <div className="flex-1 text-gray-600 px-3 py-1.5 text-[11px] font-mono break-all select-all">
+                      {currentAddress}
                     </div>
-                    <label className="flex flex-col items-center gap-2 cursor-pointer">
-                      <div className="h-16 w-16 border-2 border-dashed border-red-500 rounded-lg flex items-center justify-center hover:bg-red-50 transition-colors overflow-hidden">
-                        {filePreview ? (
-                          <img src={filePreview} alt="Comprovativo" className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="text-2xl font-black text-red-500">+</span>
-                        )}
-                      </div>
-                      <span className="text-[10px] text-neutral-500 text-center">{fileLabel}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            if (filePreview) {
-                              URL.revokeObjectURL(filePreview);
-                            }
-                            const preview = URL.createObjectURL(file);
-                            setSelectedFile(file);
-                            setFilePreview(preview);
-                            setFileLabel(file.name);
-                          }
-                        }}
-                        className="hidden"
-                      />
-                    </label>
-                    <button type="submit"
-                      className="w-full bg-[#1e88e5] hover:bg-[#1565c0] text-white font-extrabold py-3.5 rounded-lg text-sm tracking-widest uppercase cursor-pointer border-none outline-none">
-                      SALVAR
+                    <button 
+                      type="button"
+                      onClick={copyCurrentAddress}
+                      className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white px-4 py-1.5 text-[11px] font-bold cursor-pointer transition-all active:scale-95 shrink-0 select-none border-l border-gray-200"
+                    >
+                      {ibanCopied ? 'COPIADO' : 'cópia'}
                     </button>
                   </div>
-                </form>
-              ) : (
-                <form onSubmit={handleRecharge} className="space-y-3">
-                  <p className="text-center text-[11px] text-red-500 font-semibold">Por favor, transfira fundos manualmente para a seguinte conta</p>
+                </div>
+              </div>
 
-                  <div className="border border-neutral-200 rounded-lg overflow-hidden">
-                    {[['Tipo','USDT'],['Nome do banco','USDT-TRC20'],['conta bancária', USDT_ADDR]].map(([label, val]) => (
-                      <div key={label} className="divide-y divide-neutral-200">
-                        <div className="bg-white px-4 py-2 text-xs font-bold text-blue-600">{label}</div>
-                        <div className="bg-slate-50 px-4 py-2 text-xs font-mono text-slate-700 break-all">{val}</div>
-                      </div>
-                    ))}
-                    <div className="bg-white px-4 py-2 text-xs font-bold text-blue-600">Número da carteira</div>
-                    <div className="bg-slate-50 px-4 py-2 flex items-center justify-between gap-2">
-                      <span className="text-xs font-mono text-slate-700 break-all flex-1">{USDT_ADDR}</span>
-                      <button type="button" onClick={copyUSDT}
-                        className="bg-blue-500 hover:bg-blue-600 text-white text-[10px] px-3 py-1 rounded cursor-pointer border-none outline-none shrink-0 font-bold">
-                        {usdtCopied ? 'Copiado' : 'cópia'}
-                      </button>
-                    </div>
-                  </div>
+              <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
+                <div className="bg-white py-2.5 px-2 border-b border-gray-200 text-center text-[#e1251b] font-bold text-[12px]">
+                  Informação sobre a procura
+                </div>
 
-                  <p className="text-center text-[11px] text-red-500 font-semibold">Informação sobre a procura</p>
-                  <div className="border border-neutral-200 rounded-lg overflow-hidden">
-                    {[['Número do pedido','202308060508708470'],['número da conta', user.phone || '244922342885'],['requisito', (rechargeAmt / 430).toFixed(2)]].map(([label, val]) => (
-                      <div key={label}>
-                        <div className="bg-white px-4 py-2 text-xs font-bold text-blue-600">{label}</div>
-                        <div className="bg-slate-50 px-4 py-2 text-xs font-mono text-slate-700">{val}</div>
-                      </div>
-                    ))}
+                <div className="border-b border-gray-200">
+                  <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Número do pedido</div>
+                  <div className="bg-[#f5f5f5] text-gray-600 px-3 py-1.5 text-[11px] font-mono border-t border-gray-200 select-all">
+                    202308060508708470
                   </div>
+                </div>
 
-                  <div className="flex gap-3">
-                    <button type="button" onClick={() => setFileLabel('comprovativo_usdt.png')}
-                      className="flex-1 bg-[#1e88e5] hover:bg-[#1565c0] text-white font-bold py-2.5 rounded text-xs flex items-center justify-center gap-1 cursor-pointer border-none outline-none">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                      </svg>
-                      Credenciais
-                    </button>
-                    <button type="submit" className="flex-1 bg-[#1e88e5] hover:bg-[#1565c0] text-white font-bold py-2.5 rounded text-xs cursor-pointer border-none outline-none">
-                      Confirmar
-                    </button>
+                <div className="border-b border-gray-200">
+                  <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">número da conta</div>
+                  <div className="bg-[#f5f5f5] text-gray-600 px-3 py-1.5 text-[11px] font-mono border-t border-gray-200 select-all font-bold">
+                    {user.phone || '244922342885'}
                   </div>
-                  <p className="text-center text-[10px] text-slate-500 bg-white border border-neutral-200 rounded px-2 py-0.5 inline-block w-full">{fileLabel}</p>
-                </form>
-              )}
-            </div>
+                </div>
+
+                <div>
+                  <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">requisito</div>
+                  <div className="bg-[#f5f5f5] text-gray-600 px-3 py-1.5 text-[11px] font-mono border-t border-gray-200 select-all">
+                    {requisitoValue}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center justify-center pt-2 gap-1 text-center select-none">
+                <div className="flex justify-center items-center gap-3 w-full">
+                  <label className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-1.5 px-4 rounded-sm cursor-pointer transition-colors flex items-center gap-1.5">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                    </svg>
+                    <span>Credenciais</span>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleFileChange} 
+                      className="hidden" 
+                    />
+                  </label>
+
+                  <button
+                    type="submit"
+                    className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-1.5 px-6 rounded-sm cursor-pointer transition-colors"
+                  >
+                    Confirmar
+                  </button>
+                </div>
+
+                <div className="text-[10px] text-neutral-500 font-sans mt-0.5">
+                  {fileLabel ? (
+                    <span className="text-[#3b82f6] font-bold">{fileLabel}</span>
+                  ) : (
+                    'Nenhum arquivo escolhido'
+                  )}
+                </div>
+
+                {filePreview && (
+                  <div className="rounded-sm overflow-hidden border border-slate-200 w-full">
+                    <img src={filePreview} alt="Comprovativo" className="w-full object-cover" />
+                  </div>
+                )}
+              </div>
+            </form>
           )}
         </div>
       </div>

@@ -101,7 +101,7 @@ export const RetirarPage: React.FC = () => {
           onClick={() => {
             if (step === 'tips') setStep('amount');
             else if (step === 'pin') setStep('tips');
-            else navigate('/meu');
+            else navigate('/meu', { state: { openMyInfoModal: true } });
           }}
           className="text-neutral-600 hover:text-neutral-900 cursor-pointer focus:outline-none flex items-center justify-center w-8 h-8"
         >
