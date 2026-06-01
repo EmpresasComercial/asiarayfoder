@@ -337,42 +337,37 @@ function MainAppLayout() {
  
                 {/* Pop-up Notice / Anúncio de Início */}
                 {isNoticeVisible && (
-                  <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center px-6 font-sans animate-fadeIn">
-                    <div className="relative w-full max-w-[360px]">
- 
-                      {/* Outer amber gradient card */}
-                      <div className="bg-gradient-to-b from-[#fde68a] to-[#fbbf24] rounded-2xl pt-3 pb-5 px-4 shadow-2xl">
- 
-                        {/* Countdown row */}
-                        <div className="text-center text-gray-700 text-[12px] font-semibold mb-2 select-none">
-                          Shut down after {noticeCountdown} seconds
+                  <div className="fixed inset-0 bg-black/70 z-[100] flex items-center justify-center px-3 py-6 font-sans animate-fadeIn">
+                    <div className="relative w-full max-w-[388px]">
+                      <div className="overflow-hidden border border-[#f59e0b] bg-[#fbbf24] shadow-[0_32px_90px_rgba(251,191,36,0.22)]">
+                        <div className="px-5 pt-4 pb-3 text-center select-none">
+                          <div className="text-[12px] font-semibold uppercase tracking-[0.3em] text-slate-900">
+                            Shut down after {noticeCountdown} seconds
+                          </div>
+                          <div className="mt-2 flex items-center justify-center gap-1 text-[24px] font-black text-slate-900 tracking-[0.18em]">
+                            <span>💧</span>
+                            <span>~Notice~</span>
+                            <span>🍂</span>
+                            <span>🍃</span>
+                            <span>💠</span>
+                          </div>
                         </div>
- 
-                        {/* ~Notice~ title row */}
-                        <div className="flex items-center justify-center gap-2 mb-3 select-none">
-                          <span className="text-xl">💧🍂</span>
-                          <span className="text-[22px] font-black text-gray-800 tracking-wider">~Notice~</span>
-                          <span className="text-xl">🍃💠</span>
+                        <div className="bg-white px-4 pb-4 pt-3 border-t border-[#fcd34d]/40 shadow-sm text-[14px] text-slate-700 leading-7 max-h-[58vh] overflow-y-auto no-scrollbar">
+                          <p className="mb-3 font-semibold text-slate-900">Documento n.º 20230501701</p>
+                          <p className="mb-3">Relativamente ao apoio total da empresa à rápida expansão do mercado angolano, a primeira decisão é: convidar outras pessoas para trabalhar, podendo o convidante como gestor obter um bónus de 10% do seguinte salário do empregado.</p>
+                          <p className="mb-3">Exemplo: O seu equipe tem 100 pessoas, todos no WS5, quanto dinheiro você pode ganhar todos os dias com isso.</p>
+                          <p className="text-xs text-slate-400">Leia com atenção e siga as regras de convite para garantir as melhores recompensas.</p>
                         </div>
- 
-                        {/* White inner card */}
-                        <div className="bg-white rounded-xl px-4 py-4 text-[13px] text-gray-700 leading-[1.65] text-left font-normal max-h-[230px] overflow-y-auto no-scrollbar shadow-sm">
-                          Documento n.º 20230501701: Relativamente ao apoio total da empresa à rápida expansão do mercado angolano, a primeira decisão é: convidar outras pessoas para trabalhar, podendo o convidante como gestor obter um bónus de 10% do seguinte salário do empregado. Exemplo: O seu equipe tem 100 pessoas, todos no WS5, quanto dinheiro você pode ganhar todos os dias com isso.
-                        </div>
- 
                       </div>
- 
-                      {/* Orange X close button — top-right outside card, exactly as in screenshot */}
                       <button
                         onClick={() => setIsNoticeVisible(false)}
-                        className="absolute -top-3 -right-3 w-[34px] h-[34px] rounded-full bg-[#f97316] flex items-center justify-center shadow-lg cursor-pointer border-2 border-white hover:bg-[#ea580c] transition-colors focus:outline-none"
+                        className="absolute -top-3 -right-3 w-[36px] h-[36px] bg-[#f97316] flex items-center justify-center shadow-[0_10px_20px_rgba(249,115,22,0.35)] cursor-pointer border-2 border-white hover:bg-[#ea580c] transition-colors focus:outline-none"
                         id="notice-close-btn"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
- 
                     </div>
                   </div>
                 )}
