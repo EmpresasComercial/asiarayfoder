@@ -2,6 +2,7 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 import { Task, TaskType } from '../types';
 import { Headphones } from 'lucide-react';
+import { EmptyState } from './EmptyState';
 
 interface TaskTabProps {
   selectedCategory: TaskType;
@@ -159,9 +160,11 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
       {/* 2. Tasks Grid List matching layout & content */}
       <div className="p-3.5 space-y-3" id="tasks-list-cards-viewport">
         {filteredTasks.length === 0 ? (
-          <div className="text-center p-12 bg-white rounded-lg border border-zinc-200 text-zinc-400 text-sm select-none">
-            Nenhuma tarefa disponível nesta categoria no momento. Excedeu o limite ou já foram todas concluídas.
-          </div>
+          <EmptyState
+            className="bg-white rounded-lg border border-zinc-200 p-12"
+            message="Sem dados"
+            description="Nenhuma tarefa disponível nesta categoria no momento. Excedeu o limite ou já foram todas concluídas."
+          />
         ) : (
           filteredTasks.map((task, idx) => {
             const reqIdx = levelIndex(task.requiredLevel);

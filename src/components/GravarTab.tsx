@@ -3,6 +3,7 @@ import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
 import { useApp } from '../context/AppContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { Task, TaskStatus } from '../types';
+import { EmptyState } from './EmptyState';
 
 import transformacaoIcon from '../../assets/task.transformacao.png';
 import searchIcon from '../../assets/task-search.png';
@@ -57,59 +58,13 @@ export const GravarTab: React.FC = () => {
   ];
 
   // Dynamically calculate counters based on existing user state + baseline numbers matching the image
-  const countTransformacao = tasks.filter(t => t.status === 'andamento').length || 4;
+  const countTransformacao = tasks.filter(t => t.status === 'andamento').length;
   const countNaoRevisto = tasks.filter(t => t.status === 'revisao').length;
   const countTerminado = tasks.filter(t => t.status === 'concluido').length + 193; // 193 is the baseline shown on the image
   const countFalhou = tasks.filter(t => t.status === 'falhado').length;
 
   // Filter tasks belonging to current active segment
-  let displayTasks = tasks.filter(t => t.status === activeSegment);
-
-  // If list is empty on Transformação, populate 4 default mock tasks exactly matching the designs
-  if (activeSegment === 'andamento' && displayTasks.length === 0) {
-    displayTasks = [
-      {
-        id: 'mock_task_1',
-        title: 'Gosto disso',
-        type: 'outros',
-        reward: 300,
-        requiredLevel: 'WS2',
-        desc: 'Gosto disso',
-        status: 'andamento',
-        joinedAt: '2023-08-06 11:56:34'
-      },
-      {
-        id: 'mock_task_2',
-        title: 'Gosto disso',
-        type: 'outros',
-        reward: 300,
-        requiredLevel: 'WS2',
-        desc: 'Gosto disso',
-        status: 'andamento',
-        joinedAt: '2023-08-06 11:56:30'
-      },
-      {
-        id: 'mock_task_3',
-        title: 'Gosto disso',
-        type: 'outros',
-        reward: 300,
-        requiredLevel: 'WS2',
-        desc: 'Gosto disso',
-        status: 'andamento',
-        joinedAt: '2023-08-06 11:50:12'
-      },
-      {
-        id: 'mock_task_4',
-        title: 'Gosto disso',
-        type: 'outros',
-        reward: 300,
-        requiredLevel: 'WS2',
-        desc: 'Gosto disso',
-        status: 'andamento',
-        joinedAt: '2023-08-06 11:48:05'
-      }
-    ];
-  }
+  const displayTasks = tasks.filter(t => t.status === activeSegment);
 
   const toggleExpand = (id: string) => {
     if (expandedId === id) {
@@ -310,12 +265,11 @@ export const GravarTab: React.FC = () => {
       {/* 3. List of dynamic cards corresponding exactly to design image styling */}
       <div className="p-0 flex flex-col relative w-full" id="gravar-task-items-wrapper">
         {displayTasks.length === 0 ? (
-          <div className="text-center py-20 px-6 bg-white text-neutral-400 text-xs flex flex-col items-center justify-center gap-2">
-            <span className="font-semibold">Nenhum registo de tarefa encontrado</span>
-            <span className="text-[10px] text-neutral-400 italic">
-              Visite a aba "tarefa" para aceitar e participar em missões diárias!
-            </span>
-          </div>
+          <EmptyState
+            className="py-20 bg-white"
+            message="Sem dados"
+            description="Nenhum registo de tarefa encontrado. Visite a aba 'tarefa' para aceitar e participar em missões diárias!"
+          />
         ) : (
           displayTasks.map((task, idx) => {
             const isExpanded = expandedId === task.id;
@@ -453,7 +407,11 @@ export const GravarTab: React.FC = () => {
 <div className="mt-4 p-4 bg-white rounded shadow">
   <h3 className="text-lg font-semibold mb-2">Posts</h3>
   {posts.length === 0 ? (
-    <p className="text-sm text-gray-500">Nenhum post encontrado</p>
+    <EmptyState
+      className="py-12"
+      message="Sem dados"
+      description="Nenhum post encontrado"
+    />
   ) : (
     posts.map((p) => (
       <div key={p.id} className="border-b py-2">

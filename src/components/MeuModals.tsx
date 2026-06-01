@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { X, Copy, Check, QrCode, ClipboardList, Wallet, Sparkles, Building, Landmark, Users, ArrowUpRight, ArrowDownLeft, ShieldCheck, Heart } from 'lucide-react';
 import { LogRecord } from '../types';
+import { EmptyState } from './EmptyState';
 import inviteBannerImg from '../../assets/invite_banner.png';
 
 interface ModalProps {
@@ -1067,35 +1068,6 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
   let filtered = logs.filter(l => l.type === cleanType);
 
   // Fallback to match image exactly if list is empty
-  if (type === 'retirada' && filtered.length === 0) {
-    filtered = [{
-      id: 'ret_default',
-      type: 'retirada',
-      amount: 15260,
-      date: '2023-06-26 11:15',
-      status: 'aprovado',
-      details: 'Retirada solicitada por IBAN'
-    }];
-  } else if (type === 'recarga' && filtered.length === 0) {
-    filtered = [
-      {
-        id: 'rec_1',
-        type: 'recarga',
-        amount: 30000,
-        date: '2026-05-18 18:14',
-        status: 'aprovado',
-        details: 'Depósito Multicaixa Express'
-      },
-      {
-        id: 'rec_2',
-        type: 'recarga',
-        amount: 10000,
-        date: '2026-05-15 14:22',
-        status: 'aprovado',
-        details: 'Banco BAI'
-      }
-    ];
-  }
 
   const getStatusBadge = (status: 'pendente' | 'aprovado' | 'rejeitado') => {
     switch (status) {
@@ -1163,38 +1135,48 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
         {/* Dynamic content container */}
         <div className="flex-1 overflow-y-auto no-scrollbar bg-white">
           {!selectedLog ? (
-            /* LIST VIEW: Exact mockup match */
-            <div className="divide-y divide-neutral-150">
-              {filtered.map((log) => {
-                // Generate a stable numeric orderId based on log ID
-                const orderId = log.id === 'ret_default' ? '260' : 
-                  (Math.abs(log.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 900 + 100);
-                
-                const dateOnly = log.date.split(' ')[0] || '2023-06-26';
+            filtered.length === 0 ? (
+              <div className="flex items-center justify-center p-10 min-h-[220px]">
+                <EmptyState
+                  className="py-10"
+                  message="Sem dados"
+                  description="Nenhum registo de retirada localizado no momento."
+                />
+              </div>
+            ) : (
+              /* LIST VIEW: Exact mockup match */
+              <div className="divide-y divide-neutral-150">
+                {filtered.map((log) => {
+                  // Generate a stable numeric orderId based on log ID
+                  const orderId = log.id === 'ret_default' ? '260' : 
+                    (Math.abs(log.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 900 + 100);
+                  
+                  const dateOnly = log.date.split(' ')[0] || '2023-06-26';
 
-                return (
-                  <div 
-                    key={log.id} 
-                    onClick={() => setSelectedLogId(log.id)}
-                    className="flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-neutral-50 active:bg-neutral-100 transition-colors"
-                  >
-                    <div className="flex flex-col space-y-0.5">
-                      <span className="text-[12px] text-neutral-400">ID da encomenda: {orderId}</span>
-                      <span className="text-[14px] font-bold text-neutral-800">Pedido {log.amount.toFixed(2)} KZ</span>
-                      <span className="text-[12px] text-neutral-400">{dateOnly}</span>
+                  return (
+                    <div 
+                      key={log.id} 
+                      onClick={() => setSelectedLogId(log.id)}
+                      className="flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-neutral-50 active:bg-neutral-100 transition-colors"
+                    >
+                      <div className="flex flex-col space-y-0.5">
+                        <span className="text-[12px] text-neutral-400">ID da encomenda: {orderId}</span>
+                        <span className="text-[14px] font-bold text-neutral-800">Pedido {log.amount.toFixed(2)} KZ</span>
+                        <span className="text-[12px] text-neutral-400">{dateOnly}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 select-none shrink-0">
+                        <span className={`text-[13px] font-bold ${getStatusTextColorClass(log.status)}`}>
+                          {getStatusText(log.status)}
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-[14px] w-[14px] text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 select-none shrink-0">
-                      <span className={`text-[13px] font-bold ${getStatusTextColorClass(log.status)}`}>
-                        {getStatusText(log.status)}
-                      </span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-[14px] w-[14px] text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )
           ) : (
             /* DETAILED VIEW: Exact mockup match */
             (() => {
@@ -1311,10 +1293,11 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
     <ModalBase isOpen={isOpen} onClose={onClose} title={`REGISTO DE ${type === 'receita' ? 'RECEITAS' : type === 'recarga' ? 'RECARGAS' : 'RETIRADAS'}`}>
       <div className="space-y-3">
         {filtered.length === 0 ? (
-          <div className="text-center py-10 text-neutral-400 text-xs flex flex-col justify-center items-center gap-2">
-            <ClipboardList size={24} className="opacity-40" />
-            <span>Nenhum registo de transação registrado sob este separador.</span>
-          </div>
+          <EmptyState
+            className="py-10"
+            message="Sem dados"
+            description={`Nenhum registo de ${type === 'receita' ? 'receitas' : type === 'recarga' ? 'recargas' : 'retiradas'} registrado sob este separador.`}
+          />
         ) : (
           <div className="space-y-3 max-h-[300px] overflow-y-auto no-scrollbar-y">
             {filtered.map((log) => (
