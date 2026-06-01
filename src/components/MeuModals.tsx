@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { X, Copy, Check, QrCode, ClipboardList, Wallet, Sparkles, Building, Landmark, Users, ArrowUpRight, ArrowDownLeft, ShieldCheck, Heart } from 'lucide-react';
 import { LogRecord } from '../types';
+import inviteBannerImg from '../../assets/invite_banner.png';
 
 interface ModalProps {
   isOpen: boolean;
@@ -695,11 +696,11 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Promotional Banner Image */}
-        <div className="w-full max-w-[340px] mt-8">
+        <div className="w-full max-w-[340px] mt-8 bg-white">
           <img 
-            src="/assets/invite_banner.png" 
+            src={inviteBannerImg}
             alt="Join Us Promotional Banner" 
-            className="w-full h-auto object-contain"
+            className="w-full h-auto object-contain bg-white"
           />
         </div>
 
