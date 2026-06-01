@@ -459,7 +459,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                     onClick={() => setRechargeAmt(val)}
                     className={`py-2.5 px-1 text-center font-bold rounded-sm border text-[11px] cursor-pointer transition-all ${rechargeAmt === val ? 'bg-[#1e88e5] border-[#1e88e5] text-white' : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
                   >
-                    {val.toLocaleString('pt-AO')} KZ
+                    {val.toLocaleString('pt-AO')}
                   </button>
                 ))}
               </div>

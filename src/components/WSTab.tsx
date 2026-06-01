@@ -224,7 +224,7 @@ export const WSTab: React.FC = () => {
       };
 
       const isCrypto = selectedMethod === 'USDT-TRC20';
-      const pageTitle = isCrypto ? 'Cobrança da moeda digital' : 'Recarregar';
+      const pageTitle = 'Detalhes de Gateway';
       const tipoValue = isCrypto ? 'USDT' : 'BANCO';
       const walletLabel = isCrypto ? 'Número da carteira' : 'Número do IBAN';
       const requisitoValue = isCrypto ? usdtReqAmount : `${selectedTierForPayment.price.toLocaleString('pt-AO')} KZ`;
@@ -401,7 +401,7 @@ export const WSTab: React.FC = () => {
             </svg>
           </button>
           
-          <span className="text-[17px] font-semibold text-neutral-800 tracking-wide translate-x-[-11px] select-none">Recarregar</span>
+          <span className="text-[17px] font-semibold text-neutral-800 tracking-wide translate-x-[-11px] select-none">Métodos pagamentos</span>
           
           <div></div>
         </div>
@@ -434,15 +434,9 @@ export const WSTab: React.FC = () => {
 
               {/* Arrow navigation indicators with USDT converter aligned */}
               <div className="flex items-center select-none">
-                {method.type === 'crypto' ? (
-                  <span className="text-[12.5px] font-semibold text-stone-600 pr-1 select-none tracking-tight flex items-center">
-                    {usdtAmount}USDT&gt;
-                  </span>
-                ) : (
-                  <span className="text-[12.5px] font-semibold text-neutral-350 pr-1 select-none tracking-tight">
-                    &gt;
-                  </span>
-                )}
+                <span className="text-[12.5px] font-semibold text-neutral-350 pr-1 select-none tracking-tight">
+                  &gt;
+                </span>
               </div>
             </div>
           ))}
