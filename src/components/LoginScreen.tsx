@@ -12,7 +12,7 @@ export const LoginScreen: React.FC = () => {
   
   const [phone, setPhone] = useState<string>('');
   const [senha, setSenha] = useState<string>('');
-  const [convite, setConvite] = useState<string>('931242');
+  const [convite, setConvite] = useState<string>('');
   const [verificacao, setVerificacao] = useState<string>('');
   
   const [captchaText, setCaptchaText] = useState<string>('FyPAE');

@@ -42,9 +42,8 @@ function MainAppLayout() {
 
   // Keep document.title in sync with routing
   useEffect(() => {
-    const key = activeTab;
-    document.title = `Asiaray | ${PAGE_ROUTES[key] ?? key}`;
-  }, [activeTab]);
+    document.title = 'Asiaray group';
+  }, []);
 
   const setActiveTab = (tab: string) => {
     const key = tab.toLowerCase();
