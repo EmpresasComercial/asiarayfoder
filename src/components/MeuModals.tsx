@@ -341,6 +341,8 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
   const [rechargeAmt, setRechargeAmt] = useState<number>(0);
   const [selectedMethod, setSelectedMethod] = useState<'BIC' | 'BFA' | 'Atlântico' | 'BCI' | 'BAI' | 'USDT-TRC20'>('BFA');
   const [comprovativo, setComprovativo] = useState<string>('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string>('');
   const [fileLabel, setFileLabel] = useState<string>('Nenhum arquivo escolhido');
   const [ibanCopied, setIbanCopied] = useState(false);
   const [usdtCopied, setUsdtCopied] = useState(false);
@@ -348,18 +350,35 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
   const IBAN = 'A086 8886 1145 9312 4224 5813 7';
   const USDT_ADDR = 'TQdoJo3s13AtTPY1NZsnxrnLdLwJFSCqT1';
 
+  React.useEffect(() => {
+    return () => {
+      if (filePreview) {
+        URL.revokeObjectURL(filePreview);
+      }
+    };
+  }, [filePreview]);
+
   const copyIBAN = () => { navigator.clipboard.writeText(IBAN); setIbanCopied(true); setTimeout(() => setIbanCopied(false), 2000); };
   const copyUSDT = () => { navigator.clipboard.writeText(USDT_ADDR); setUsdtCopied(true); setTimeout(() => setUsdtCopied(false), 2000); };
 
   const handleRecharge = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedFile) {
+      alert('Por favor, carregue o comprovativo de transferência antes de submeter.');
+      return;
+    }
+
     showLoading('A submeter comprovativo de recarga...');
     setTimeout(() => {
-      addRecharge(rechargeAmt, `Depósito via ${selectedMethod}`);
+      addRecharge(rechargeAmt, `Depósito via ${selectedMethod}`, selectedFile.name);
       hideLoading();
       alert('Comprovativo submetido. A auditoria Asiaray irá validar.');
       setRechargeStep('amount');
       setRechargeAmt(0);
+      setSelectedFile(null);
+      setFilePreview('');
+      setFileLabel('Nenhum arquivo escolhido');
+      setComprovativo('');
       onClose();
     }, 1400);
   };
@@ -555,13 +574,33 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                         className="w-full text-xs border border-neutral-200 rounded-lg p-3 h-20 resize-none focus:outline-none placeholder-neutral-400" />
                       <span className="absolute bottom-2 right-2 text-[9px] text-neutral-400">{comprovativo.length}/100</span>
                     </div>
-                    <div
-                      onClick={() => setFileLabel('comprovativo.jpg')}
-                      className="h-16 w-16 border-2 border-dashed border-red-500 rounded-lg flex items-center justify-center cursor-pointer hover:bg-red-50 transition-colors">
-                      {fileLabel !== 'Nenhum arquivo escolhido'
-                        ? <Check size={20} className="text-green-500" />
-                        : <span className="text-2xl font-black text-red-500">+</span>}
-                    </div>
+                    <label className="flex flex-col items-center gap-2 cursor-pointer">
+                      <div className="h-16 w-16 border-2 border-dashed border-red-500 rounded-lg flex items-center justify-center hover:bg-red-50 transition-colors overflow-hidden">
+                        {filePreview ? (
+                          <img src={filePreview} alt="Comprovativo" className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="text-2xl font-black text-red-500">+</span>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-neutral-500 text-center">{fileLabel}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            if (filePreview) {
+                              URL.revokeObjectURL(filePreview);
+                            }
+                            const preview = URL.createObjectURL(file);
+                            setSelectedFile(file);
+                            setFilePreview(preview);
+                            setFileLabel(file.name);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
                     <button type="submit"
                       className="w-full bg-[#1e88e5] hover:bg-[#1565c0] text-white font-extrabold py-3.5 rounded-lg text-sm tracking-widest uppercase cursor-pointer border-none outline-none">
                       SALVAR

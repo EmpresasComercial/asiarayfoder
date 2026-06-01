@@ -45,7 +45,7 @@ interface AppContextProps {
   claimTask: (taskId: string) => boolean;
   submitTaskProof: (taskId: string, proofUrl: string) => void;
   approvePendingTasks: () => void;
-  addRecharge: (amount: number, txId: string) => void;
+  addRecharge: (amount: number, txId: string, proofFileName?: string) => void;
   addWithdrawal: (amount: number) => { success: boolean; error?: string };
   convertUsdToKz: (usdAmount: number) => Promise<{ success: boolean; message: string }>;
   updateBankInfo: (bankName: string, bankAccount: string, holderName: string) => void;
@@ -648,14 +648,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Recharge trigger (mock)
-  const addRecharge = (amount: number, txId: string) => {
+  const addRecharge = (amount: number, txId: string, proofFileName?: string) => {
+    const proofDetails = proofFileName ? `${txId} • ${proofFileName}` : txId || 'Depósito Bancário';
     const newLog: LogRecord = {
       id: 'rec_' + String(Math.floor(10000 + Math.random() * 90000)),
       type: 'recarga',
       amount: amount,
       date: new Date().toISOString().replace('T', ' ').slice(0, 16),
       status: 'aprovado', // Immediately approve for simulation speed
-      details: txId || 'Depósito Bancário'
+      details: proofDetails
     };
 
     setLogs(prev => [newLog, ...prev]);
