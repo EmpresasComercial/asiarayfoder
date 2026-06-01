@@ -55,17 +55,9 @@ export const RetirarPage: React.FC = () => {
   const handlePinKeyPress = (val: string) => {
     if (val === 'backspace') {
       setPin(prev => prev.slice(0, -1));
-    } else if (val === 'hide') {
-      // Just ignore or close
     } else {
-      if (pin.length < 6) {
-        const newPin = pin + val;
-        setPin(newPin);
-        
-        // Auto trigger validation on 6th digit
-        if (newPin.length === 6) {
-          validatePin(newPin);
-        }
+      if (pin.length < 4) {
+        setPin(prev => prev + val);
       }
     }
   };
@@ -267,7 +259,7 @@ export const RetirarPage: React.FC = () => {
               <div className="w-full bg-[#f8fafc] border border-slate-100 rounded-xl p-4 text-[12px] text-neutral-600 space-y-2 mb-6 shadow-sm">
                 <div className="flex justify-between">
                   <span>Comissão da plataforma:</span>
-                  <span className="font-semibold text-neutral-800">- KZ{commission.toFixed(2)}</span>
+                  <span className="font-semibold text-red-600">- KZ{commission.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tarifas de acesso:</span>
@@ -279,16 +271,16 @@ export const RetirarPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>Montante real: (KZ):</span>
-                  <span className="font-bold text-neutral-900">KZ {realAmount.toFixed(2)}</span>
+                  <span className="font-bold text-emerald-600">KZ {realAmount.toFixed(2)}</span>
                 </div>
               </div>
 
-              {/* 6 Digit PIN Fields */}
-              <div className="flex gap-2 justify-center w-full max-w-[280px] my-3">
-                {[...Array(6)].map((_, i) => (
+              {/* 4 Digit PIN Fields */}
+              <div className="flex gap-2 justify-center w-full max-w-[240px] my-3">
+                {[...Array(4)].map((_, i) => (
                   <div 
                     key={i} 
-                    className="w-10 h-10 border border-slate-300 rounded-md flex items-center justify-center text-lg font-bold text-neutral-900 bg-white"
+                    className="w-10 h-10 border border-slate-300 flex items-center justify-center text-lg font-bold text-neutral-900 bg-white"
                   >
                     {pin[i] ? (
                       <span className="w-2.5 h-2.5 bg-neutral-800 rounded-full"></span>
@@ -320,14 +312,11 @@ export const RetirarPage: React.FC = () => {
                 </button>
               ))}
 
-              {/* Keyboard hide icon */}
               <button
-                onClick={() => setStep('tips')}
-                className="bg-white/40 text-neutral-700 py-3 rounded-lg text-lg flex items-center justify-center hover:bg-slate-50 cursor-pointer"
+                onClick={() => setPin('')}
+                className="bg-white/40 text-neutral-700 py-3 rounded-lg text-[14px] font-bold flex items-center justify-center hover:bg-slate-50 cursor-pointer"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 13h-4M9 13h-4m2-4H5m14 0h-4M9 9h-4m14-4h-4m2-4H5" />
-                </svg>
+                Limpar
               </button>
 
               <button
@@ -337,14 +326,17 @@ export const RetirarPage: React.FC = () => {
                 0
               </button>
 
-              {/* Delete / Backspace key */}
               <button
-                onClick={() => handlePinKeyPress('backspace')}
-                className="bg-white/40 text-neutral-700 py-3 rounded-lg text-lg flex items-center justify-center hover:bg-slate-50 cursor-pointer"
+                onClick={() => {
+                  if (pin.length === 4) {
+                    validatePin(pin);
+                  } else {
+                    addToast('Digite os 4 dígitos para enviar.', 'warning');
+                  }
+                }}
+                className="bg-[#1e88e5] text-white py-3 rounded-lg text-[14px] font-bold flex items-center justify-center hover:bg-[#1565c0] cursor-pointer"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z" />
-                </svg>
+                Enviar
               </button>
             </div>
 
