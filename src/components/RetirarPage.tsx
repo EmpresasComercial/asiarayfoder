@@ -9,7 +9,7 @@ export const RetirarPage: React.FC = () => {
 
   // Mode state: 'amount' | 'tips' | 'pin'
   const [step, setStep] = useState<'amount' | 'tips' | 'pin'>('amount');
-  const [amount, setAmount] = useState<number>(0);
+  const [amountStr, setAmountStr] = useState<string>('');
   const [walletType, setWalletType] = useState<'pocket' | 'task'>('task'); // Default checked to Task Wallet as it has balance in screenshot
   
   // Pin inputs
@@ -31,6 +31,7 @@ export const RetirarPage: React.FC = () => {
   const taskWalletBalance = stats.balance; // Using stats.balance for task wallet
   
   const currentAvailableBalance = walletType === 'pocket' ? pocketBalance : taskWalletBalance;
+  const amount = Number(amountStr) || 0;
 
   const commission = amount * 0.5;
   const accessFee = 0.00;
@@ -50,6 +51,18 @@ export const RetirarPage: React.FC = () => {
       return;
     }
     setStep('tips');
+  };
+
+  const handleAmountKeyPress = (val: string) => {
+    if (val === 'clear') {
+      setAmountStr('');
+    } else if (val === 'send') {
+      handleConfirmAmount();
+    } else {
+      if (amountStr.length < 10) {
+        setAmountStr(prev => (prev === '0' ? val : prev + val));
+      }
+    }
   };
 
   const handlePinKeyPress = (val: string) => {
@@ -127,13 +140,9 @@ export const RetirarPage: React.FC = () => {
                 <span className="text-[34px] font-semibold text-neutral-900 mr-3 select-none">KZ</span>
                 <input 
                   type="text" 
-                  pattern="[0-9]*"
                   inputMode="numeric"
-                  value={amount === 0 ? '' : amount}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/[^0-9]/g, '');
-                    setAmount(Number(val));
-                  }}
+                  readOnly
+                  value={amountStr}
                   placeholder="0"
                   className="text-[34px] font-semibold text-neutral-900 focus:outline-none w-full bg-transparent p-0 border-none outline-none"
                 />
@@ -170,13 +179,38 @@ export const RetirarPage: React.FC = () => {
                 </label>
               </div>
 
-              {/* Confirm Button */}
-              <div className="mt-auto pt-8">
+              {/* Virtual keypad */}
+              <div className="grid grid-cols-3 gap-2 mt-6">
+                {['1','2','3','4','5','6','7','8','9'].map(val => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => handleAmountKeyPress(val)}
+                    className="h-14 rounded-xl bg-[#f7f8fb] border border-slate-200 text-neutral-900 text-base font-semibold hover:bg-[#eef2f6] active:scale-[0.99] transition-transform"
+                  >
+                    {val}
+                  </button>
+                ))}
                 <button
-                  onClick={handleConfirmAmount}
-                  className="w-full bg-[#1e88e5] text-white py-3 rounded-lg text-[14px] font-bold shadow-md hover:bg-[#1565c0] transition-colors cursor-pointer"
+                  type="button"
+                  onClick={() => handleAmountKeyPress('clear')}
+                  className="h-14 rounded-xl bg-white border border-slate-200 text-sm font-bold text-neutral-600 hover:bg-slate-50 transition-colors"
                 >
-                  Confirmar Retirada
+                  Limpar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAmountKeyPress('0')}
+                  className="h-14 rounded-xl bg-[#f7f8fb] border border-slate-200 text-neutral-900 text-base font-semibold hover:bg-[#eef2f6] transition-colors"
+                >
+                  0
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAmountKeyPress('send')}
+                  className="h-14 rounded-xl bg-[#1e88e5] text-white font-bold hover:bg-[#1565c0] transition-colors"
+                >
+                  OK
                 </button>
               </div>
             </div>
