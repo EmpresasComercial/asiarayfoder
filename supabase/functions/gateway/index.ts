@@ -241,6 +241,8 @@ serve(async (req) => {
         if (error) throw error;
         result = data;
         break;
+      }
+
       case 310: {
         if (!mustBePositiveNumber(payload.amount_usd)) {
           return json(400, { success: false, error: "Dados de conversão inválidos" });

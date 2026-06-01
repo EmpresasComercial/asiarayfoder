@@ -2,6 +2,20 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Task, UserProfile, FinancialStats, LogRecord, TeamReferral, TaskType } from '../types';
 import { supabase, getAccessToken, GATEWAY_URL } from '../lib/supabase';
 
+const normalizeBankName = (bankName?: string) => {
+  if (!bankName) return 'Banco BAI';
+  const normalized: Record<string, string> = {
+    'BAI (Banco Angolano de Investimentos)': 'Banco BAI',
+    'BFA (Banco de Fomento Angola)': 'Banco BFA',
+    'BIC (Banco BIC)': 'Banco BIC',
+    'BCI (Banco de Comércio e Indústria)': 'Banco BCI',
+    'Millennium Atlântico': 'Banco ATL',
+    'Banco Sol': 'Banco Sol',
+    'Standard Bank Angola': 'Standard Bank Angola'
+  };
+  return normalized[bankName] || bankName;
+};
+
 export interface AlertConfig {
   message: string;
   title?: string;
@@ -213,14 +227,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [user, setUser] = useState<UserProfile>(() => {
     const saved = localStorage.getItem('asiaray_user');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved) as UserProfile;
+      return {
+        ...parsed,
+        bankName: normalizeBankName(parsed.bankName)
+      };
+    }
     return {
       phone: '244922342885', // Matches Image 1!
       id: '13793',
       level: 'WS2', // Matches WS2 Level in image
       creditScore: 95, // bom rating
       inviteCode: '931242',
-      bankName: 'BAI (Banco Angolano de Investimentos)',
+      bankName: 'Banco BAI',
       bankAccount: 'RIB004000009570177510185',
       holderName: 'Mateus Santos',
       paymentPin: undefined
@@ -906,7 +926,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       level: 'WS2',
       creditScore: 95,
       inviteCode: '931242',
-      bankName: 'BAI (Banco Angolano de Investimentos)',
+      bankName: 'Banco BAI',
       bankAccount: 'AO06 0040 0000 9312 4224 1018 3',
       holderName: 'Mateus Santos',
       paymentPin: undefined

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { ArrowLeft, Grid } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 export const RetirarPage: React.FC = () => {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ export const RetirarPage: React.FC = () => {
   }, [setIsFullScreenActive]);
 
   // Derived values
-  const displayBank = user.bankName || 'BAI (Banco Angolano de Investimentos)';
+  const displayBank = user.bankName || 'Banco BAI';
   const lastFourDigits = user.bankAccount ? user.bankAccount.replace(/\s+/g, '').slice(-4) : '0185';
   
   const pocketBalance = 0; // Pocket money is KZ 0 in the screenshot
@@ -105,9 +105,6 @@ export const RetirarPage: React.FC = () => {
         <span className="text-[16px] font-bold text-neutral-800 tracking-tight text-center flex-1">
           {step === 'pin' ? 'Confirme a senha' : 'Retirar'}
         </span>
-        <div className="bg-slate-300/40 rounded-md p-1.5 flex items-center justify-center text-neutral-600 w-8 h-8">
-          <Grid size={16} strokeWidth={2.5} />
-        </div>
       </div>
 
       {/* Main Area */}

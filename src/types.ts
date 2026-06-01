@@ -1,4 +1,4 @@
-export type TaskType = 'Tiktok' | 'Facebook' | 'Whatsapp' | 'outros';
+export type TaskType = 'Tiktok' | 'Facebook' | 'Whatsapp' | 'Amazon' | 'outros';
 
 export type TaskStatus = 'disponivel' | 'andamento' | 'revisao' | 'concluido' | 'falhado';
 

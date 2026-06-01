@@ -59,7 +59,7 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       setIsFullScreenActive(false);
     };
   }, [isOpen, setIsFullScreenActive]);
-  const [bank, setBank] = useState(user.bankName || 'BAI (Banco Angolano de Investimentos)');
+  const [bank, setBank] = useState(user.bankName || 'Banco BAI');
   const [account, setAccount] = useState(user.bankAccount || '');
   const [holder, setHolder] = useState(user.holderName || '');
 
@@ -84,12 +84,12 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   };
 
   const banksList = [
-    'BAI (Banco Angolano de Investimentos)',
-    'BFA (Banco de Fomento Angola)',
-    'BIC (Banco BIC)',
-    'BCI (Banco de Comércio e Indústria)',
+    'Banco BAI',
+    'Banco BFA',
+    'Banco BIC',
+    'Banco BCI',
     'Banco Sol',
-    'Millennium Atlântico',
+    'Banco ATL',
     'Standard Bank Angola'
   ];
 

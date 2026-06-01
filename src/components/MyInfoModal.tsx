@@ -32,7 +32,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
   const [nickName, setNickName] = useState('Asiaray VIP');
 
   // Bank Info inputs
-  const [bank, setBank] = useState(user.bankName || 'BAI (Banco Angolano de Investimentos)');
+  const [bank, setBank] = useState(user.bankName || 'Banco BAI');
   const [account, setAccount] = useState(user.bankAccount || '');
   const [holder, setHolder] = useState(user.holderName || '');
   
@@ -171,7 +171,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
 
   // 1. RENDERING SUB-PAGE: Informação de retirada (full-page, read-only display matching WSTab IBAN layout)
   if (activeSubPage === 'withdrawInfo') {
-    const displayBank = user.bankName || 'BIC (Banco BIC)';
+    const displayBank = user.bankName || 'Banco BAI';
     const displayIBAN = user.bankAccount || '555555555';
     const displayHolder = user.holderName || '5555555';
 
@@ -254,10 +254,6 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         <div className="flex-1 p-3 space-y-4 bg-white overflow-y-auto">
           {/* Box 1: Inputs */}
           <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
-            <div className="bg-white py-2.5 px-2 border-b border-gray-200 text-center text-[#e1251b] font-bold text-[12px]">
-              Alterar credenciais de acesso
-            </div>
-
             {/* Senha Antiga */}
             <div className="border-b border-gray-200">
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Senha Antiga</div>
@@ -322,7 +318,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
               onClick={() => handlePasswordReset('login')}
               className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2 px-6 rounded-sm cursor-pointer transition-colors w-full text-center uppercase tracking-wide"
             >
-              Confirmar
+              Gravar senha
             </button>
           </div>
         </div>
@@ -333,7 +329,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
   // 4. RENDERING SUB-PAGE: Gravar/ Alterar a Senha de Pagamento
   if (activeSubPage === 'payPasswordCreate' || activeSubPage === 'payPasswordChange') {
     const isCreateMode = activeSubPage === 'payPasswordCreate';
-    const title = isCreateMode ? 'Gravar senha' : 'Alterar senha';
+    const title = isCreateMode ? 'Gravar senha de pagamento' : 'Alterar senha de pagamento';
     return (
       <div className="fixed inset-0 z-[50] bg-[#f5f5f5] flex flex-col font-sans animate-fadeIn">
         <div className="bg-white px-4 py-3 flex items-center justify-between border-b border-gray-200 select-none" style={{ height: '48px' }}>
@@ -420,7 +416,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
               onClick={() => handlePasswordReset(isCreateMode ? 'paymentCreate' : 'paymentChange')}
               className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2 px-6 rounded-sm cursor-pointer transition-colors w-full text-center uppercase tracking-wide"
             >
-              Confirmar
+              Gravar pin
             </button>
           </div>
         </div>
