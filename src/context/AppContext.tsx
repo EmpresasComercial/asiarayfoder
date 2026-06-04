@@ -66,6 +66,7 @@ interface AppContextProps {
   loadingMessage?: string;
   showLoading: (message?: string) => void;
   hideLoading: () => void;
+  fetchWithdrawalRecords: () => Promise<LogRecord[]>;
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -420,9 +421,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         level: 'WS0',
         creditScore: 85,
         inviteCode: profileData?.invite_code || '',
-        bankName: '',
-        bankAccount: '',
-        holderName: '',
+        bankName: profileData?.bank_name || '',
+        bankAccount: profileData?.bank_account || '',
+        holderName: profileData?.holder_name || '',
         paymentPin: profileData?.payment_pin ?? undefined,
         idChaveUnica: profileData?.id_chave_unica ?? undefined
       };
@@ -512,9 +513,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         level: 'WS0',
         creditScore: 80,
         inviteCode: profileData?.invite_code || '',
-        bankName: '',
-        bankAccount: '',
-        holderName: '',
+        bankName: profileData?.bank_name || '',
+        bankAccount: profileData?.bank_account || '',
+        holderName: profileData?.holder_name || '',
         paymentPin: profileData?.payment_pin ?? undefined,
         idChaveUnica: profileData?.id_chave_unica ?? undefined
       };
@@ -791,6 +792,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addToast((err as Error).message, 'error');
     }
   };
+  // Fetch withdrawal records from backend (gateway op 311)
+  const fetchWithdrawalRecords = async () => {
+    try {
+      const token = await getAccessToken();
+      if (!token) return [];
+      const resp = await fetch(GATEWAY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ op: 311, data: {} })
+      });
+      if (resp.ok) {
+        const res = await resp.json();
+        if (res?.success && res?.result) {
+          return Array.isArray(res.result) ? res.result : [res.result];
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch withdrawal records', e);
+    }
+    return [];
+  };
 
   // Refresh user profile from backend (gateway op 101 → get_user_profile)
   // Returns: id, phone, balance, invite_code, balance_correte
@@ -820,6 +845,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             id: p.id || prev.id,
             inviteCode: p.invite_code || prev.inviteCode,
             idChaveUnica: p.id_chave_unica ?? prev.idChaveUnica,
+            bankName: p.bank_name || prev.bankName,
+            bankAccount: p.bank_account || prev.bankAccount,
+            holderName: p.holder_name || prev.holderName
           }));
 
           // Update financial stats with real balance from profiles.balance
@@ -961,6 +989,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       increaseCreditScore,
       updateUserPaymentPin,
       resetAll,
+      fetchWithdrawalRecords,
       showAlert,
       showConfirm,
       alertConfig,

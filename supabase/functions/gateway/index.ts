@@ -15,6 +15,7 @@ const OP_RULES: Record<number, OperationRule> = {
   206: { name: "create_usdt_deposit", roles: ["user"] },
   309: { name: "request_withdrawal", roles: ["user"] },
   310: { name: "transfer_reproducao_to_balance", roles: ["user"] },
+  311: { name: "get_withdrawal_records", roles: ["user"] },
   412: { name: "add_bank_account", roles: ["user"] },
   413: { name: "update_bank_account", roles: ["user"] },
   414: { name: "delete_client_bank", roles: ["user"] },
@@ -255,6 +256,12 @@ serve(async (req) => {
         break;
       }
 
+      case 311: {
+        const { data, error } = await supabase.rpc("get_withdrawal_records");
+        if (error) throw error;
+        result = data;
+        break;
+      }
 
       case 412: {
         if (

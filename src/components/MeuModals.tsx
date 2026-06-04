@@ -1065,28 +1065,31 @@ interface ListModalProps extends ModalProps {
   type: 'receita' | 'recarga' | 'retirada';
 }
 
-export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, type }) => {
-  const { logs, user, setIsFullScreenActive } = useApp();
+export const ListModal: React.FC<ListModalProps> = ({ isOpen, onClose, type }) => {
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
+  const { logs: contextLogs, user, setIsFullScreenActive, fetchWithdrawalRecords } = useApp();
+  const [withdrawalLogs, setWithdrawalLogs] = useState<LogRecord[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  React.useEffect(() => {
-    if (isOpen) {
-      setIsFullScreenActive(true);
+  // Fetch withdrawal records when modal opens for retirada
+  useEffect(() => {
+    if (isOpen && type === 'retirada') {
+      setLoading(true);
+      fetchWithdrawalRecords()
+        .then((data) => {
+          // Expected shape: array of records matching LogRecord fields
+          setWithdrawalLogs(data);
+        })
+        .catch((err) => {
+          console.error('Error fetching withdrawal records:', err);
+        })
+        .finally(() => setLoading(false));
     }
-    return () => {
-      setIsFullScreenActive(false);
-    };
-  }, [isOpen, setIsFullScreenActive]);
+  }, [isOpen, type]);
 
-  if (!isOpen) return null;
+  // Use fetched data if available, otherwise fallback to context logs
+  const filtered = type === 'retirada' ? (withdrawalLogs.length ? withdrawalLogs : []) : contextLogs.filter(l => l.type === (type === 'receita' ? 'recompensa' : type));
 
-  // Filter logs corresponding to requested ledger
-  const cleanType = type === 'receita' ? 'recompensa' : type;
-  let filtered = logs.filter(l => l.type === cleanType);
-
-  // Fallback to match image exactly if list is empty
-
-  const getStatusBadge = (status: 'pendente' | 'aprovado' | 'rejeitado') => {
     switch (status) {
       case 'aprovado':
         return <span className="bg-[#ccfbf1] text-[#0f766e] text-[10px] font-bold px-2.5 py-0.5 rounded-full">Aprovado</span>;
@@ -1119,7 +1122,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
     }
   };
 
-  // If type is retirada, render the layout identical to the uploaded image
+
   if (type === 'retirada') {
     const selectedLog = filtered.find(l => l.id === selectedLogId);
 
