@@ -14,3 +14,31 @@ export const getAccessToken = async (): Promise<string | null> => {
   const { data } = await supabase.auth.getSession();
   return data.session?.access_token ?? null;
 };
+
+export const gatewayCall = async (op: number, payload: any = {}) => {
+  const token = await getAccessToken();
+  if (!token) throw new Error('Sessão inválida');
+
+  const resp = await fetch(GATEWAY_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ op, data: payload })
+  });
+
+  const data = await resp.json();
+  
+  if (resp.status === 401 && data.force_logout) {
+    await supabase.auth.signOut();
+    window.dispatchEvent(new Event('force-logout'));
+    throw new Error('SESSION_EXPIRED');
+  }
+
+  if (!resp.ok) {
+    throw new Error(data.error || 'Erro na requisição');
+  }
+
+  return data;
+};

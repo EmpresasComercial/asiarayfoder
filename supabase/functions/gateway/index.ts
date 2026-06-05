@@ -23,14 +23,10 @@ const OP_RULES: Record<number, OperationRule> = {
   512: { name: "get_active_products", roles: ["user"] },
   513: { name: "get_user_posts", roles: ["user"] },
   701: { name: "redeem_gift_code", roles: ["user"] },
-  801: { name: "submit_verification", roles: ["user"] },
-  901: { name: "submit_task_proof", roles: ["user"] },
-  902: { name: "get_daily_limit", roles: ["user"] },
-  903: { name: "count_user_tasks_today", roles: ["user"] },
 };
 
 const MAX_BODY_BYTES = 8192;
-const MAX_TOKEN_AGE_SECONDS = 300;
+const MAX_TOKEN_AGE_SECONDS = 1800; // 30 minutos
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -89,11 +85,11 @@ function assertTokenFresh(token: string) {
   }
 
   if (now >= exp) {
-    throw new Error("Token expirado");
+    throw new Error("SESSION_EXPIRED: Token expirado.");
   }
 
   if (now - iat > MAX_TOKEN_AGE_SECONDS) {
-    throw new Error("Token com mais de 5 minutos");
+    throw new Error("SESSION_EXPIRED: A sua sessão expirou (mais de 30 minutos). Por favor, inicie sessão novamente.");
   }
 }
 
@@ -173,14 +169,14 @@ serve(async (req) => {
 
     switch (op) {
       case 101: {
-        const { data, error } = await supabase.rpc("get_user_profile");
+        const { data, error } = await supabase.rpc("get_user_profile_v2");
         if (error) throw error;
         result = data;
         break;
       }
 
       case 102: {
-        const { data, error } = await supabase.rpc("get_home_financial_stats");
+        const { data, error } = await supabase.rpc("get_home_financial_stats_v2");
         if (error) throw error;
         result = data;
         break;
@@ -359,53 +355,7 @@ serve(async (req) => {
         break;
       }
 
-      case 801: {
-        if (
-          !mustBeNonEmptyString(payload.nome) ||
-          !mustBeNonEmptyString(payload.bi_numero) ||
-          !mustBeNonEmptyString(payload.frente_path) ||
-          !mustBeNonEmptyString(payload.verso_path)
-        ) {
-          return json(400, { success: false, error: "Dados de verificação inválidos" });
-        }
 
-        const { data, error } = await supabase.rpc("submit_verification", {
-          p_nome: String(payload.nome).trim(),
-          p_bi_numero: String(payload.bi_numero).trim(),
-          p_frente_path: String(payload.frente_path).trim(),
-          p_verso_path: String(payload.verso_path).trim(),
-        });
-
-        if (error) throw error;
-        result = data;
-        break;
-      }
-
-      // Daily task operations
-      case 901: {
-        if (!mustBeNonEmptyString(payload.url_imagem)) {
-          return json(400, { success: false, error: "URL da imagem é obrigatória" });
-        }
-        const { data, error } = await supabase.rpc("submit_task_proof", {
-          p_url_imagem: String(payload.url_imagem).trim(),
-          // nao_visto is set to false by default in the RPC
-        });
-        if (error) throw error;
-        result = data;
-        break;
-      }
-      case 902: {
-        const { data, error } = await supabase.rpc("get_daily_limit");
-        if (error) throw error;
-        result = data;
-        break;
-      }
-      case 903: {
-        const { data, error } = await supabase.rpc("count_user_tasks_today");
-        if (error) throw error;
-        result = data;
-        break;
-      }
 
       default:
         return json(400, { success: false, error: "Operação inválida" });
@@ -419,9 +369,20 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Gateway error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Erro inesperado";
+    
+    // Tratamento robusto para forçar o logout do lado do cliente
+    if (errorMessage.includes("SESSION_EXPIRED")) {
+      return json(401, {
+        success: false,
+        error: errorMessage.replace("SESSION_EXPIRED: ", ""),
+        force_logout: true // Sinal claro para o frontend deslogar o usuário
+      });
+    }
+
     return json(500, {
       success: false,
-      error: error instanceof Error ? error.message : "Erro inesperado",
+      error: errorMessage,
     });
   }
 });

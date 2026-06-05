@@ -43,7 +43,7 @@ interface AppContextProps {
   registerUser: (phone: string, pin: string, inviteCode: string) => Promise<void>;
   refreshUserProfile: () => Promise<void>;
   claimTask: (taskId: string) => boolean;
-  submitTaskProof: (taskId: string, proofUrl: string) => void;
+
   approvePendingTasks: () => void;
   addRecharge: (amount: number, txId: string, proofFileName?: string) => void;
   addWithdrawal: (amount: number) => { success: boolean; error?: string };
@@ -404,6 +404,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [isLoggedIn, user?.id]);
 
+  useEffect(() => {
+    const handleForceLogout = () => {
+      logout();
+      window.location.href = '/login';
+    };
+    window.addEventListener('force-logout', handleForceLogout);
+    return () => window.removeEventListener('force-logout', handleForceLogout);
+  }, []);
+
   // Auth: Login real via Supabase Auth
   const login = async (phone: string, pin: string): Promise<boolean> => {
     const cleanPhone = phone.replace(/[^0-9]/g, '');
@@ -595,20 +604,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return true;
   };
-
-  // Submit Task proof screenshot/link
-  const submitTaskProof = (taskId: string, proofUrl: string) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === taskId && t.status === 'andamento') {
-        return { 
-          ...t, 
-          status: 'revisao', 
-          proofUrl: proofUrl || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c',
-          submittedAt: new Date().toISOString()
-        };
-      }
-      return t;
-    }));
 
     // Start a set timeout to automatically approve task after 7 seconds for high-fidelity interactive simulation
     setTimeout(() => {
@@ -1002,7 +997,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       registerUser,
       refreshUserProfile,
       claimTask,
-      submitTaskProof,
+
       approvePendingTasks,
       addRecharge,
       addWithdrawal,

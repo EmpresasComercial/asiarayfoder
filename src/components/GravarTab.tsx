@@ -11,7 +11,7 @@ import completedIcon from '../../assets/task-completed-64.png';
 import failedIcon from '../../assets/icon-task-failed.png';
 
 export const GravarTab: React.FC = () => {
-  const { tasks, submitTaskProof, approvePendingTasks } = useApp();
+  const { tasks, approvePendingTasks } = useApp();
   const [activeSegment, setActiveSegment] = useState<TaskStatus>('andamento');
   
   // Track expanded task detail blocks
@@ -76,11 +76,8 @@ export const GravarTab: React.FC = () => {
   };
 
   const handleSubmit = (taskId: string) => {
-    const finalProof = selectedFile || 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=300';
-    submitTaskProof(taskId, finalProof);
-    alert('Sucesso: Comprovativo submetido. Tarefa enviada para a fila de Auditoria Técnica.');
+    alert('Operação desativada. As submissões agora são validadas automaticamente pelo sistema.');
     setExpandedId(null);
-    setActiveSegment('revisao'); // Shift view to auditing tab
   };
 
   const handleInstantApproval = () => {
@@ -127,37 +124,7 @@ export const GravarTab: React.FC = () => {
         </span>
       </div>
 
-      {/* Dashed square upload indicator with red bold + sign */}
-      <div className="flex flex-col items-start gap-1">
-        <div 
-          onClick={() => {
-            setSelectedFile('https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=300');
-          }}
-          className="w-[58px] h-[58px] border-[1.5px] border-dashed border-red-500 rounded bg-neutral-50 hover:bg-neutral-100 flex items-center justify-center cursor-pointer select-none relative overflow-hidden active:scale-95 transition-all shadow-none"
-          id={`upload-box-plus-${task.id}`}
-        >
-          {selectedFile ? (
-            <>
-              <img referrerPolicy="no-referrer" src={selectedFile} alt="proof" className="w-full h-full object-cover" />
-              <div 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedFile('');
-                }}
-                className="absolute top-0.5 right-0.5 bg-white/90 rounded-full text-slate-800 p-0.5 hover:bg-black/80"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </div>
-            </>
-          ) : (
-            <span className="text-[28px] text-[#ff1e1e] font-bold leading-none select-none translate-y-[-1px]">
-              +
-            </span>
-          )}
-        </div>
-      </div>
+
 
       {/* Orange-Red salvar gradient button */}
       <div className="pt-2">
