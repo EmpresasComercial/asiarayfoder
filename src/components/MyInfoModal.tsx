@@ -32,7 +32,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
   const [nickName, setNickName] = useState('Asiaray VIP');
 
   // Bank Info inputs
-  const [bank, setBank] = useState(user.bankName || 'Banco BAI');
+  const [bank, setBank] = useState(user.bankName || '');
   const [account, setAccount] = useState(user.bankAccount || '');
   const [holder, setHolder] = useState(user.holderName || '');
   
@@ -40,7 +40,7 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
     if (isOpen) {
       setIsFullScreenActive(true);
       setRealName(user.holderName || '');
-      setBank(user.bankName || 'Banco BAI');
+      setBank(user.bankName || '');
       setAccount(user.bankAccount || '');
       setHolder(user.holderName || '');
     }
@@ -175,9 +175,9 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
 
   // 1. RENDERING SUB-PAGE: Informação de retirada (full-page, read-only display matching WSTab IBAN layout)
   if (activeSubPage === 'withdrawInfo') {
-    const displayBank = user.bankName || 'Banco BAI';
-    const displayIBAN = user.bankAccount || '555555555';
-    const displayHolder = user.holderName || '5555555';
+    const displayBank = user.bankName || '';
+    const displayIBAN = user.bankAccount || '';
+    const displayHolder = user.holderName || '';
 
     return (
       <div className="fixed inset-0 z-[50] bg-[#f5f5f5] flex flex-col font-sans animate-fadeIn">
