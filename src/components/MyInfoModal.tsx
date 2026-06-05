@@ -39,11 +39,15 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
   React.useEffect(() => {
     if (isOpen) {
       setIsFullScreenActive(true);
+      setRealName(user.holderName || '');
+      setBank(user.bankName || 'Banco BAI');
+      setAccount(user.bankAccount || '');
+      setHolder(user.holderName || '');
     }
     return () => {
       setIsFullScreenActive(false);
     };
-  }, [isOpen, setIsFullScreenActive]);
+  }, [isOpen, user, setIsFullScreenActive]);
 
   if (!isOpen) return null;
 

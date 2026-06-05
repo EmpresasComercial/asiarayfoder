@@ -418,6 +418,7 @@ serve(async (req) => {
       result,
     });
   } catch (error) {
+    console.error("Gateway error:", error);
     return json(500, {
       success: false,
       error: error instanceof Error ? error.message : "Erro inesperado",

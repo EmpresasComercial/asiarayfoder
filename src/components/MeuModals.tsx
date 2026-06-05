@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { X, Copy, Check, QrCode, ClipboardList, Wallet, Sparkles, Building, Landmark, Users, ArrowUpRight, ArrowDownLeft, ShieldCheck, Heart } from 'lucide-react';
 import { LogRecord } from '../types';
@@ -1065,7 +1065,7 @@ interface ListModalProps extends ModalProps {
   type: 'receita' | 'recarga' | 'retirada';
 }
 
-export const ListModal: React.FC<ListModalProps> = ({ isOpen, onClose, type }) => {
+export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, type }) => {
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
   const { logs: contextLogs, user, setIsFullScreenActive, fetchWithdrawalRecords } = useApp();
   const [withdrawalLogs, setWithdrawalLogs] = useState<LogRecord[]>([]);
@@ -1090,6 +1090,7 @@ export const ListModal: React.FC<ListModalProps> = ({ isOpen, onClose, type }) =
   // Use fetched data if available, otherwise fallback to context logs
   const filtered = type === 'retirada' ? (withdrawalLogs.length ? withdrawalLogs : []) : contextLogs.filter(l => l.type === (type === 'receita' ? 'recompensa' : type));
 
+  const getStatusBadge = (status: 'pendente' | 'aprovado' | 'rejeitado') => {
     switch (status) {
       case 'aprovado':
         return <span className="bg-[#ccfbf1] text-[#0f766e] text-[10px] font-bold px-2.5 py-0.5 rounded-full">Aprovado</span>;

@@ -282,6 +282,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('asiaray_team', JSON.stringify(team));
   }, [isLoggedIn, user, stats, tasks, logs, team]);
 
+  // Sync session state with Supabase Auth state changes
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('onAuthStateChange:', event, session);
+      if (session) {
+        setIsLoggedIn(true);
+        localStorage.setItem('asiaray_logged', 'true');
+      } else {
+        setIsLoggedIn(false);
+        localStorage.removeItem('asiaray_logged');
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   // Load real-time financial stats from Database via Gateway (OP: 102)
   const fetchFinancialStats = async () => {
     try {
@@ -333,9 +350,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (!isLoggedIn) return;
 
+    refreshUserProfile();
     fetchFinancialStats();
+    
     // Opcional: Atualiza a cada 30 segundos como fallback secundário
-    const interval = setInterval(fetchFinancialStats, 30000);
+    const interval = setInterval(() => {
+      refreshUserProfile();
+      fetchFinancialStats();
+    }, 30000);
     return () => clearInterval(interval);
   }, [isLoggedIn]);
 
@@ -418,7 +440,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const loggedUser: UserProfile = {
         phone: profileData?.phone || cleanPhone,
         id: profileData?.id || data.user.id,
-        level: 'WS0',
+        level: profileData?.level || 'WS0',
         creditScore: 85,
         inviteCode: profileData?.invite_code || '',
         bankName: profileData?.bank_name || '',
@@ -437,7 +459,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setStats(prev => ({
           ...prev,
           balance: profileData.balance !== undefined && profileData.balance !== null ? parseNum(profileData.balance, prev.balance) : prev.balance,
-          balanceUSDT: profileData.balance_correte !== undefined && profileData.balance_correte !== null ? parseNum(profileData.balance_correte, prev.balanceUSDT) : prev.balanceUSDT,
+          balanceUSDT: profileData.balance_correte_usdt20 !== undefined && profileData.balance_correte_usdt20 !== null ? parseNum(profileData.balance_correte_usdt20, prev.balanceUSDT) : prev.balanceUSDT,
         }));
       }
       setIsLoggedIn(true);
@@ -510,7 +532,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const newUser: UserProfile = {
         phone: profileData?.phone || cleanPhone,
         id: profileData?.id || data.user.id,
-        level: 'WS0',
+        level: profileData?.level || 'WS0',
         creditScore: 80,
         inviteCode: profileData?.invite_code || '',
         bankName: profileData?.bank_name || '',
@@ -529,7 +551,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setStats(prev => ({
           ...prev,
           balance: profileData.balance !== undefined && profileData.balance !== null ? parseNum(profileData.balance, prev.balance) : prev.balance,
-          balanceUSDT: profileData.balance_correte !== undefined && profileData.balance_correte !== null ? parseNum(profileData.balance_correte, prev.balanceUSDT) : prev.balanceUSDT,
+          balanceUSDT: profileData.balance_correte_usdt20 !== undefined && profileData.balance_correte_usdt20 !== null ? parseNum(profileData.balance_correte_usdt20, prev.balanceUSDT) : prev.balanceUSDT,
         }));
       }
       setIsLoggedIn(true);
@@ -847,7 +869,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             idChaveUnica: p.id_chave_unica ?? prev.idChaveUnica,
             bankName: p.bank_name || prev.bankName,
             bankAccount: p.bank_account || prev.bankAccount,
-            holderName: p.holder_name || prev.holderName
+            holderName: p.holder_name || prev.holderName,
+            level: p.level || prev.level
           }));
 
           // Update financial stats with real balance from profiles.balance
