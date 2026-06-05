@@ -22,6 +22,7 @@ const OP_RULES: Record<number, OperationRule> = {
   511: { name: "purchase_product", roles: ["user"] },
   512: { name: "get_active_products", roles: ["user"] },
   513: { name: "get_user_posts", roles: ["user"] },
+  601: { name: "get_user_shop_items", roles: ["user"] },
   701: { name: "redeem_gift_code", roles: ["user"] },
   415: { name: "update_payment_pin", roles: ["user"] },
 };
@@ -379,7 +380,66 @@ serve(async (req) => {
         break;
       }
 
+      case 601: {
+        const { data, error } = await supabase.rpc("get_user_shop_items");
+        if (error) throw error;
+        result = data;
+        break;
+      }
 
+      case 602: {
+        if (!payload.shop_id) return json(400, { success: false, error: "Missing shop_id" });
+        const { data, error } = await supabase.rpc("claim_daily_task", { p_shop_id: payload.shop_id });
+        if (error) throw error;
+        if (!data?.success) return json(400, data);
+        result = data;
+        break;
+      }
+
+      case 603: {
+        if (!payload.tarefa_agd_id) return json(400, { success: false, error: "Missing tarefa_agd_id" });
+        const { data, error } = await supabase.rpc("complete_daily_task", { p_tarefa_agd_id: payload.tarefa_agd_id });
+        if (error) throw error;
+        if (!data?.success) return json(400, data);
+        result = data;
+        break;
+      }
+
+      case 604: {
+        const { data, error } = await supabase
+          .from("tarefa_agd")
+          .select("*")
+          .eq("uid_agdor", user.id)
+          .eq("status_transformando", "transformação")
+          .order("data_criada", { ascending: false });
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
+      case 605: {
+        const { data, error } = await supabase
+          .from("tarefas_diarias")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("status", "concluido")
+          .order("data_atribuicao", { ascending: false });
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
+      case 606: {
+        const { data, error } = await supabase
+          .from("tarefas_diarias")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("status", "falhado")
+          .order("data_atribuicao", { ascending: false });
+        if (error) throw error;
+        result = data;
+        break;
+      }
 
       default:
         return json(400, { success: false, error: "Operação inválida" });

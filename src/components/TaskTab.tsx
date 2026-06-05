@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Task, TaskType } from '../types';
-import { Headphones } from 'lucide-react';
+import { TaskType } from '../types';
 import { EmptyState } from './EmptyState';
+import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
 
 interface TaskTabProps {
   selectedCategory: TaskType;
@@ -10,7 +10,20 @@ interface TaskTabProps {
   setActiveTab: (tab: string) => void;
 }
 
-// High-fidelity Inline SVGs for the Category Selection Header from image
+// ─── Shop item from the database ───
+interface ShopItem {
+  id: number;
+  user_id: string;
+  nome_produto: string;
+  preco: number;
+  rendimento_diario: number;
+  data_compra: string;
+  duracao_dias: number;
+  data_expiracao: string;
+  status: string;
+}
+
+// ─── Inline SVGs for tab header icons ───
 
 const WhatsappWordmark: React.FC = () => (
   <div className="flex flex-col items-center select-none pt-0.5">
@@ -83,38 +96,110 @@ const CardLeftLogo: React.FC<{ type: TaskType }> = ({ type }) => {
   );
 };
 
+// ─── Calculate remaining profit for a shop item ───
+function calcLucroRestante(item: ShopItem): number {
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const dataCompra = new Date(item.data_compra);
+  dataCompra.setHours(0, 0, 0, 0);
+
+  const diffMs = hoje.getTime() - dataCompra.getTime();
+  const diasPassados = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+  const diasRestantes = Math.max(0, item.duracao_dias - diasPassados);
+  return Number((item.rendimento_diario * diasRestantes).toFixed(2));
+}
+
 export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedCategory, setActiveTab }) => {
-  const { tasks, user, claimTask, showConfirm } = useApp();
+  const { user, isSessionExpired } = useApp();
 
-  // Helper level index comparison
-  const levelIndex = (lvl: string) => parseInt(lvl.slice(-1) || '0');
+  // Shop items fetched from the database (op 601)
+  const [shopItems, setShopItems] = useState<ShopItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Filter tasks matching active selectedCategory
-  const filteredTasks = tasks.filter(t => t.type === selectedCategory);
+  // Fetch user's active shop items from gateway
+  useEffect(() => {
+    if (isSessionExpired) return;
 
-  const handleClaim = (task: Task) => {
-    // Assert level eligibility
-    const reqIndex = levelIndex(task.requiredLevel);
-    const userIndex = levelIndex(user.level);
+    const loadShopItems = async () => {
+      setLoading(true);
+      try {
+        const token = await getAccessToken();
+        if (!token) { setLoading(false); return; }
 
-    if (userIndex < reqIndex) {
-      alert(`Limitado: Requer nível ${task.requiredLevel} ou superior. Atualize a sua conta sob o painel de Membros.`);
-      return;
+        const resp = await fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ op: 601, data: {} })
+        });
+
+        // Intercept 401/force_logout
+        if (resp.status === 401) {
+          const errData = await resp.json().catch(() => ({}));
+          const msg = errData?.error || 'Sessão inválida. Faça login novamente.';
+          window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: msg } }));
+          setLoading(false);
+          return;
+        }
+
+        if (resp.ok) {
+          const res = await resp.json();
+          if (res?.success && Array.isArray(res.result)) {
+            setShopItems(res.result);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading shop items:', err);
+      }
+      setLoading(false);
+    };
+    loadShopItems();
+  }, [isSessionExpired]);
+
+  const [claimingId, setClaimingId] = useState<number | null>(null);
+
+  const handleClaimTask = async (shopId: number) => {
+    if (isSessionExpired || claimingId) return;
+    setClaimingId(shopId);
+    
+    try {
+      const token = await getAccessToken();
+      if (!token) { setClaimingId(null); return; }
+
+      const resp = await fetch(GATEWAY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ op: 602, data: { shop_id: shopId } })
+      });
+
+      if (resp.status === 401) {
+        const errData = await resp.json().catch(() => ({}));
+        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: errData?.error || 'Sessão inválida' } }));
+        setClaimingId(null);
+        return;
+      }
+
+      const res = await resp.json();
+      if (res.success) {
+        window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Tarefa recebida com sucesso!', type: 'success' } }));
+        setActiveTab('Gravar');
+      } else {
+        window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: res.error || 'Erro ao obter tarefa', type: 'error' } }));
+      }
+    } catch (err) {
+      console.error(err);
+      window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Erro na conexão', type: 'error' } }));
     }
-
-    if (task.status !== 'disponivel') {
-      alert('Operação Negada: Esta tarefa já se encontra em progresso.');
-      return;
-    }
-
-    const success = claimTask(task.id);
-    if (success) {
-      alert('Sucesso: Tarefa atribuída. Redirecionando para o painel "Gravar".');
-      setActiveTab('Gravar');
-    } else {
-      alert('Controlo de Fluxo: Limite diário de tarefas atingido. Conclua pendências em "Gravar".');
-    }
+    setClaimingId(null);
   };
+
+  // All 3 tabs show the same shop data
+  const displayItems = shopItems;
 
   return (
     <div id="tasks-screen-wrapper" className="min-h-screen bg-stone-100/60 pb-20 relative font-sans">
@@ -157,83 +242,74 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
 
       </div>
 
-      {/* 2. Tasks Grid List matching layout & content */}
+      {/* 2. Tasks Grid List — data from shop table */}
       <div className="p-3.5 space-y-3" id="tasks-list-cards-viewport">
-        {filteredTasks.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="w-6 h-6 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
+          </div>
+        ) : displayItems.length === 0 ? (
           <EmptyState
             className="bg-white rounded-lg border border-zinc-200 p-12"
             message="Sem dados"
-            description="Nenhuma tarefa disponível nesta categoria no momento. Excedeu o limite ou já foram todas concluídas."
+            description="Nenhuma tarefa disponível nesta categoria no momento. Adquira um produto para começar a receber tarefas."
           />
         ) : (
-          filteredTasks.map((task, idx) => {
-            const reqIdx = levelIndex(task.requiredLevel);
-            const userIdx = levelIndex(user.level);
-            const canWork = userIdx >= reqIdx;
+          displayItems.map((item) => {
+            const lucroRestante = calcLucroRestante(item);
             
-            // Generate authentic random or index-based names like ad****, **min
-            const randomUsers = ['ad****', '**min', 'sh****', 'ru****', 'me****', 'li****'];
-            const targetedUser = randomUsers[idx % randomUsers.length];
-
-            // Alternate reward texts like "300.00 KZ" vs "300.00 (KZ300.00)" for maximum fidelity
-            const isAlternateType = idx % 2 === 1;
-            const rewardText = isAlternateType 
-              ? `${task.reward.toFixed(2)} (KZ${task.reward.toFixed(2)})`
-              : `${task.reward.toFixed(2)} KZ`;
-
-            // Remaining numbers matching 99992, 99993, 99995 from image
-            const remainingCount = 99990 + (idx % 6);
+            // Notice: We don't block by isOwnItem anymore. If it's in this list, it IS their item (fetched from their shop_id).
+            // We just let them click it. If they already claimed it today, the backend (OP 602) will return an error and we show it.
 
             return (
               <div 
-                key={task.id}
+                key={item.id}
                 className="bg-white rounded-sm border border-zinc-200/85 shadow-xs overflow-hidden flex min-h-[105px]"
-                id={`task-card-item-${task.id}`}
+                id={`task-card-item-${item.id}`}
               >
                 {/* Left side logo column */}
-                <CardLeftLogo type={task.type} />
+                <CardLeftLogo type={selectedCategory} />
 
                 {/* Central meta information column */}
                 <div className="flex-1 p-3 flex flex-col justify-between text-left select-none pr-1">
                   
-                  {/* Row 1: Demander and 'pago' indicator */}
+                  {/* Row 1: demander = nome_produto + PAGO badge */}
                   <div className="text-[12.5px] text-zinc-500 font-sans tracking-tight leading-none">
-                    demander: <span className="font-semibold text-zinc-700">{targetedUser}</span>{' '}
-                    <span className="text-[#d97706] font-extrabold text-[11px] ml-1 uppercase">pago</span>
+                    demander: <span className="font-semibold text-zinc-700">{item.nome_produto}</span>{' '}
+                    {item.status === 'ativo' && (
+                      <span className="text-[#d97706] font-extrabold text-[11px] ml-1 uppercase">PAGO</span>
+                    )}
                   </div>
 
-                  {/* Row 2: Reward currency rate */}
+                  {/* Row 2: preco from shop table */}
                   <div className="text-[13px] font-black text-[#27272a] font-sans tracking-wide leading-tight mt-1">
-                    {rewardText}
+                    {Number(item.preco).toFixed(2)} KZ
                   </div>
 
-                  {/* Row 3: Remaining tasks amount */}
+                  {/* Row 3: restante = lucro restante calculado */}
                   <div className="text-[11px] text-zinc-400 font-sans mt-0.5">
-                    restante: <span className="text-zinc-900 font-extrabold text-[12px]">{remainingCount}</span>
+                    restante: <span className="text-zinc-900 font-extrabold text-[12px]">{lucroRestante}</span>
                   </div>
 
-                  {/* Row 4: Static Objective line */}
+                  {/* Row 4: Objectivo da tarefa = nome_produto */}
                   <div className="text-[11.5px] text-zinc-500 font-sans mt-1">
-                    Objectivo da tarefa: <span className="text-zinc-700 font-medium">Gosto disso</span>
+                    Objectivo da tarefa: <span className="text-zinc-700 font-medium">{item.nome_produto}</span>
                   </div>
 
                 </div>
 
-                {/* Right actions column containing gradient orange button */}
+                {/* Right actions column */}
                 <div className="p-3 flex items-center justify-center shrink-0">
-                  {task.status === 'disponivel' ? (
-                    <button
-                      id={`get-task-btn-${task.id}`}
-                      onClick={() => handleClaim(task)}
-                      className={`h-[28px] px-3 text-[11.5px] font-black text-slate-800 bg-gradient-to-b from-[#f97316] to-[#ea580c] hover:brightness-[1.05] active:brightness-[0.95] rounded-xs shadow-sm cursor-pointer select-none transition-all outline-none border-none border-orange-600/25`}
-                    >
-                      Obter a tarefa
-                    </button>
-                  ) : (
-                    <span className="text-[10.5px] font-bold text-zinc-400 bg-zinc-50 border border-zinc-200 px-2 py-1 rounded select-none">
-                      Reivindicada
-                    </span>
-                  )}
+                  <button
+                    onClick={() => handleClaimTask(item.id)}
+                    disabled={claimingId === item.id}
+                    id={`get-task-btn-${item.id}`}
+                    className={`h-[28px] px-3 text-[11.5px] font-black text-slate-800 bg-gradient-to-b from-[#f97316] to-[#ea580c] hover:brightness-[1.05] active:brightness-[0.95] rounded-xs shadow-sm cursor-pointer select-none transition-all outline-none border-none border-orange-600/25 ${
+                      claimingId === item.id ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {claimingId === item.id ? 'Processando...' : 'Obter a tarefa'}
+                  </button>
                 </div>
 
               </div>

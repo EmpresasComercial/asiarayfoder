@@ -94,89 +94,31 @@ export const WSTab: React.FC = () => {
     };
   }, [selectedTierForPayment, setIsFullScreenActive]);
 
-  const staticTiers = [
-    {
-      level: 'WS0',
-      name: 'Membro de Teste',
-      price: 0,
-      dailyTasks: 1,
-      payPerTask: 100,
-      bgStyle: 'linear-gradient(135deg, #a1a1aa 0%, #e4e4e7 15%, #a1a1aa 30%, #d4d4d8 45%, #f4f4f5 60%, #a1a1aa 75%, #d4d4d8 90%, #e4e4e7 100%)',
-      badge: 'Básico',
-      desc: 'Ideal para experimentar o painel de mídias parceiras em Angola.'
-    },
-    {
-      level: 'WS1',
-      name: 'Membro Inicial',
-      price: 8000,
-      dailyTasks: 2,
-      payPerTask: 4000,
-      bgStyle: 'linear-gradient(135deg, #3b608c 0%, #c0d1e5 15%, #3b608c 30%, #517ca8 45%, #e1ecf7 60%, #3b608c 75%, #517ca8 90%, #5d8dc2 100%)',
-      badge: 'Popular',
-      desc: 'Acesso às ofertas e anúncios regulares de mídias sociais locais.'
-    },
-    {
-      level: 'WS2',
-      name: 'Membro Oficial',
-      price: 25000,
-      dailyTasks: 4,
-      payPerTask: 6250,
-      bgStyle: 'linear-gradient(135deg, #5c6773 0%, #d1dbe5 15%, #5c6773 30%, #7d8b9c 45%, #eef3f7 60%, #5c6773 75%, #7d8b9c 90%, #8b99a6 100%)',
-      badge: 'Recomendado',
-      desc: 'Nível atual por padrão. Ofertas de avaliação premium e relatórios de marca.'
-    },
-    {
-      level: 'WS3',
-      name: 'Membro Especialista',
-      price: 150000,
-      dailyTasks: 6,
-      payPerTask: 25000,
-      bgStyle: 'linear-gradient(135deg, #4c2254 0%, #dab5dc 15%, #4c2254 30%, #7b4382 45%, #f6eff7 60%, #4c2254 75%, #7b4382 90%, #8c5294 100%)',
-      badge: 'Profissional',
-      desc: 'Recomendações e curadoria avançada para marcas internacionais de luxo.'
-    },
-    {
-      level: 'WS4',
-      name: 'Sócio Investidor',
-      price: 500000,
-      dailyTasks: 10,
-      payPerTask: 50000,
-      bgStyle: 'linear-gradient(135deg, #946916 0%, #f6e3bd 15%, #946916 30%, #ca9b3b 45%, #fffbf2 60%, #946916 75%, #ca9b3b 90%, #dbac4d 100%)',
-      badge: 'Executive',
-      desc: 'Retornos substanciais em canais corporativos e aplicativos licenciados.'
-    },
-    {
-      level: 'WS5',
-      name: 'Embaixador Asiaray',
-      price: 1500000,
-      dailyTasks: 20,
-      payPerTask: 75000,
-      bgStyle: 'linear-gradient(135deg, #a82424 0%, #fcdcdd 15%, #a82424 30%, #d44848 45%, #fff5f5 60%, #a82424 75%, #d44848 90%, #e05e5e 100%)',
-      badge: 'Elite Especial',
-      desc: 'Comissão de teto máximo em múltiplos setores de e-commerce global.'
-    }
-  ];
+  const visualMap: Record<string, { dailyTasks: number; bgStyle: string }> = {
+    WS0: { dailyTasks: 1, bgStyle: 'linear-gradient(135deg, #a1a1aa 0%, #e4e4e7 15%, #a1a1aa 30%, #d4d4d8 45%, #f4f4f5 60%, #a1a1aa 75%, #d4d4d8 90%, #e4e4e7 100%)' },
+    WS1: { dailyTasks: 2, bgStyle: 'linear-gradient(135deg, #3b608c 0%, #c0d1e5 15%, #3b608c 30%, #517ca8 45%, #e1ecf7 60%, #3b608c 75%, #517ca8 90%, #5d8dc2 100%)' },
+    WS2: { dailyTasks: 4, bgStyle: 'linear-gradient(135deg, #5c6773 0%, #d1dbe5 15%, #5c6773 30%, #7d8b9c 45%, #eef3f7 60%, #5c6773 75%, #7d8b9c 90%, #8b99a6 100%)' },
+    WS3: { dailyTasks: 6, bgStyle: 'linear-gradient(135deg, #4c2254 0%, #dab5dc 15%, #4c2254 30%, #7b4382 45%, #f6eff7 60%, #4c2254 75%, #7b4382 90%, #8c5294 100%)' },
+    WS4: { dailyTasks: 10, bgStyle: 'linear-gradient(135deg, #946916 0%, #f6e3bd 15%, #946916 30%, #ca9b3b 45%, #fffbf2 60%, #946916 75%, #ca9b3b 90%, #dbac4d 100%)' },
+    WS5: { dailyTasks: 20, bgStyle: 'linear-gradient(135deg, #a82424 0%, #fcdcdd 15%, #a82424 30%, #d44848 45%, #fff5f5 60%, #a82424 75%, #d44848 90%, #e05e5e 100%)' }
+  };
 
-  const tiers = staticTiers.map(t => {
-    const dbP = dbProducts.find(p => p.name === t.level);
-    if (dbP) {
-      return {
-        ...t,
-        dbId: dbP.id,
-        price: Number(dbP.price),
-        dailyTasks: Number(dbP.tarefa_por_dia) || t.dailyTasks,
-        payPerTask: Number(dbP.daily_income) || t.payPerTask,
-        link_whatsap: dbP.link_whatsap,
-        link_facebook: dbP.link_facebook,
-        link_tiktok: dbP.link_tiktok,
-        limite_tarefa_por_dia: dbP.limite_tarefa_por_dia ? Number(dbP.limite_tarefa_por_dia) : undefined
-      };
-    }
-    return t;
-  });
+  const defaultStyle = 'linear-gradient(135deg, #5c6773 0%, #d1dbe5 15%, #5c6773 30%, #7d8b9c 45%, #eef3f7 60%, #5c6773 75%, #7d8b9c 90%, #8b99a6 100%)';
+
+  const tiers = dbProducts.map(dbP => {
+    const vis = visualMap[dbP.name] || { dailyTasks: 1, bgStyle: defaultStyle };
+    return {
+      level: dbP.name,
+      dbId: dbP.id,
+      price: Number(dbP.price),
+      dailyTasks: Number(dbP.tarefa_por_dia) || vis.dailyTasks,
+      payPerTask: Number(dbP.daily_income),
+      bgStyle: vis.bgStyle
+    };
+  }).sort((a, b) => a.price - b.price);
 
   // Get current user's VIP config details
-  const currentTier = tiers.find(t => t.level === user.level) || tiers[2];
+  const currentTier = tiers.find(t => t.level === user.level) || tiers[0] || { dailyTasks: 0 };
 
   // Render navigation to Payment Subviews
   if (selectedTierForPayment) {
