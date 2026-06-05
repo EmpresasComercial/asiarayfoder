@@ -411,6 +411,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const handleForceLogout = () => {
       setIsSessionExpired(true);
+      // Immediately wipe sensitive bank data and session indicators
+      setUser(prev => ({
+        ...prev,
+        bankName: '',
+        bankAccount: '',
+        holderName: ''
+      }));
+      localStorage.removeItem('asiaray_user');
+      localStorage.removeItem('asiaray_logged');
     };
     window.addEventListener('force-logout', handleForceLogout);
     return () => window.removeEventListener('force-logout', handleForceLogout);
