@@ -359,6 +359,8 @@ export const GravarTab: React.FC = () => {
                           </span>
                         </div>
                       )}
+                    </>
+                  )}
 
                   {!isExpanded && (
                     <div className="absolute right-4 top-[50%] -translate-y-1/2 flex items-center select-none">
