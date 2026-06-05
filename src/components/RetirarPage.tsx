@@ -117,102 +117,105 @@ export const RetirarPage: React.FC = () => {
         
         {/* Step 1: Input amount */}
         {step === 'amount' && (
-          <div className="flex flex-col flex-1">
-            {/* Gateway Card (Grey block) */}
-            <div className="bg-[#f0f3f6] p-4 flex flex-col justify-between border-b border-slate-200">
-              <div className="flex justify-between items-center text-neutral-800 font-bold text-[13px] cursor-pointer">
-                <span>Tipo de Gateway: {displayBank.split(' ')[0]} ({lastFourDigits})</span>
-                <span className="text-neutral-400 text-lg font-light">&gt;</span>
+          <div className="flex flex-col flex-1 justify-between overflow-hidden">
+            {/* Scrollable Content Area */}
+            <div className="flex-1 overflow-y-auto no-scrollbar pb-4">
+              {/* Gateway Card (Grey block) */}
+              <div className="bg-[#f0f3f6] p-4 flex flex-col justify-between border-b border-slate-200">
+                <div className="flex justify-between items-center text-neutral-800 font-bold text-[13px] cursor-pointer">
+                  <span>Tipo de Gateway: {displayBank.split(' ')[0]} ({lastFourDigits})</span>
+                  <span className="text-neutral-400 text-lg font-light">&gt;</span>
+                </div>
+                <span className="text-[10px] text-neutral-500 text-right mt-3 self-end block max-w-[240px] leading-tight">
+                  * Diferentes tipos de métodos de pagamento têm taxas diferentes
+                </span>
               </div>
-              <span className="text-[10px] text-neutral-500 text-right mt-3 self-end block max-w-[240px] leading-tight">
-                * Diferentes tipos de métodos de pagamento têm taxas diferentes
-              </span>
+
+              {/* Input area (White block) */}
+              <div className="p-5 flex flex-col">
+                <span className="text-[14px] font-bold text-neutral-800 mb-2">
+                  Montante de retirada:
+                </span>
+
+                {/* Big Currency input */}
+                <div className="flex items-baseline border-b border-slate-200 pb-3 mb-6 mt-2">
+                  <span className="text-[34px] font-semibold text-neutral-900 mr-3 select-none">KZ</span>
+                  <input 
+                    type="text" 
+                    inputMode="numeric"
+                    readOnly
+                    value={amountStr}
+                    placeholder="0"
+                    className="text-[34px] font-semibold text-neutral-900 focus:outline-none w-full bg-transparent p-0 border-none outline-none"
+                  />
+                </div>
+
+                {/* Wallet options Checkboxes */}
+                <div className="space-y-4">
+                  {/* Option 1: Pocket money */}
+                  <label className="flex items-center justify-between cursor-pointer select-none">
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="checkbox" 
+                        checked={walletType === 'pocket'}
+                        onChange={() => setWalletType('pocket')}
+                        className="w-[18px] h-[18px] text-[#2563eb] rounded border-slate-300 focus:ring-0 cursor-pointer"
+                      />
+                      <span className="text-[13px] font-medium text-neutral-700">Pocket money</span>
+                    </div>
+                    <span className="text-[13px] text-neutral-800">KZ{pocketBalance}</span>
+                  </label>
+
+                  {/* Option 2: Task wallet */}
+                  <label className="flex items-center justify-between cursor-pointer select-none">
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="checkbox" 
+                        checked={walletType === 'task'}
+                        onChange={() => setWalletType('task')}
+                        className="w-[18px] h-[18px] text-[#2563eb] rounded border-slate-300 focus:ring-0 cursor-pointer"
+                      />
+                      <span className="text-[13px] font-medium text-neutral-700">Task wallet</span>
+                    </div>
+                    <span className="text-[13px] text-neutral-800">KZ{taskWalletBalance.toFixed(2)}</span>
+                  </label>
+                </div>
+              </div>
             </div>
 
-            {/* Input area (White block) */}
-            <div className="p-5 flex-1 flex flex-col">
-              <span className="text-[14px] font-bold text-neutral-800 mb-2">
-                Montante de retirada:
-              </span>
-
-              {/* Big Currency input */}
-              <div className="flex items-baseline border-b border-slate-200 pb-3 mb-6 mt-2">
-                <span className="text-[34px] font-semibold text-neutral-900 mr-3 select-none">KZ</span>
-                <input 
-                  type="text" 
-                  inputMode="numeric"
-                  readOnly
-                  value={amountStr}
-                  placeholder="0"
-                  className="text-[34px] font-semibold text-neutral-900 focus:outline-none w-full bg-transparent p-0 border-none outline-none"
-                />
-              </div>
-
-              {/* Wallet options Checkboxes */}
-              <div className="space-y-4">
-                {/* Option 1: Pocket money */}
-                <label className="flex items-center justify-between cursor-pointer select-none">
-                  <div className="flex items-center gap-3">
-                    <input 
-                      type="checkbox" 
-                      checked={walletType === 'pocket'}
-                      onChange={() => setWalletType('pocket')}
-                      className="w-[18px] h-[18px] text-[#2563eb] rounded border-slate-300 focus:ring-0 cursor-pointer"
-                    />
-                    <span className="text-[13px] font-medium text-neutral-700">Pocket money</span>
-                  </div>
-                  <span className="text-[13px] text-neutral-800">KZ{pocketBalance}</span>
-                </label>
-
-                {/* Option 2: Task wallet */}
-                <label className="flex items-center justify-between cursor-pointer select-none">
-                  <div className="flex items-center gap-3">
-                    <input 
-                      type="checkbox" 
-                      checked={walletType === 'task'}
-                      onChange={() => setWalletType('task')}
-                      className="w-[18px] h-[18px] text-[#2563eb] rounded border-slate-300 focus:ring-0 cursor-pointer"
-                    />
-                    <span className="text-[13px] font-medium text-neutral-700">Task wallet</span>
-                  </div>
-                  <span className="text-[13px] text-neutral-800">KZ{taskWalletBalance.toFixed(2)}</span>
-                </label>
-              </div>
-
-              {/* Virtual keypad */}
-              <div className="grid grid-cols-3 gap-2 mt-6">
-                {['1','2','3','4','5','6','7','8','9'].map(val => (
-                  <button
-                    key={val}
-                    type="button"
-                    onClick={() => handleAmountKeyPress(val)}
-                    className="h-14 rounded-xl bg-[#f7f8fb] border border-slate-200 text-neutral-900 text-base font-semibold hover:bg-[#eef2f6] active:scale-[0.99] transition-transform"
-                  >
-                    {val}
-                  </button>
-                ))}
+            {/* Fixed Virtual Keypad at the bottom of the page */}
+            <div className="bg-[#f0f3f6] border-t border-slate-200 p-2 grid grid-cols-3 gap-1 select-none">
+              {['1','2','3','4','5','6','7','8','9'].map(val => (
                 <button
+                  key={val}
                   type="button"
-                  onClick={() => handleAmountKeyPress('clear')}
-                  className="h-14 rounded-xl bg-white border border-slate-200 text-sm font-bold text-neutral-600 hover:bg-slate-50 transition-colors"
+                  onClick={() => handleAmountKeyPress(val)}
+                  className="bg-white text-neutral-950 font-medium py-3 rounded-lg text-lg flex items-center justify-center hover:bg-slate-50 cursor-pointer shadow-sm active:bg-slate-100"
                 >
-                  Limpar
+                  {val}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleAmountKeyPress('0')}
-                  className="h-14 rounded-xl bg-[#f7f8fb] border border-slate-200 text-neutral-900 text-base font-semibold hover:bg-[#eef2f6] transition-colors"
-                >
-                  0
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAmountKeyPress('send')}
-                  className="h-14 rounded-xl bg-[#1e88e5] text-white font-bold hover:bg-[#1565c0] transition-colors"
-                >
-                  OK
-                </button>
-              </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => handleAmountKeyPress('clear')}
+                className="bg-white/40 text-neutral-700 py-3 rounded-lg text-[14px] font-bold flex items-center justify-center hover:bg-slate-50 cursor-pointer"
+              >
+                Limpar
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAmountKeyPress('0')}
+                className="bg-white text-neutral-950 font-medium py-3 rounded-lg text-lg flex items-center justify-center hover:bg-slate-50 cursor-pointer shadow-sm active:bg-slate-100"
+              >
+                0
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAmountKeyPress('send')}
+                className="bg-[#1e88e5] text-white py-3 rounded-lg text-[14px] font-bold flex items-center justify-center hover:bg-[#1565c0] cursor-pointer"
+              >
+                OK
+              </button>
             </div>
           </div>
         )}
