@@ -602,13 +602,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       unfinishedCount: prev.unfinishedCount + 1
     }));
 
-    return true;
-  };
-
-    // Start a set timeout to automatically approve task after 7 seconds for high-fidelity interactive simulation
+    // Auto-approve task after 7 seconds for interactive simulation
     setTimeout(() => {
       approveTask(taskId);
     }, 7000);
+
+    return true;
   };
 
   // Support direct approval
@@ -877,7 +876,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setStats(prev => ({
             ...prev,
             balance: p.balance !== undefined && p.balance !== null ? parseNum(p.balance, prev.balance) : prev.balance,
-            balanceUSDT: p.balance_correte !== undefined && p.balance_correte !== null ? parseNum(p.balance_correte, prev.balanceUSDT) : prev.balanceUSDT,
+            balanceUSDT: p.balance_correte_usdt20 !== undefined && p.balance_correte_usdt20 !== null ? parseNum(p.balance_correte_usdt20, prev.balanceUSDT) : prev.balanceUSDT,
           }));
         }
       }
