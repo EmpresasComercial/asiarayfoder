@@ -4,6 +4,35 @@ import {BrowserRouter} from 'react-router-dom';
 import App from './App.tsx';
 import './index.css';
 
+// Global fetch interceptor to catch unauthorized/expired session API responses
+const originalFetch = window.fetch;
+window.fetch = async (...args) => {
+  const response = await originalFetch(...args);
+  const url = typeof args[0] === 'string' ? args[0] : (args[0] as any)?.url || '';
+  
+  if (response.status === 401) {
+    window.dispatchEvent(new Event('force-logout'));
+  } else if (url && url.includes('/functions/v1/gateway') && !response.ok) {
+    try {
+      const clone = response.clone();
+      const data = await clone.json();
+      const errText = JSON.stringify(data).toLowerCase();
+      if (
+        data?.force_logout ||
+        errText.includes('expirou') ||
+        errText.includes('expirada') ||
+        errText.includes('expired') ||
+        errText.includes('sessão') ||
+        errText.includes('session')
+      ) {
+        window.dispatchEvent(new Event('force-logout'));
+      }
+    } catch (_) {}
+  }
+  return response;
+};
+
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
