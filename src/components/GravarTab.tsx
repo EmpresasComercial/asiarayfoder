@@ -101,7 +101,7 @@ export const GravarTab: React.FC = () => {
 
   // Counters
   const countTransformacao = agdTasks.length;
-  const countTerminado = completedTasks.length + 193; // 193 baseline from image
+  const countTerminado = completedTasks.length;
   const countFalhou = failedTasks.length;
 
   const toggleExpand = (id: number) => {
