@@ -17,7 +17,7 @@ import { TaskType } from './types';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 function MainAppLayout() {
-  const { isLoggedIn, user, stats, showConfirm, isFullScreenActive, isSessionExpired } = useApp();
+  const { isLoggedIn, user, stats, showConfirm, isFullScreenActive, isSessionExpired, sessionExpiredMessage } = useApp();
   
   // Page route definitions — route name === page name
   const PAGE_ROUTES: Record<string, string> = {
@@ -385,7 +385,7 @@ function MainAppLayout() {
       <CustomAlert />
       <CustomToast />
       <CustomSpinner />
-      <SessionExpiredModal isOpen={isSessionExpired} />
+      <SessionExpiredModal isOpen={isSessionExpired} message={sessionExpiredMessage} />
     </div>
   );
 }

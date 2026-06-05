@@ -69,6 +69,8 @@ interface AppContextProps {
   fetchWithdrawalRecords: () => Promise<LogRecord[]>;
   isSessionExpired: boolean;
   setIsSessionExpired: (expired: boolean) => void;
+  sessionExpiredMessage: string;
+  setSessionExpiredMessage: (message: string) => void;
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -224,6 +226,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const [isSessionExpired, setIsSessionExpired] = useState<boolean>(false);
+  const [sessionExpiredMessage, setSessionExpiredMessage] = useState<string>('');
 
   // Try loading from localStorage
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
@@ -300,7 +303,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setIsLoggedIn(false);
         localStorage.removeItem('asiaray_logged');
         if (wasLoggedIn) {
-          window.dispatchEvent(new Event('force-logout'));
+          window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: 'A sua sessão expirou por segurança. Por favor, faça login novamente.' } }));
         }
         wasLoggedIn = false;
       }
@@ -416,7 +419,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [isLoggedIn, user?.id]);
 
   useEffect(() => {
-    const handleForceLogout = () => {
+    const handleForceLogout = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const msg = customEvent.detail?.message || 'A sua sessão expirou por motivos de segurança. Por favor, faça login novamente.';
+      setSessionExpiredMessage(msg);
       setIsSessionExpired(true);
       // Immediately wipe sensitive bank data and session indicators
       setUser(prev => ({
@@ -1000,7 +1006,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTeam(INITIAL_REFERRALS);
   };
 
-  return <AppContext.Provider value={{ isLoggedIn, user, stats, tasks, logs, team, login, logout, registerUser, refreshUserProfile, claimTask, approvePendingTasks, addRecharge, addWithdrawal, convertUsdToKz, updateBankInfo, upgradeMembership, increaseCreditScore, updateUserPaymentPin, resetAll, fetchWithdrawalRecords, showAlert, showConfirm, alertConfig, closeAlert, toasts, addToast, removeToast, isFullScreenActive, setIsFullScreenActive, isLoading, loadingMessage, showLoading, hideLoading, isSessionExpired, setIsSessionExpired }}>{children}</AppContext.Provider>;
+  return <AppContext.Provider value={{ isLoggedIn, user, stats, tasks, logs, team, login, logout, registerUser, refreshUserProfile, claimTask, approvePendingTasks, addRecharge, addWithdrawal, convertUsdToKz, updateBankInfo, upgradeMembership, increaseCreditScore, updateUserPaymentPin, resetAll, fetchWithdrawalRecords, showAlert, showConfirm, alertConfig, closeAlert, toasts, addToast, removeToast, isFullScreenActive, setIsFullScreenActive, isLoading, loadingMessage, showLoading, hideLoading, isSessionExpired, setIsSessionExpired, sessionExpiredMessage, setSessionExpiredMessage }}>{children}</AppContext.Provider>;
 };
 
 export const useApp = () => {

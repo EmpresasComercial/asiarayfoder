@@ -2,9 +2,10 @@ import React, { useEffect, useRef } from 'react';
 
 interface SessionExpiredModalProps {
   isOpen: boolean;
+  message?: string;
 }
 
-export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen }) => {
+export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen, message }) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -85,10 +86,10 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
           </span>
         </div>
 
-        {/* Body content with exact text spacing and style */}
+        {/* Body content with dynamic text spacing and style */}
         <div className="px-5 py-5 select-text">
           <p className="text-[13px] text-neutral-600 leading-relaxed text-left">
-            A sua sessão expirou por motivos de segurança. Por favor, faça login novamente para continuar a utilizar a plataforma e aceder às suas funções.
+            {message || 'A sua sessão expirou por segurança. Por favor, faça login novamente para continuar.'}
           </p>
         </div>
 

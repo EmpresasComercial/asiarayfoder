@@ -11,7 +11,14 @@ window.fetch = async (...args) => {
   const url = typeof args[0] === 'string' ? args[0] : (args[0] as any)?.url || '';
   
   if (response.status === 401) {
-    window.dispatchEvent(new Event('force-logout'));
+    try {
+      const clone = response.clone();
+      const data = await clone.json();
+      const msg = data.error || 'A sua sessão expirou por motivos de segurança.';
+      window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: msg } }));
+    } catch (_) {
+      window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: 'A sua sessão expirou por motivos de segurança.' } }));
+    }
   } else if (url && url.includes('/functions/v1/gateway') && !response.ok) {
     try {
       const clone = response.clone();
@@ -25,7 +32,8 @@ window.fetch = async (...args) => {
         errText.includes('sessão') ||
         errText.includes('session')
       ) {
-        window.dispatchEvent(new Event('force-logout'));
+        const msg = data.error || 'A sua sessão expirou.';
+        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: msg } }));
       }
     } catch (_) {}
   }
