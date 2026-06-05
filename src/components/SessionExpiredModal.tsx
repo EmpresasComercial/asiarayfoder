@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import { ShieldAlert } from 'lucide-react';
 
 interface SessionExpiredModalProps {
   isOpen: boolean;
@@ -10,7 +9,6 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
 
   useEffect(() => {
     if (isOpen && buttonRef.current) {
-      // Auto-focus the button for accessibility
       setTimeout(() => {
         buttonRef.current?.focus();
       }, 100);
@@ -21,13 +19,8 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
 
   const handleReLogin = async () => {
     try {
-      // 1. Clear localStorage
       localStorage.clear();
-
-      // 2. Clear sessionStorage
       sessionStorage.clear();
-
-      // 3. Clear application caches
       if ('caches' in window) {
         try {
           const cacheKeys = await caches.keys();
@@ -36,8 +29,6 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
           console.warn('Error clearing caches:', err);
         }
       }
-
-      // 4. Clear cookies
       try {
         const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
@@ -53,53 +44,61 @@ export const SessionExpiredModal: React.FC<SessionExpiredModalProps> = ({ isOpen
     } catch (error) {
       console.error('Error in session cleanup:', error);
     } finally {
-      // 5. Redirect to login
       window.location.href = '/login';
     }
   };
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-      {/* Backdrop with dark overlay and intense blur to block rest of application */}
+      {/* Backdrop: translucent dark overlay with a soft blur for focus */}
       <div 
-        className="fixed inset-0 bg-slate-950/80 backdrop-blur-md transition-opacity duration-300"
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
         aria-hidden="true"
       />
 
-      {/* Small, modern centered modal container */}
+      {/* Modern, light, clean white modal styled exactly like the screenshot */}
       <div 
-        className="relative w-full max-w-sm transform overflow-hidden rounded-2xl bg-white p-6 text-center align-middle shadow-2xl transition-all duration-300 border border-slate-100 animate-in fade-in zoom-in-95 duration-200"
+        className="relative w-full max-w-[340px] transform overflow-hidden rounded-[16px] bg-white shadow-2xl border border-neutral-100 transition-all duration-200 flex flex-col font-sans select-none animate-in fade-in zoom-in-95"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
-        {/* Warning Icon with stylish animated gradient ring */}
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 border border-red-100 mb-4 animate-bounce">
-          <ShieldAlert className="h-7 w-7 text-red-600" />
+        {/* Header matching screenshot structure */}
+        <div className="relative flex items-center justify-center py-3.5 px-4 border-b border-neutral-100 select-none">
+          {/* Mock/functional Close X button on the left */}
+          <button 
+            onClick={handleReLogin}
+            className="absolute left-4 text-neutral-400 hover:text-neutral-600 focus:outline-none cursor-pointer p-0.5"
+            aria-label="Fechar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          
+          {/* Centered Title */}
+          <span 
+            id="modal-title" 
+            className="text-[16px] font-bold text-neutral-800 tracking-tight text-center"
+          >
+            Sessão Expirada
+          </span>
         </div>
 
-        {/* Title */}
-        <h3 
-          id="modal-title" 
-          className="text-lg font-bold font-display text-slate-900 tracking-tight"
-        >
-          Sessão Expirada
-        </h3>
-
-        {/* Message */}
-        <div className="mt-2.5">
-          <p className="text-sm text-slate-500 leading-relaxed">
-            A sua sessão expirou por motivos de segurança. Por favor, inicie sessão novamente para continuar a utilizar a plataforma.
+        {/* Body content with exact text spacing and style */}
+        <div className="px-5 py-5 select-text">
+          <p className="text-[13px] text-neutral-600 leading-relaxed text-left">
+            A sua sessão expirou por motivos de segurança. Por favor, faça login novamente para continuar a utilizar a plataforma e aceder às suas funções.
           </p>
         </div>
 
-        {/* Button */}
-        <div className="mt-6">
+        {/* Buttons footer matching design in screenshot */}
+        <div className="px-5 pb-5 pt-1 flex justify-center w-full">
           <button
             ref={buttonRef}
             type="button"
             onClick={handleReLogin}
-            className="w-full inline-flex justify-center items-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-950/10 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 active:scale-98 transition-all cursor-pointer"
+            className="w-full h-10 bg-[#1e88e5] hover:bg-[#1565c0] active:scale-[0.98] text-white text-[13px] font-semibold rounded-[8px] transition-all flex items-center justify-center cursor-pointer shadow-sm shadow-[#1e88e5]/10 focus:outline-none focus:ring-2 focus:ring-[#1e88e5] focus:ring-offset-2"
           >
             Logar Novamente
           </button>
