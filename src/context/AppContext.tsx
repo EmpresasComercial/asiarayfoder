@@ -768,45 +768,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Update bank
   // Atualiza banco via gateway OP 412 (add_bank_account)
-  const updateBankInfo = async (bankName: string, bankAccount: string, holderName: string) => {
-    // Atualizar estado local imediatamente
+  const updateBankInfo = async (bankName: string, bankAccount: string, holderName: string): Promise<{success: boolean; message: string}> => {
+    const token = await getAccessToken();
+    if (!token) {
+      throw new Error('Sessão expirada. Faça login novamente.');
+    }
+    const resp = await fetch(GATEWAY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        op: 412,
+        data: {
+          bank_name: bankName,
+          holder_name: holderName,
+          iban: bankAccount
+        }
+      })
+    });
+    const resData = await resp.json();
+    if (!resp.ok || !resData.success) {
+      throw new Error(resData.error || 'Erro desconhecido');
+    }
+    // Só atualizar estado local após confirmação do backend
     setUser(prev => ({
       ...prev,
       bankName,
       bankAccount,
       holderName
     }));
-
-    // Enviar para o backend via gateway
-    try {
-      const token = await getAccessToken();
-      if (!token) {
-        addToast('Sessão expirada. Faça login novamente.', 'error');
-        return;
-      }
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          op: 412,
-          data: {
-            bank_name: bankName,
-            holder_name: holderName,
-            iban: bankAccount
-          }
-        })
-      });
-      const resData = await resp.json();
-      if (!resp.ok || !resData.success) {
-        throw new Error(resData.error || 'Erro ao gravar dados bancários');
-      }
-    } catch (err) {
-      console.error('Erro ao salvar banco no backend:', err);
-      addToast((err as Error).message, 'error');
-    }
+    const resultMsg = resData.result?.message || 'Operação concluída.';
+    return { success: true, message: resultMsg };
   };
   // Fetch withdrawal records from backend (gateway op 311)
   const fetchWithdrawalRecords = async () => {

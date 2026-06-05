@@ -203,7 +203,6 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
               <EmptyState message="Nenhuma conta bancária vinculada." />
             </div>
           ) : (
-            {/* Box 1: Read-only bank info display */}
             <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
 
               {/* Tipo */}

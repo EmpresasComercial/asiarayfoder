@@ -60,27 +60,23 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       setIsFullScreenActive(false);
     };
   }, [isOpen, setIsFullScreenActive]);
-  const [bank, setBank] = useState(user.bankName || 'Banco BAI');
-  const [account, setAccount] = useState(user.bankAccount || '');
-  const [holder, setHolder] = useState(user.holderName || '');
+  const [bank, setBank] = useState('Banco BAI');
+  const [account, setAccount] = useState('');
+  const [holder, setHolder] = useState('');
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!account || !holder) {
-      alert('Erro: Titular e IBAN são campos obrigatórios.');
-      return;
-    }
     
     showLoading('A processar e gravar os dados bancários...');
     
     try {
-      await updateBankInfo(bank, account, holder);
+      const res = await updateBankInfo(bank, account, holder);
       hideLoading();
-      alert('Sucesso: Conta bancária vinculada para levantamentos.');
+      alert(res.message);
       onClose();
     } catch (err: any) {
       hideLoading();
-      alert(err.message || 'Erro: Não foi possível gravar os dados. Tente novamente.');
+      alert(err.message);
     }
   };
 

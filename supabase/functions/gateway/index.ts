@@ -275,6 +275,9 @@ serve(async (req) => {
         });
 
         if (error) throw error;
+        if (data && typeof data === "object" && data.success === false) {
+          return json(400, { success: false, error: data.message });
+        }
         result = data;
         break;
       }
