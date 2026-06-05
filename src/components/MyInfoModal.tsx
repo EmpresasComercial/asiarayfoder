@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import infoIcon from '../../assets/icons8-password-login-48.png';
 import withdrawInfoIcon from '../../assets/icons8-card-withdrawal-48.png';
 import paymentPinIcon from '../../assets/icons8-password-retirada-update-48.png';
+import { EmptyState } from './EmptyState';
 
 interface MyInfoModalProps {
   isOpen: boolean;
@@ -197,41 +198,47 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         </div>
 
         <div className="flex-1 p-3 space-y-4 bg-white overflow-y-auto">
-          {/* Box 1: Read-only bank info display */}
-          <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
+          {!displayBank && !displayIBAN ? (
+            <div className="mt-10">
+              <EmptyState message="Nenhuma conta bancária vinculada." />
+            </div>
+          ) : (
+            {/* Box 1: Read-only bank info display */}
+            <div className="border border-gray-200 bg-white rounded-sm overflow-hidden">
 
-            {/* Tipo */}
-            <div className="border-b border-gray-200">
-              <div className="text-[#0a52a3] font-medium text-[12px] px-3 py-1 bg-white">Tipo</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 font-mono">
-                BANCO
+              {/* Tipo */}
+              <div className="border-b border-gray-200">
+                <div className="text-[#0a52a3] font-medium text-[12px] px-3 py-1 bg-white">Tipo</div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 font-mono">
+                  BANCO
+                </div>
+              </div>
+
+              {/* Instituição Bancária */}
+              <div className="border-b border-gray-200">
+                <div className="text-[#0a52a3] font-medium text-[12px] px-3 py-1 bg-white">Instituição Bancária</div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 font-mono">
+                  {displayBank}
+                </div>
+              </div>
+
+              {/* IBAN */}
+              <div className="border-b border-gray-200">
+                <div className="text-[#0a52a3] font-medium text-[12px] px-3 py-1 bg-white">Número do IBAN</div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 font-mono">
+                  {displayIBAN}
+                </div>
+              </div>
+
+              {/* Nome do Titular */}
+              <div>
+                <div className="text-[#0a52a3] font-medium text-[12px] px-3 py-1 bg-white">Nome Completo do Titular</div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 font-mono">
+                  {displayHolder}
+                </div>
               </div>
             </div>
-
-            {/* Instituição Bancária */}
-            <div className="border-b border-gray-200">
-              <div className="text-[#0a52a3] font-medium text-[12px] px-3 py-1 bg-white">Instituição Bancária</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 font-mono">
-                {displayBank}
-              </div>
-            </div>
-
-            {/* IBAN */}
-            <div className="border-b border-gray-200">
-              <div className="text-[#0a52a3] font-medium text-[12px] px-3 py-1 bg-white">Número do IBAN</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 font-mono">
-                {displayIBAN}
-              </div>
-            </div>
-
-            {/* Nome do Titular */}
-            <div>
-              <div className="text-[#0a52a3] font-medium text-[12px] px-3 py-1 bg-white">Nome Completo do Titular</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 font-mono">
-                {displayHolder}
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     );
