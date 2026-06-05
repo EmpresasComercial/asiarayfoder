@@ -286,16 +286,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('asiaray_team', JSON.stringify(team));
   }, [isLoggedIn, user, stats, tasks, logs, team]);
 
+  // Global fetch interceptor to catch any 401 Unauthorized responses from gateway
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const response = await originalFetch(...args);
+      if (response.status === 401) {
+        try {
+          const clone = response.clone();
+          const data = await clone.json();
+          if (data && (data.force_logout || data.error?.includes('SESSION_EXPIRED') || data.error?.includes('expirada'))) {
+            window.dispatchEvent(new Event('force-logout'));
+          }
+        } catch (_) {
+          const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request).url;
+          if (url && url.includes('/functions/v1/gateway')) {
+            window.dispatchEvent(new Event('force-logout'));
+          }
+        }
+      }
+      return response;
+    };
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
+
   // Sync session state with Supabase Auth state changes
   useEffect(() => {
+    let wasLoggedIn = localStorage.getItem('asiaray_logged') === 'true';
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('onAuthStateChange:', event, session);
       if (session) {
         setIsLoggedIn(true);
         localStorage.setItem('asiaray_logged', 'true');
+        wasLoggedIn = true;
       } else {
         setIsLoggedIn(false);
         localStorage.removeItem('asiaray_logged');
+        if (wasLoggedIn) {
+          window.dispatchEvent(new Event('force-logout'));
+        }
+        wasLoggedIn = false;
       }
     });
     return () => {
