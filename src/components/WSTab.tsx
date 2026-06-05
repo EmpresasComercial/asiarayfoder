@@ -30,7 +30,7 @@ const GoldCoinIcon: React.FC = () => (
 );
 
 export const WSTab: React.FC = () => {
-  const { user, stats, upgradeMembership, addRecharge, setIsFullScreenActive } = useApp();
+  const { user, stats, upgradeMembership, addRecharge, setIsFullScreenActive, isSessionExpired } = useApp();
 
   const [selectedTierForPayment, setSelectedTierForPayment] = useState<any | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
@@ -47,6 +47,8 @@ export const WSTab: React.FC = () => {
   const [dbProducts, setDbProducts] = useState<any[]>([]);
 
   useEffect(() => {
+    if (isSessionExpired) return; // Block data fetching when session expired
+
     const loadProducts = async () => {
       try {
         const token = await getAccessToken();
@@ -59,6 +61,15 @@ export const WSTab: React.FC = () => {
           },
           body: JSON.stringify({ op: 512, data: {} })
         });
+
+        // Intercept 401/force_logout from gateway
+        if (resp.status === 401) {
+          const errData = await resp.json().catch(() => ({}));
+          const msg = errData?.error || 'Sessão inválida. Faça login novamente.';
+          window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: msg } }));
+          return;
+        }
+
         if (resp.ok) {
           const res = await resp.json();
           if (res?.success && Array.isArray(res.result)) {
@@ -70,7 +81,7 @@ export const WSTab: React.FC = () => {
       }
     };
     loadProducts();
-  }, []);
+  }, [isSessionExpired]);
 
   React.useEffect(() => {
     if (selectedTierForPayment) {

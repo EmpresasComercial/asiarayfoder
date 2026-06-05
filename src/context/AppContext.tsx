@@ -51,7 +51,7 @@ interface AppContextProps {
   updateBankInfo: (bankName: string, bankAccount: string, holderName: string) => void;
   upgradeMembership: (level: string, cost: number, productId?: string) => Promise<boolean>;
   increaseCreditScore: (points: number) => void;
-  updateUserPaymentPin: (newPin?: string) => void;
+  updateUserPaymentPin: (newPin: string, oldPin?: string) => Promise<{ success: boolean; message: string }>;
   resetAll: () => void;
   showAlert: (message: string, title?: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
   showConfirm: (message: string, onConfirm: () => void, title?: string) => void;
@@ -227,6 +227,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [isSessionExpired, setIsSessionExpired] = useState<boolean>(false);
   const [sessionExpiredMessage, setSessionExpiredMessage] = useState<string>('');
+  const sessionExpiredRef = React.useRef(false);
+
+  // Keep ref in sync with state so the helper can read it synchronously
+  useEffect(() => {
+    sessionExpiredRef.current = isSessionExpired;
+  }, [isSessionExpired]);
+
+  /**
+   * Centralized gateway fetch helper.
+   * 1. If session is already expired → returns null immediately (no network call, no data leak)
+   * 2. If gateway responds 401 + force_logout → triggers session expired modal and returns null
+   * 3. Otherwise returns the parsed JSON body
+   */
+  const gatewayFetch = async (op: number, data: Record<string, unknown> = {}): Promise<any | null> => {
+    // Guard: session already expired — block ALL gateway calls
+    if (sessionExpiredRef.current) return null;
+
+    const token = await getAccessToken();
+    if (!token) return null;
+
+    const resp = await fetch(GATEWAY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ op, data })
+    });
+
+    const resData = await resp.json().catch(() => ({}));
+
+    // Intercept 401 with force_logout flag from gateway
+    if (resp.status === 401 && resData?.force_logout) {
+      const msg = resData.error || 'A sua sessão expirou por segurança. Por favor, faça login novamente.';
+      window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: msg } }));
+      return null;
+    }
+
+    // Intercept any 401 (even without explicit force_logout)
+    if (resp.status === 401) {
+      window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: resData?.error || 'Sessão inválida. Faça login novamente.' } }));
+      return null;
+    }
+
+    return { resp, resData };
+  };
 
   // Try loading from localStorage
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
@@ -316,44 +362,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Load real-time financial stats from Database via Gateway (OP: 102)
   const fetchFinancialStats = async () => {
     try {
-      const token = await getAccessToken();
-      if (!token) return;
+      const gw = await gatewayFetch(102);
+      if (!gw) return; // session expired or no token
 
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          op: 102,
-          data: {}
-        })
-      });
-
-      if (resp.ok) {
-        const resData = await resp.json();
-        if (resData?.success && resData?.result) {
-          const rawResult = resData.result;
-          const r = Array.isArray(rawResult) ? rawResult[0] : rawResult;
-          if (r) {
-            const parseNum = (val: any, fallback: number = 0) => {
-              const n = Number(val);
-              return isNaN(n) ? fallback : n;
-            };
-            setStats(prev => ({
-              ...prev,
-              balance: r.balance !== undefined && r.balance !== null ? parseNum(r.balance, prev.balance) : prev.balance,
-              incomeYesterday: parseNum(r.income_yesterday, 0),
-              incomeToday: parseNum(r.income_today, 0),
-              incomeThisWeek: parseNum(r.income_this_week, 0),
-              incomeThisMonth: parseNum(r.income_this_month, 0),
-              incomeLastMonth: parseNum(r.income_last_month, 0),
-              incomeTotal: parseNum(r.income_total, 0),
-              completedTodayCount: parseNum(r.completed_today_count, 0),
-              unfinishedCount: parseNum(r.unfinished_count, 0)
-            }));
-          }
+      const { resp, resData } = gw;
+      if (resp.ok && resData?.success && resData?.result) {
+        const rawResult = resData.result;
+        const r = Array.isArray(rawResult) ? rawResult[0] : rawResult;
+        if (r) {
+          const parseNum = (val: any, fallback: number = 0) => {
+            const n = Number(val);
+            return isNaN(n) ? fallback : n;
+          };
+          setStats(prev => ({
+            ...prev,
+            balance: r.balance !== undefined && r.balance !== null ? parseNum(r.balance, prev.balance) : prev.balance,
+            incomeYesterday: parseNum(r.income_yesterday, 0),
+            incomeToday: parseNum(r.income_today, 0),
+            incomeThisWeek: parseNum(r.income_this_week, 0),
+            incomeThisMonth: parseNum(r.income_this_month, 0),
+            incomeLastMonth: parseNum(r.income_last_month, 0),
+            incomeTotal: parseNum(r.income_total, 0),
+            completedTodayCount: parseNum(r.completed_today_count, 0),
+            unfinishedCount: parseNum(r.unfinished_count, 0)
+          }));
         }
       }
     } catch (err) {
@@ -362,22 +394,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   useEffect(() => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn || isSessionExpired) return;
 
     refreshUserProfile();
     fetchFinancialStats();
     
     // Opcional: Atualiza a cada 30 segundos como fallback secundário
     const interval = setInterval(() => {
+      if (sessionExpiredRef.current) return; // Stop polling when expired
       refreshUserProfile();
       fetchFinancialStats();
     }, 30000);
     return () => clearInterval(interval);
-  }, [isLoggedIn]);
+  }, [isLoggedIn, isSessionExpired]);
 
   // Setup Supabase Realtime subscriptions for profiles and tarefas_diarias
   useEffect(() => {
-    if (!isLoggedIn || !user?.id) return;
+    if (!isLoggedIn || !user?.id || isSessionExpired) return;
 
     const channel = supabase
       .channel(`realtime_db_changes_${user.id}`)
@@ -390,6 +423,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           filter: `id=eq.${user.id}`,
         },
         (payload) => {
+          if (sessionExpiredRef.current) return;
           console.log('Realtime profile change:', payload);
           refreshUserProfile();
           fetchFinancialStats();
@@ -404,6 +438,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
+          if (sessionExpiredRef.current) return;
           console.log('Realtime tarefa change:', payload);
           refreshUserProfile();
           fetchFinancialStats();
@@ -416,7 +451,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [isLoggedIn, user?.id]);
+  }, [isLoggedIn, user?.id, isSessionExpired]);
 
   useEffect(() => {
     const handleForceLogout = (e: Event) => {
@@ -751,25 +786,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Convert USDT balance to KZ via Gateway OP 310 calling transfer_reproducao_to_balance
   const convertUsdToKz = async (usdAmount: number): Promise<{ success: boolean; message: string }> => {
     try {
-      const token = await getAccessToken();
-      if (!token) {
+      const gw = await gatewayFetch(310, { amount_usd: usdAmount });
+      if (!gw) {
         return { success: false, message: 'Sessão expirada. Faça login novamente.' };
       }
 
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          op: 310,
-          data: { amount_usd: usdAmount }
-        })
-      });
-
+      const { resp, resData } = gw;
       if (resp.ok) {
-        const resData = await resp.json();
         if (resData?.success && resData?.result) {
           const r = resData.result;
           if (r.success) {
@@ -782,8 +805,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return { success: false, message: resData?.error || 'Erro ao converter saldo.' };
         }
       } else {
-        const errData = await resp.json().catch(() => ({}));
-        return { success: false, message: errData?.error || 'Falha na comunicação com o servidor.' };
+        return { success: false, message: resData?.error || 'Falha na comunicação com o servidor.' };
       }
     } catch (err) {
       console.error('Erro na conversão:', err);
@@ -794,26 +816,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Update bank
   // Atualiza banco via gateway OP 412 (add_bank_account)
   const updateBankInfo = async (bankName: string, bankAccount: string, holderName: string): Promise<{success: boolean; message: string}> => {
-    const token = await getAccessToken();
-    if (!token) {
+    const gw = await gatewayFetch(412, {
+      bank_name: bankName,
+      holder_name: holderName,
+      iban: bankAccount
+    });
+    if (!gw) {
       throw new Error('Sessão expirada. Faça login novamente.');
     }
-    const resp = await fetch(GATEWAY_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        op: 412,
-        data: {
-          bank_name: bankName,
-          holder_name: holderName,
-          iban: bankAccount
-        }
-      })
-    });
-    const resData = await resp.json();
+    const { resp, resData } = gw;
     if (!resp.ok || !resData.success) {
       throw new Error(resData.error || 'Erro desconhecido');
     }
@@ -830,23 +841,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Fetch withdrawal records from backend (gateway op 311)
   const fetchWithdrawalRecords = async () => {
     try {
-      const token = await getAccessToken();
-      if (!token) return [];
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ op: 311, data: {} })
-      });
+      const gw = await gatewayFetch(311);
+      if (!gw) return []; // session expired
+      const { resp, resData } = gw;
       if (resp.ok) {
-        const res = await resp.json();
-        if (res?.success === false) {
-           alert("Gateway Error (Stats): " + JSON.stringify(res.raw_error || res.error));
+        if (resData?.success === false) {
+           alert("Gateway Error (Stats): " + JSON.stringify(resData.raw_error || resData.error));
         }
-        if (res?.success && res?.result) {
-          return Array.isArray(res.result) ? res.result : [res.result];
+        if (resData?.success && resData?.result) {
+          return Array.isArray(resData.result) ? resData.result : [resData.result];
         }
       }
     } catch (e) {
@@ -859,17 +862,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Returns: id, phone, balance, invite_code, balance_correte
   const refreshUserProfile = async () => {
     try {
-      const token = await getAccessToken();
-      if (!token) return;
-      const resp = await fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ op: 101, data: {} })
-      });
-      const res = await resp.json();
+      const gw = await gatewayFetch(101);
+      if (!gw) return; // session expired or no token
+      const { resp, resData: res } = gw;
       if (!resp.ok || res?.success === false) {
          alert("Gateway Error (UserProfile): " + JSON.stringify(res?.raw_error || res?.error || "Unknown Error"));
       }
@@ -888,7 +883,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           bankName: p.bank_name || prev.bankName,
           bankAccount: p.bank_account || prev.bankAccount,
           holderName: p.holder_name || prev.holderName,
-          level: p.level || prev.level
+          level: p.level || prev.level,
+          paymentPin: p.payment_pin || prev.paymentPin
         }));
 
         // Update financial stats with real balance from profiles.balance
@@ -912,23 +908,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const upgradeMembership = async (level: string, cost: number, productId?: string): Promise<boolean> => {
     if (productId) {
       try {
-        const token = await getAccessToken();
-        if (!token) return false;
+        const gw = await gatewayFetch(511, { product_id: productId });
+        if (!gw) return false; // session expired
         
-        const resp = await fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            op: 511,
-            data: { product_id: productId }
-          })
-        });
-        
+        const { resp, resData: res } = gw;
         if (resp.ok) {
-          const res = await resp.json();
           if (res?.success && res.result?.success) {
             addToast(res.result?.message || 'Ativação realizada com sucesso!', 'success');
             await refreshUserProfile();
@@ -980,11 +964,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
-  const updateUserPaymentPin = (newPin?: string) => {
+  const updateUserPaymentPin = async (newPin: string, oldPin?: string): Promise<{ success: boolean; message: string }> => {
+    const gw = await gatewayFetch(415, {
+      new_pin: newPin,
+      old_pin: oldPin || null
+    });
+    if (!gw) {
+      throw new Error('Sessão expirada. Faça login novamente.');
+    }
+
+    const { resp, resData: res } = gw;
+    if (!resp.ok || res?.success === false) {
+      return { success: false, message: res?.error || 'Erro ao gravar PIN de pagamento.' };
+    }
+
     setUser(prev => ({
       ...prev,
       paymentPin: newPin
     }));
+
+    return { success: true, message: res?.result?.message || 'PIN de pagamento gravado com sucesso.' };
   };
 
   const resetAll = () => {

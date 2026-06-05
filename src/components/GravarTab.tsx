@@ -11,7 +11,7 @@ import completedIcon from '../../assets/task-completed-64.png';
 import failedIcon from '../../assets/icon-task-failed.png';
 
 export const GravarTab: React.FC = () => {
-  const { tasks, approvePendingTasks } = useApp();
+  const { tasks, approvePendingTasks, isSessionExpired } = useApp();
   const [activeSegment, setActiveSegment] = useState<TaskStatus>('andamento');
   
   // Track expanded task detail blocks
@@ -23,8 +23,10 @@ export const GravarTab: React.FC = () => {
   // New state for posts from post_tarefas_user
   const [posts, setPosts] = useState<any[]>([]);
 
-  // Fetch posts via gateway on component mount
+  // Fetch posts via gateway on component mount — blocked when session expired
   useEffect(() => {
+    if (isSessionExpired) return; // Block data fetching when session expired
+
     const loadPosts = async () => {
       try {
         const token = await getAccessToken();
@@ -37,6 +39,15 @@ export const GravarTab: React.FC = () => {
           },
           body: JSON.stringify({ op: 513, data: {} })
         });
+
+        // Intercept 401/force_logout from gateway
+        if (resp.status === 401) {
+          const errData = await resp.json().catch(() => ({}));
+          const msg = errData?.error || 'Sessão inválida. Faça login novamente.';
+          window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: msg } }));
+          return;
+        }
+
         if (resp.ok) {
           const res = await resp.json();
           if (res?.success && Array.isArray(res.result)) {
@@ -48,7 +59,7 @@ export const GravarTab: React.FC = () => {
       }
     };
     loadPosts();
-  }, []);
+  }, [isSessionExpired]);
 
   const segments = [
     { status: 'andamento' as TaskStatus, label: 'Transformação', iconType: 'transformacao' },

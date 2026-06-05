@@ -23,6 +23,7 @@ const OP_RULES: Record<number, OperationRule> = {
   512: { name: "get_active_products", roles: ["user"] },
   513: { name: "get_user_posts", roles: ["user"] },
   701: { name: "redeem_gift_code", roles: ["user"] },
+  415: { name: "update_payment_pin", roles: ["user"] },
 };
 
 const MAX_BODY_BYTES = 8192;
@@ -312,6 +313,26 @@ serve(async (req) => {
         });
 
         if (error) throw error;
+        result = data;
+        break;
+      }
+
+      case 415: {
+        if (!mustBeNonEmptyString(payload.new_pin)) {
+          return json(400, { success: false, error: "Novo PIN inválido" });
+        }
+
+        const { data, error } = await supabase.rpc("update_payment_pin", {
+          p_new_pin: String(payload.new_pin).trim(),
+          p_old_pin: payload.old_pin ? String(payload.old_pin).trim() : null,
+        });
+
+        if (error) throw error;
+
+        if (data && data.success === false) {
+          return json(400, { success: false, error: data.message });
+        }
+
         result = data;
         break;
       }

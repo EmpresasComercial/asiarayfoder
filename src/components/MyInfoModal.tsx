@@ -88,13 +88,20 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         return;
       }
 
-      updateUserPaymentPin(newPassword);
       addToast('A processar segurança de chaves AES-256...', 'info');
-      setTimeout(() => {
-        addToast('Senha de pagamento gravada com sucesso!', 'success');
-        resetPasswordInputs();
-        setActiveSubPage('none');
-      }, 1200);
+      updateUserPaymentPin(newPassword)
+        .then((res) => {
+          if (res.success) {
+            addToast(res.message, 'success');
+            resetPasswordInputs();
+            setActiveSubPage('none');
+          } else {
+            alert(res.message);
+          }
+        })
+        .catch((err) => {
+          alert(err.message || 'Erro ao processar.');
+        });
       return;
     }
 
@@ -126,13 +133,20 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
         return;
       }
 
-      updateUserPaymentPin(newPassword);
       addToast('A processar segurança de chaves AES-256...', 'info');
-      setTimeout(() => {
-        addToast('Senha de pagamento alterada com sucesso!', 'success');
-        resetPasswordInputs();
-        setActiveSubPage('none');
-      }, 1200);
+      updateUserPaymentPin(newPassword, oldPassword)
+        .then((res) => {
+          if (res.success) {
+            addToast(res.message, 'success');
+            resetPasswordInputs();
+            setActiveSubPage('none');
+          } else {
+            alert(res.message);
+          }
+        })
+        .catch((err) => {
+          alert(err.message || 'Erro ao processar.');
+        });
     }
   };
 
