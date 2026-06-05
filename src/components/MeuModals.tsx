@@ -78,9 +78,9 @@ export const BankModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       hideLoading();
       alert('Sucesso: Conta bancária vinculada para levantamentos.');
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       hideLoading();
-      alert('Erro: Não foi possível gravar os dados. Tente novamente.');
+      alert(err.message || 'Erro: Não foi possível gravar os dados. Tente novamente.');
     }
   };
 
