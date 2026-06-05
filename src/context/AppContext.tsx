@@ -67,6 +67,8 @@ interface AppContextProps {
   showLoading: (message?: string) => void;
   hideLoading: () => void;
   fetchWithdrawalRecords: () => Promise<LogRecord[]>;
+  isSessionExpired: boolean;
+  setIsSessionExpired: (expired: boolean) => void;
 }
 
 const AppContext = createContext<AppContextProps | undefined>(undefined);
@@ -220,6 +222,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addToast(rawText, type, 5000);
     };
   }, []);
+
+  const [isSessionExpired, setIsSessionExpired] = useState<boolean>(false);
 
   // Try loading from localStorage
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
@@ -406,8 +410,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     const handleForceLogout = () => {
-      logout();
-      window.location.href = '/login';
+      setIsSessionExpired(true);
     };
     window.addEventListener('force-logout', handleForceLogout);
     return () => window.removeEventListener('force-logout', handleForceLogout);
@@ -981,7 +984,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTeam(INITIAL_REFERRALS);
   };
 
-  return <AppContext.Provider value={{ isLoggedIn, user, stats, tasks, logs, team, login, logout, registerUser, refreshUserProfile, claimTask, approvePendingTasks, addRecharge, addWithdrawal, convertUsdToKz, updateBankInfo, upgradeMembership, increaseCreditScore, updateUserPaymentPin, resetAll, fetchWithdrawalRecords, showAlert, showConfirm, alertConfig, closeAlert, toasts, addToast, removeToast, isFullScreenActive, setIsFullScreenActive, isLoading, loadingMessage, showLoading, hideLoading }}>{children}</AppContext.Provider>;
+  return <AppContext.Provider value={{ isLoggedIn, user, stats, tasks, logs, team, login, logout, registerUser, refreshUserProfile, claimTask, approvePendingTasks, addRecharge, addWithdrawal, convertUsdToKz, updateBankInfo, upgradeMembership, increaseCreditScore, updateUserPaymentPin, resetAll, fetchWithdrawalRecords, showAlert, showConfirm, alertConfig, closeAlert, toasts, addToast, removeToast, isFullScreenActive, setIsFullScreenActive, isLoading, loadingMessage, showLoading, hideLoading, isSessionExpired, setIsSessionExpired }}>{children}</AppContext.Provider>;
 };
 
 export const useApp = () => {

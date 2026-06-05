@@ -10,13 +10,14 @@ import { RetirarPage } from './components/RetirarPage';
 import { CustomAlert } from './components/CustomAlert';
 import { CustomToast } from './components/CustomToast';
 import { CustomSpinner } from './components/CustomSpinner';
+import { SessionExpiredModal } from './components/SessionExpiredModal';
 import { Home, Shield, Sparkles, ClipboardCheck, User, Headphones } from 'lucide-react';
 import supportIcon from '../assets/icons8-support-fluente64.png';
 import { TaskType } from './types';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 function MainAppLayout() {
-  const { isLoggedIn, user, stats, showConfirm, isFullScreenActive } = useApp();
+  const { isLoggedIn, user, stats, showConfirm, isFullScreenActive, isSessionExpired } = useApp();
   
   // Page route definitions — route name === page name
   const PAGE_ROUTES: Record<string, string> = {
@@ -384,6 +385,7 @@ function MainAppLayout() {
       <CustomAlert />
       <CustomToast />
       <CustomSpinner />
+      <SessionExpiredModal isOpen={isSessionExpired} />
     </div>
   );
 }
