@@ -823,6 +823,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
       if (resp.ok) {
         const res = await resp.json();
+        if (res?.success === false) {
+           alert("Gateway Error (Stats): " + JSON.stringify(res.raw_error || res.error));
+        }
         if (res?.success && res?.result) {
           return Array.isArray(res.result) ? res.result : [res.result];
         }
@@ -847,38 +850,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         },
         body: JSON.stringify({ op: 101, data: {} })
       });
-      if (resp.ok) {
-        const res = await resp.json();
-        if (res?.success && res?.result) {
-          // result can be an array (RETURNS TABLE) or single object
-          const p = Array.isArray(res.result) ? res.result[0] : res.result;
-          if (!p) return;
+      const res = await resp.json();
+      if (!resp.ok || res?.success === false) {
+         alert("Gateway Error (UserProfile): " + JSON.stringify(res?.raw_error || res?.error || "Unknown Error"));
+      }
+      if (res?.success && res?.result) {
+        // result can be an array (RETURNS TABLE) or single object
+        const p = Array.isArray(res.result) ? res.result[0] : res.result;
+        if (!p) return;
 
-          // Update user profile fields
-          setUser(prev => ({
-            ...prev,
-            phone: p.phone || prev.phone,
-            id: p.id || prev.id,
-            inviteCode: p.invite_code || prev.inviteCode,
-            idChaveUnica: p.id_chave_unica ?? prev.idChaveUnica,
-            bankName: p.bank_name || prev.bankName,
-            bankAccount: p.bank_account || prev.bankAccount,
-            holderName: p.holder_name || prev.holderName,
-            level: p.level || prev.level
-          }));
+        // Update user profile fields
+        setUser(prev => ({
+          ...prev,
+          phone: p.phone || prev.phone,
+          id: p.id || prev.id,
+          inviteCode: p.invite_code || prev.inviteCode,
+          idChaveUnica: p.id_chave_unica ?? prev.idChaveUnica,
+          bankName: p.bank_name || prev.bankName,
+          bankAccount: p.bank_account || prev.bankAccount,
+          holderName: p.holder_name || prev.holderName,
+          level: p.level || prev.level
+        }));
 
-          // Update financial stats with real balance from profiles.balance
-          // and USDT balance from tarefas_diarias.balance_correte
-          const parseNum = (val: any, fallback: number = 0) => {
-            const n = Number(val);
-            return isNaN(n) ? fallback : n;
-          };
-          setStats(prev => ({
-            ...prev,
-            balance: p.balance !== undefined && p.balance !== null ? parseNum(p.balance, prev.balance) : prev.balance,
-            balanceUSDT: p.balance_correte_usdt20 !== undefined && p.balance_correte_usdt20 !== null ? parseNum(p.balance_correte_usdt20, prev.balanceUSDT) : prev.balanceUSDT,
-          }));
-        }
+        // Update financial stats with real balance from profiles.balance
+        // and USDT balance from tarefas_diarias.balance_correte
+        const parseNum = (val: any, fallback: number = 0) => {
+          const n = Number(val);
+          return isNaN(n) ? fallback : n;
+        };
+        setStats(prev => ({
+          ...prev,
+          balance: p.balance !== undefined && p.balance !== null ? parseNum(p.balance, prev.balance) : prev.balance,
+          balanceUSDT: p.balance_correte_usdt20 !== undefined && p.balance_correte_usdt20 !== null ? parseNum(p.balance_correte_usdt20, prev.balanceUSDT) : prev.balanceUSDT,
+        }));
       }
     } catch (e) {
       console.error('Failed to refresh user profile', e);

@@ -369,7 +369,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Gateway error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Erro inesperado";
+    const errorMessage = error instanceof Error ? error.message : (typeof error === 'object' && error !== null ? JSON.stringify(error) : String(error));
     
     // Tratamento robusto para forçar o logout do lado do cliente
     if (errorMessage.includes("SESSION_EXPIRED")) {
@@ -383,6 +383,7 @@ serve(async (req) => {
     return json(500, {
       success: false,
       error: errorMessage,
+      raw_error: error
     });
   }
 });
