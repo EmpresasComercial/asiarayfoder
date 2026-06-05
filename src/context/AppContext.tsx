@@ -984,47 +984,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTeam(INITIAL_REFERRALS);
   };
 
-  return (
-    <AppContext.Provider value={{
-      isLoggedIn,
-      user,
-      stats,
-      tasks,
-      logs,
-      team,
-      login,
-      logout,
-      registerUser,
-      refreshUserProfile,
-      claimTask,
-
-      approvePendingTasks,
-      addRecharge,
-      addWithdrawal,
-      convertUsdToKz,
-      updateBankInfo,
-      upgradeMembership,
-      increaseCreditScore,
-      updateUserPaymentPin,
-      resetAll,
-      fetchWithdrawalRecords,
-      showAlert,
-      showConfirm,
-      alertConfig,
-      closeAlert,
-      toasts,
-      addToast,
-      removeToast,
-      isFullScreenActive,
-      setIsFullScreenActive,
-      isLoading,
-      loadingMessage,
-      showLoading,
-      hideLoading
-    }}>
-      {children}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={{ isLoggedIn, user, stats, tasks, logs, team, login, logout, registerUser, refreshUserProfile, claimTask, approvePendingTasks, addRecharge, addWithdrawal, convertUsdToKz, updateBankInfo, upgradeMembership, increaseCreditScore, updateUserPaymentPin, resetAll, fetchWithdrawalRecords, showAlert, showConfirm, alertConfig, closeAlert, toasts, addToast, removeToast, isFullScreenActive, setIsFullScreenActive, isLoading, loadingMessage, showLoading, hideLoading }}>{children}</AppContext.Provider>;
 };
 
 export const useApp = () => {
