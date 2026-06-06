@@ -641,7 +641,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
 export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const { user, setIsFullScreenActive } = useApp();
   const [copied, setCopied] = useState(false);
-  const [domain, setDomain] = useState('https://asiarays.asiarays.com');
+  const [domain, setDomain] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -662,13 +662,15 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     }
     return () => {
       setIsFullScreenActive(false);
+      setDomain(null);
     };
   }, [isOpen, setIsFullScreenActive]);
 
-  const cleanDomain = domain.replace(/\/$/, '');
-  const inviteUrl = `${cleanDomain}/Public/reg/smid/${user?.inviteCode || 'AS09030S'}`;
+  const cleanDomain = domain ? domain.replace(/\/$/, '') : '';
+  const inviteUrl = domain && user?.inviteCode ? `${cleanDomain}/Public/reg/smid/${user.inviteCode}` : '';
 
   const copyLink = () => {
+    if (!inviteUrl) return;
     navigator.clipboard.writeText(inviteUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -705,14 +707,15 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         
         {/* Link */}
         <span className="text-[12px] text-neutral-700 font-sans font-medium mt-2.5 break-all text-center max-w-xs select-all">
-          {inviteUrl}
+          {inviteUrl ? inviteUrl : 'Ligação de convite indisponível'}
         </span>
 
         {/* Buttons */}
         <div className="w-full max-w-[280px] mt-4 space-y-3 select-none">
           <button
             onClick={copyLink}
-            className="w-full bg-[#ff0000] hover:bg-[#cc0000] text-white text-[13px] font-bold py-2.5 rounded-[5px] active:scale-95 transition-all cursor-pointer border-none outline-none shadow-sm block text-center"
+            disabled={!inviteUrl}
+            className={`w-full text-white text-[13px] font-bold py-2.5 rounded-[5px] transition-all block text-center border-none outline-none shadow-sm ${inviteUrl ? 'bg-[#ff0000] hover:bg-[#cc0000] active:scale-95 cursor-pointer' : 'bg-neutral-300 cursor-not-allowed'}`}
           >
             {copied ? 'Copiado!' : 'cópia'}
           </button>
