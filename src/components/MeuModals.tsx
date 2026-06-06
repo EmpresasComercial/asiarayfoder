@@ -756,9 +756,24 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  const levelUm = teamData?.nivel_um || teamData?.nivel1 || [];
-  const secundario = teamData?.nivel_dois || teamData?.nivel2 || [];
-  const nivelTres = teamData?.nivel_tres || teamData?.nivel3 || [];
+  // Process the raw array from get_my_team
+  const rawTeam = Array.isArray(teamData) ? teamData : [];
+  
+  const levelUm = rawTeam.filter((m: any) => m.level === 1).map((m: any) => ({
+    phone: m.phone,
+    date: m.created_at ? new Date(m.created_at).toISOString().split('T')[0] : '',
+    amount: Number(m.reloaded_amount || 0).toFixed(2)
+  }));
+  const secundario = rawTeam.filter((m: any) => m.level === 2).map((m: any) => ({
+    phone: m.phone,
+    date: m.created_at ? new Date(m.created_at).toISOString().split('T')[0] : '',
+    amount: Number(m.reloaded_amount || 0).toFixed(2)
+  }));
+  const nivelTres = rawTeam.filter((m: any) => m.level === 3).map((m: any) => ({
+    phone: m.phone,
+    date: m.created_at ? new Date(m.created_at).toISOString().split('T')[0] : '',
+    amount: Number(m.reloaded_amount || 0).toFixed(2)
+  }));
 
   const getMemberList = () => {
     switch (activeTab) {
@@ -769,15 +784,20 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const stats = teamData?.stats || teamData || {};
-  const saldoTotal = stats.saldo_total || stats.saldoTotal || 0;
-  const fluxoTotal = stats.fluxo_total || stats.fluxoTotal || 0;
-  const recargaTotal = stats.recarga_total || stats.recargaTotal || 0;
-  const retiradaTotal = stats.retirada_total || stats.retiradaTotal || 0;
-  const primCarga = stats.primeira_carga || stats.primCarga || 0;
-  const empurroes = stats.empurroes_diretos || stats.empurroes || 0;
-  const tamEquipa = stats.tamanho_equipa || stats.tamanho || 0;
-  const novoNum = stats.novo_numero || stats.novoNum || 0;
+  const recargaTotal = rawTeam.reduce((sum: number, m: any) => sum + Number(m.reloaded_amount || 0), 0);
+  const primCarga = rawTeam.filter((m: any) => Number(m.reloaded_amount) > 0).length;
+  const empurroes = levelUm.length;
+  const tamEquipa = rawTeam.length;
+  const novoNum = rawTeam.filter((m: any) => {
+    if (!m.created_at) return false;
+    const isToday = new Date(m.created_at).toDateString() === new Date().toDateString();
+    return isToday;
+  }).length;
+  
+  // We don't have direct DB access for these two from this endpoint yet, but we provide realistic fallbacks/placeholders
+  const saldoTotal = teamData?.stats?.saldoTotal || 0;
+  const fluxoTotal = teamData?.stats?.fluxoTotal || 0;
+  const retiradaTotal = teamData?.stats?.retiradaTotal || 0;
 
   return (
     <div className="fixed inset-0 z-[150] bg-[#f8f9fa] flex flex-col font-sans animate-fadeIn">
