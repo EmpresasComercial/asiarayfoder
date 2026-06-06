@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { X, Copy, Check, QrCode, ClipboardList, Wallet, Sparkles, Building, Landmark, Users, ArrowUpRight, ArrowDownLeft, ShieldCheck, Heart } from 'lucide-react';
 import { LogRecord } from '../types';
 import { EmptyState } from './EmptyState';
+import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
 import inviteBannerImg from '../../assets/invite_banner.png';
 
 interface ModalProps {
@@ -727,10 +728,26 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const { team, setIsFullScreenActive } = useApp();
   const [activeTab, setActiveTab] = useState<'nivel_um' | 'secundario' | 'nivel_tres'>('nivel_um');
+  const [teamData, setTeamData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   React.useEffect(() => {
     if (isOpen) {
       setIsFullScreenActive(true);
+      setLoading(true);
+      getAccessToken().then(token => {
+        if (!token) return;
+        return fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ op: 801, data: {} })
+        }).then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              setTeamData(data.result || {});
+            }
+          });
+      }).finally(() => setLoading(false));
     }
     return () => {
       setIsFullScreenActive(false);
@@ -739,44 +756,28 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  // Mock list matching the exact rows from the user's screenshot
-  const levelUmMock = [
-    { phone: '244929556335', date: '2023-06-06', amount: '88900.00' },
-    { phone: '933513577', date: '2023-06-13', amount: '23440.00' },
-    { phone: '923132970', date: '2023-06-06', amount: '42520.00' },
-    { phone: '244923389942', date: '2023-07-24', amount: '3800.00' },
-    { phone: '922867439', date: '2023-07-19', amount: '4020.00' },
-    { phone: '924727491', date: '2023-07-15', amount: '2800.00' },
-    { phone: '940975793', date: '2023-07-12', amount: '11100.00' },
-    { phone: '244946907594', date: '2023-07-04', amount: '11000.00' },
-    { phone: '244937949004', date: '2023-07-04', amount: '2600.00' },
-    { phone: '932044640', date: '2023-06-30', amount: '9800.00' },
-  ];
-
-  const secundarioMock = [
-    { phone: '244924883901', date: '2023-06-08', amount: '15000.00' },
-    { phone: '931298475', date: '2023-06-14', amount: '5600.00' },
-    { phone: '924102938', date: '2023-06-20', amount: '12800.00' },
-    { phone: '244933928172', date: '2023-07-01', amount: '4500.00' },
-  ];
-
-  const nivelTresMock = [
-    { phone: '925881029', date: '2023-06-10', amount: '2200.00' },
-    { phone: '244941029384', date: '2023-06-11', amount: '1800.00' },
-  ];
+  const levelUm = teamData?.nivel_um || teamData?.nivel1 || [];
+  const secundario = teamData?.nivel_dois || teamData?.nivel2 || [];
+  const nivelTres = teamData?.nivel_tres || teamData?.nivel3 || [];
 
   const getMemberList = () => {
     switch (activeTab) {
-      case 'nivel_um':
-        return levelUmMock;
-      case 'secundario':
-        return secundarioMock;
-      case 'nivel_tres':
-        return nivelTresMock;
-      default:
-        return levelUmMock;
+      case 'nivel_um': return levelUm;
+      case 'secundario': return secundario;
+      case 'nivel_tres': return nivelTres;
+      default: return levelUm;
     }
   };
+
+  const stats = teamData?.stats || teamData || {};
+  const saldoTotal = stats.saldo_total || stats.saldoTotal || 0;
+  const fluxoTotal = stats.fluxo_total || stats.fluxoTotal || 0;
+  const recargaTotal = stats.recarga_total || stats.recargaTotal || 0;
+  const retiradaTotal = stats.retirada_total || stats.retiradaTotal || 0;
+  const primCarga = stats.primeira_carga || stats.primCarga || 0;
+  const empurroes = stats.empurroes_diretos || stats.empurroes || 0;
+  const tamEquipa = stats.tamanho_equipa || stats.tamanho || 0;
+  const novoNum = stats.novo_numero || stats.novoNum || 0;
 
   return (
     <div className="fixed inset-0 z-[150] bg-[#f8f9fa] flex flex-col font-sans animate-fadeIn">
@@ -809,11 +810,11 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           <div className="grid grid-cols-2 border-b border-gray-100">
             <div className="p-3 border-r border-gray-100 flex flex-col justify-between min-h-[56px]">
               <span className="text-[10px] text-neutral-400 block scale-95 origin-left">saldo total da equipa (KZ)</span>
-              <span className="text-[13px] font-semibold text-neutral-800 mt-1 font-mono">1618680.00</span>
+              <span className="text-[13px] font-semibold text-neutral-800 mt-1 font-mono">{Number(saldoTotal).toFixed(2)}</span>
             </div>
             <div className="p-3 flex flex-col justify-between min-h-[56px] text-right">
               <span className="text-[10px] text-neutral-400 block scale-95 origin-right">fluxo total da equipa (KZ)</span>
-              <span className="text-[13px] font-semibold text-neutral-800 mt-1 font-mono">3560710.00</span>
+              <span className="text-[13px] font-semibold text-neutral-800 mt-1 font-mono">{Number(fluxoTotal).toFixed(2)}</span>
             </div>
           </div>
 
@@ -821,11 +822,11 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           <div className="grid grid-cols-2 border-b border-gray-100">
             <div className="p-3 border-r border-gray-100 flex flex-col justify-between min-h-[56px]">
               <span className="text-[10px] text-neutral-400 block scale-95 origin-left">Recarga total da equipa (KZ)</span>
-              <span className="text-[13px] font-semibold text-neutral-800 mt-1 font-mono">&nbsp;</span>
+              <span className="text-[13px] font-semibold text-neutral-800 mt-1 font-mono">{Number(recargaTotal).toFixed(2)}</span>
             </div>
             <div className="p-3 flex flex-col justify-between min-h-[56px] text-right">
               <span className="text-[10px] text-neutral-400 block scale-95 origin-right">retirada total da equipa (KZ)</span>
-              <span className="text-[13px] font-semibold text-neutral-800 mt-1 font-mono">739270.00</span>
+              <span className="text-[13px] font-semibold text-neutral-800 mt-1 font-mono">{Number(retiradaTotal).toFixed(2)}</span>
             </div>
           </div>
 
@@ -834,13 +835,13 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             <div className="p-3 border-r border-gray-100 flex flex-col justify-between min-h-[56px]">
               <span className="text-[10px] text-neutral-400 block scale-95 origin-left">número de primeira carga</span>
               <span className="text-[12px] font-medium text-red-500 mt-1">
-                <span className="font-bold">0</span> Pessoas
+                <span className="font-bold">{primCarga}</span> Pessoas
               </span>
             </div>
             <div className="p-3 flex flex-col justify-between min-h-[56px] text-right">
               <span className="text-[10px] text-neutral-400 block scale-95 origin-right">número de empurrões directos</span>
               <span className="text-[12px] font-medium text-red-500 mt-1">
-                <span className="font-bold">836</span> Pessoas
+                <span className="font-bold">{empurroes}</span> Pessoas
               </span>
             </div>
           </div>
@@ -850,13 +851,13 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             <div className="p-3 border-r border-gray-100 flex flex-col justify-between min-h-[56px]">
               <span className="text-[10px] text-neutral-400 block scale-95 origin-left">tamanho da equipa</span>
               <span className="text-[12px] font-medium text-red-500 mt-1">
-                <span className="font-bold">3161</span> Pessoas
+                <span className="font-bold">{tamEquipa}</span> Pessoas
               </span>
             </div>
             <div className="p-3 flex flex-col justify-between min-h-[56px] text-right">
               <span className="text-[10px] text-neutral-400 block scale-95 origin-right">Novo número</span>
               <span className="text-[12px] font-medium text-red-500 mt-1">
-                <span className="font-bold">5</span> Pessoas
+                <span className="font-bold">{novoNum}</span> Pessoas
               </span>
             </div>
           </div>
@@ -871,7 +872,7 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               activeTab === 'nivel_um' ? 'text-[#d24c3c]' : 'text-neutral-500'
             }`}
           >
-            nível um (836)
+            nível um ({levelUm.length})
             {activeTab === 'nivel_um' && (
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#d24c3c]" />
             )}
@@ -882,7 +883,7 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               activeTab === 'secundario' ? 'text-[#d24c3c]' : 'text-neutral-500'
             }`}
           >
-            secundário (1379)
+            secundário ({secundario.length})
             {activeTab === 'secundario' && (
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#d24c3c]" />
             )}
@@ -893,7 +894,7 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               activeTab === 'nivel_tres' ? 'text-[#d24c3c]' : 'text-neutral-500'
             }`}
           >
-            nível três (946)
+            nível três ({nivelTres.length})
             {activeTab === 'nivel_tres' && (
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#d24c3c]" />
             )}
@@ -901,12 +902,20 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Members List Table */}
-        <div className="bg-white divide-y divide-gray-100">
-          {getMemberList().map((mbr, idx) => (
+        <div className="bg-white divide-y divide-gray-100 relative min-h-[100px]">
+          {loading && (
+            <div className="absolute inset-0 bg-white/60 flex items-center justify-center z-10">
+              <div className="animate-spin h-5 w-5 border-2 border-[#10b981] border-t-transparent rounded-full"></div>
+            </div>
+          )}
+          {getMemberList().length === 0 && !loading && (
+            <div className="py-10 text-center text-neutral-400 text-[11px]">Nenhum membro encontrado.</div>
+          )}
+          {getMemberList().map((mbr: any, idx) => (
             <div key={idx} className="flex justify-between items-center px-6 py-3.5 text-[12px] text-neutral-600 font-sans">
-              <span className="font-mono text-neutral-800 font-medium flex-1 text-left">{mbr.phone}</span>
-              <span className="text-neutral-400 font-mono flex-1 text-center">{mbr.date}</span>
-              <span className="font-mono text-neutral-800 font-medium flex-1 text-right">{mbr.amount}</span>
+              <span className="font-mono text-neutral-800 font-medium flex-1 text-left">{mbr.phone || mbr.telefone}</span>
+              <span className="text-neutral-400 font-mono flex-1 text-center">{mbr.date || mbr.data}</span>
+              <span className="font-mono text-neutral-800 font-medium flex-1 text-right">{mbr.amount || mbr.valor}</span>
             </div>
           ))}
         </div>
@@ -1065,6 +1074,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
   const { logs: contextLogs, user, setIsFullScreenActive, fetchWithdrawalRecords } = useApp();
   const [withdrawalLogs, setWithdrawalLogs] = useState<LogRecord[]>([]);
+  const [completedTasks, setCompletedTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   // Fetch withdrawal records when modal opens for retirada
@@ -1083,8 +1093,42 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
     }
   }, [isOpen, type]);
 
+  // Fetch completed tasks when modal opens for receita
+  useEffect(() => {
+    if (isOpen && type === 'receita') {
+      setLoading(true);
+      getAccessToken().then(token => {
+        if (!token) return;
+        return fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ op: 605, data: {} })
+        }).then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              setCompletedTasks(data.result || []);
+            }
+          })
+      }).finally(() => setLoading(false));
+    }
+  }, [isOpen, type]);
+
   // Use fetched data if available, otherwise fallback to context logs
-  const filtered = type === 'retirada' ? (withdrawalLogs.length ? withdrawalLogs : []) : contextLogs.filter(l => l.type === (type === 'receita' ? 'recompensa' : type));
+  let filtered: any[] = [];
+  if (type === 'retirada') {
+    filtered = withdrawalLogs.length ? withdrawalLogs : [];
+  } else if (type === 'receita') {
+    filtered = completedTasks.map(task => ({
+      id: task.id.toString(),
+      type: 'recompensa',
+      amount: Number(task.renda_coletada),
+      date: new Date(task.data_atribuicao).toLocaleString('pt-AO').replace(',', ''),
+      status: 'aprovado',
+      details: 'Tarefa Concluída'
+    }));
+  } else {
+    filtered = contextLogs.filter(l => l.type === type);
+  }
 
   const getStatusBadge = (status: 'pendente' | 'aprovado' | 'rejeitado') => {
     switch (status) {

@@ -441,6 +441,13 @@ serve(async (req) => {
         break;
       }
 
+      case 801: {
+        const { data, error } = await supabase.rpc("get_my_team");
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
       default:
         return json(400, { success: false, error: "Operação inválida" });
     }
