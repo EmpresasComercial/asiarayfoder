@@ -641,17 +641,32 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
 export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const { user, setIsFullScreenActive } = useApp();
   const [copied, setCopied] = useState(false);
-
-  const inviteUrl = `https://asiarays.asiarays.com/Public/reg/smid/${user.inviteCode || '931242'}`;
+  const [domain, setDomain] = useState('https://asiarays.asiarays.com');
 
   React.useEffect(() => {
     if (isOpen) {
       setIsFullScreenActive(true);
+      getAccessToken().then(token => {
+        if (!token) return;
+        return fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ op: 901, data: {} })
+        }).then(res => res.json())
+          .then(data => {
+            if (data.success && data.result?.dominio_publicidad) {
+              setDomain(data.result.dominio_publicidad);
+            }
+          }).catch(console.error);
+      });
     }
     return () => {
       setIsFullScreenActive(false);
     };
   }, [isOpen, setIsFullScreenActive]);
+
+  const cleanDomain = domain.replace(/\/$/, '');
+  const inviteUrl = `${cleanDomain}/Public/reg/smid/${user?.inviteCode || 'AS09030S'}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(inviteUrl);

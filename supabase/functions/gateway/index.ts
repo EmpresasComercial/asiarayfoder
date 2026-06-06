@@ -448,6 +448,13 @@ serve(async (req) => {
         break;
       }
 
+      case 901: {
+        const { data, error } = await supabase.rpc("get_support");
+        if (error) throw error;
+        result = data?.[0] || null;
+        break;
+      }
+
       default:
         return json(400, { success: false, error: "Operação inválida" });
     }
