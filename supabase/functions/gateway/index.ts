@@ -25,6 +25,9 @@ const OP_RULES: Record<number, OperationRule> = {
   601: { name: "get_user_shop_items", roles: ["user"] },
   701: { name: "redeem_gift_code", roles: ["user"] },
   415: { name: "update_payment_pin", roles: ["user"] },
+  801: { name: "get_my_team", roles: ["user"] },
+  802: { name: "get_weekly_income", roles: ["user"] },
+  901: { name: "get_support", roles: ["user"] },
 };
 
 const MAX_BODY_BYTES = 8192;
@@ -443,6 +446,13 @@ serve(async (req) => {
 
       case 801: {
         const { data, error } = await supabase.rpc("get_my_team");
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
+      case 802: {
+        const { data, error } = await supabase.rpc("get_weekly_income");
         if (error) throw error;
         result = data;
         break;

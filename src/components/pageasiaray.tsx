@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import logoImg from '../../assets/logo.asiaarys.png';
 
 export const LoginScreen: React.FC = () => {
@@ -8,12 +8,14 @@ export const LoginScreen: React.FC = () => {
   
   const location = useLocation();
   const navigate = useNavigate();
+  const { inviteCode } = useParams();
   const currentView = location.pathname === '/login' ? 'login' : 'cadastro';
   
   const [phone, setPhone] = useState<string>('');
   const [senha, setSenha] = useState<string>('');
   const [convite, setConvite] = useState<string>('');
   const [verificacao, setVerificacao] = useState<string>('');
+  const [showSenha, setShowSenha] = useState<boolean>(false);
   
   const [captchaText, setCaptchaText] = useState<string>('FyPAE');
 
@@ -30,6 +32,13 @@ export const LoginScreen: React.FC = () => {
     generateCaptcha();
   }, [currentView]);
 
+  // Auto-preenche código de convite se vier pela URL /reg/smid/:inviteCode
+  useEffect(() => {
+    if (inviteCode) {
+      setConvite(inviteCode);
+    }
+  }, [inviteCode]);
+
   const handleSubmitCadastro = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -37,14 +46,37 @@ export const LoginScreen: React.FC = () => {
       addToast('Por favor, informe seu número de telefone.', 'warning');
       return;
     }
+
+    // Validação: telefone deve ter pelo menos 9 dígitos
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.length < 9) {
+      addToast('Número de telefone inválido. Deve ter pelo menos 9 dígitos.', 'warning');
+      return;
+    }
+
     if (!senha) {
       addToast('Por favor, digite sua senha de segurança.', 'warning');
       return;
     }
+
+    // Validação CRÍTICA: Supabase exige senha com mínimo 6 caracteres
+    if (senha.length < 6) {
+      addToast('A senha deve ter pelo menos 6 caracteres.', 'warning');
+      return;
+    }
+
     if (!convite) {
       addToast('Por favor, informe o código de convite obrigatório.', 'warning');
       return;
     }
+
+    // Validação do formato do código de convite: AS + 5 dígitos + S (ex: AS09030S)
+    const invitePattern = /^AS\d{5}S$/;
+    if (!invitePattern.test(convite.trim())) {
+      addToast('Código de convite inválido. Formato esperado: AS + 5 números + S (ex: AS09030S).', 'error');
+      return;
+    }
+
     if (verificacao.toLowerCase() !== captchaText.toLowerCase()) {
       addToast('Código de verificação incorreto.', 'error');
       generateCaptcha();
@@ -56,7 +88,7 @@ export const LoginScreen: React.FC = () => {
 
     (async () => {
       try {
-        await registerUser(phone, senha, convite);
+        await registerUser(cleanPhone, senha, convite.trim());
       } catch (err) {
         // O próprio registerUser já mostra toast de erro com a mensagem do banco
       } finally {
@@ -83,7 +115,6 @@ export const LoginScreen: React.FC = () => {
       try {
         const ok = await login(phone, senha);
         // O próprio login já trata a exibição de toasts de erro ou sucesso baseados no banco/Supabase.
-        // O login do Supabase Auth retorna erro "Invalid login credentials" se as credenciais forem inválidas.
       } catch (err) {
         // Tratado no AppContext
       } finally {
@@ -128,16 +159,39 @@ export const LoginScreen: React.FC = () => {
 
               {/* Senha */}
               <div className="border-b border-gray-200">
-                <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Senha</div>
-                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
+                <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Senha <span className="text-gray-400 font-normal">(mín. 6 caracteres)</span></div>
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 flex items-center gap-1">
                   <input 
                     id="cadastro-senha-field"
-                    type="password" 
-                    placeholder="Senha"
+                    type={showSenha ? 'text' : 'password'}
+                    placeholder="Mínimo 6 caracteres"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
-                    className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans"
+                    minLength={6}
+                    className="bg-transparent border-none outline-none flex-1 text-neutral-800 text-[12px] font-sans"
                   />
+                  <button
+                    id="toggle-senha-visibility-cadastro"
+                    type="button"
+                    onClick={() => setShowSenha(prev => !prev)}
+                    className="shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                    aria-label={showSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                  >
+                    {showSenha ? (
+                      /* Eye-off icon */
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                      </svg>
+                    ) : (
+                      /* Eye icon */
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -148,7 +202,7 @@ export const LoginScreen: React.FC = () => {
                   <input 
                     id="cadastro-invitation-field"
                     type="text" 
-                    placeholder="Código do convite"
+                    placeholder="Ex: AS09030S"
                     value={convite}
                     onChange={(e) => setConvite(e.target.value)}
                     className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans"
@@ -243,15 +297,37 @@ export const LoginScreen: React.FC = () => {
               {/* Senha */}
               <div>
                 <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Senha</div>
-                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 flex items-center gap-1">
                   <input 
                     id="login-senha-field"
-                    type="password" 
+                    type={showSenha ? 'text' : 'password'}
                     placeholder="Sua senha de acesso"
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
-                    className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans"
+                    className="bg-transparent border-none outline-none flex-1 text-neutral-800 text-[12px] font-sans"
                   />
+                  <button
+                    id="toggle-senha-visibility-login"
+                    type="button"
+                    onClick={() => setShowSenha(prev => !prev)}
+                    className="shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                    aria-label={showSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                  >
+                    {showSenha ? (
+                      /* Eye-off icon */
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                      </svg>
+                    ) : (
+                      /* Eye icon */
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>

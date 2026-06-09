@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
-import { LoginScreen } from './components/LoginScreen';
+import { LoginScreen } from './components/pageasiaray';
 import { HomeTab } from './components/HomeTab';
 import { WSTab } from './components/WSTab';
+import { PurchaseDetailsPage } from './components/PurchaseDetailsPage';
 import { TaskTab } from './components/TaskTab';
 import { GravarTab } from './components/GravarTab';
 import { MeuTab } from './components/MeuTab';
@@ -14,7 +15,7 @@ import { SessionExpiredModal } from './components/SessionExpiredModal';
 import { Home, Shield, Sparkles, ClipboardCheck, User, Headphones } from 'lucide-react';
 import supportIcon from '../assets/icons8-support-fluente64.png';
 import { TaskType } from './types';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 
 function MainAppLayout() {
   const { isLoggedIn, user, stats, showConfirm, isFullScreenActive, isSessionExpired, sessionExpiredMessage } = useApp();
@@ -30,9 +31,11 @@ function MainAppLayout() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const { inviteCode } = useParams();
+  const [convite, setConvite] = useState('');
 
   const getActiveTabFromPath = (pathname: string): string => {
-    if (pathname === '/ws') return 'ws';
+    if (pathname.startsWith('/ws')) return 'ws';
     if (pathname === '/tarefa') return 'tarefa';
     if (pathname === '/gravar') return 'gravar';
     if (pathname === '/meu') return 'meu';
@@ -80,6 +83,13 @@ function MainAppLayout() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [supportPos]);
+
+  // Auto-fill invitation code from URL param if present
+  useEffect(() => {
+    if (inviteCode) {
+      setConvite(inviteCode);
+    }
+  }, [inviteCode]);
 
   // Global mouse move and up handlers when dragging
   useEffect(() => {
@@ -244,7 +254,9 @@ function MainAppLayout() {
       <Routes>
         <Route path="/login" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/" replace />} />
         <Route path="/register" element={!isLoggedIn ? <LoginScreen /> : <Navigate to="/" replace />} />
+        <Route path="/reg/smid/:inviteCode" element={<LoginScreen />} />
         <Route path="/retirar" element={isLoggedIn ? <RetirarPage /> : <Navigate to="/login" replace />} />
+        <Route path="/ws/compra/:tierLevel" element={isLoggedIn ? <PurchaseDetailsPage /> : <Navigate to="/login" replace />} />
         <Route 
           path="/*" 
           element={

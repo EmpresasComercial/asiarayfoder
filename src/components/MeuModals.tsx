@@ -1036,65 +1036,125 @@ export const RulesModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   );
 };
 
-// 7. DECLARAÇÃO DIÁRIA MODAL (Beautiful native financial performance charts)
+// 7. DECLARAÇÃO DIÁRIA MODAL (Real data from get_weekly_income via gateway op 802)
 export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const { stats } = useApp();
 
-  // Create an elegant simulated chart using responsive SVGs
-  const dataPoints = [
-    { label: 'Seg', val: stats.incomeToday * 0.4 },
-    { label: 'Ter', val: stats.incomeToday * 0.65 },
-    { label: 'Qua', val: stats.incomeToday * 1.15 },
-    { label: 'Qui', val: stats.incomeToday * 0.9 },
-    { label: 'Sex', val: stats.incomeToday * 1.45 },
-    { label: 'Sáb', val: stats.incomeToday * 2.1 },
-    { label: 'Dom', val: stats.incomeToday }
-  ];
+  type WeekDay = { dia: string; day_date: string; total: number };
+  const [weekData, setWeekData] = useState<WeekDay[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const maxVal = Math.max(...dataPoints.map(d => d.val)) || 1000;
+  useEffect(() => {
+    if (!isOpen) return;
+    setLoading(true);
+    getAccessToken().then(token => {
+      if (!token) return;
+      return fetch(GATEWAY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ op: 802, data: {} })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && Array.isArray(data.result)) {
+            setWeekData(data.result.map((r: any) => ({
+              dia: r.dia,
+              day_date: r.day_date,
+              total: Number(r.total) || 0
+            })));
+          }
+        })
+        .catch(err => console.error('DailyDeclaration fetch error:', err));
+    }).finally(() => setLoading(false));
+  }, [isOpen]);
+
+  // Use real week data or fallback to 7 zeros while loading
+  const dataPoints: WeekDay[] = weekData.length === 7
+    ? weekData
+    : ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'].map(d => ({ dia: d, day_date: '', total: 0 }));
+
+  const maxVal = Math.max(...dataPoints.map(d => d.total), 1);
+
+  // Real stats from context
+  const previsaoAcumulada = stats.incomeThisMonth * 1.25;
+  const mediaDiaria = weekData.length
+    ? weekData.reduce((s, d) => s + d.total, 0) / 7
+    : stats.incomeToday;
+  const totalSemana = weekData.reduce((s, d) => s + d.total, 0);
 
   return (
     <ModalBase isOpen={isOpen} onClose={onClose} title="Declaração Diária">
       <div className="space-y-4">
+        {/* Previsão Acumulada */}
         <div className="text-center bg-neutral-50 p-4 border border-neutral-100 rounded-2xl relative overflow-hidden">
           <span className="text-[10px] uppercase font-bold text-neutral-400">Previsão Acumulada</span>
-          <h3 className="text-xl font-mono font-extrabold text-green-600 mt-1">KZ {(stats.incomeThisMonth * 1.25).toLocaleString('pt-AO', { minimumFractionDigits: 2 })}</h3>
-          <p className="text-[10px] text-neutral-550 mt-1">Simulação matemática de rendimento semanal residual baseada na sua associação.</p>
+          <h3 className="text-xl font-mono font-extrabold text-green-600 mt-1">
+            KZ {previsaoAcumulada.toLocaleString('pt-AO', { minimumFractionDigits: 2 })}
+          </h3>
+          <p className="text-[10px] text-neutral-500 mt-1">Simulação matemática de rendimento semanal residual baseada na sua associação.</p>
         </div>
 
-        {/* Responsive Custom SVG financial chart */}
+        {/* Gráfico de barras — dados reais dos últimos 7 dias */}
         <div className="space-y-1.5 p-2 bg-neutral-50 rounded-xl border border-neutral-150">
-          <h4 className="text-[10px] font-bold text-neutral-400 uppercase tracking-wide px-1">Curva de Ganhos Semanais (KZ)</h4>
-          
+          <div className="flex justify-between items-center px-1">
+            <h4 className="text-[10px] font-bold text-neutral-400 uppercase tracking-wide">Curva de Ganhos Semanais (KZ)</h4>
+            {loading && <span className="text-[9px] text-green-500 animate-pulse">A carregar...</span>}
+          </div>
+
           <div className="flex justify-between items-end h-32 pt-4 px-1" id="svg-graph-box">
             {dataPoints.map((dp, idx) => {
-              const heightPct = Math.max(10, Math.min(100, (dp.val / maxVal) * 100));
+              const heightPct = Math.max(4, Math.min(100, (dp.total / maxVal) * 100));
+              const isToday = dp.day_date === new Date().toISOString().split('T')[0];
               return (
                 <div key={idx} className="flex flex-col items-center flex-1 space-y-1.5 h-full justify-end group">
-                  <div className="text-[8px] font-mono text-green-700 bg-green-50 px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity translate-y-2">
-                    {Math.round(dp.val)}
+                  {/* Tooltip com valor real */}
+                  <div className="text-[8px] font-mono text-green-700 bg-green-50 px-1 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                    KZ {Math.round(dp.total).toLocaleString()}
                   </div>
-                  <div 
+                  <div
                     style={{ height: `${heightPct}%` }}
-                    className="w-5 bg-gradient-to-t from-[#0d7377] to-[#14ffec] rounded-t-sm transition-all duration-500 ease-out cursor-pointer hover:bg-neutral-800"
-                  ></div>
-                  <span className="text-[10px] font-bold text-neutral-400">{dp.label}</span>
+                    className={`w-5 rounded-t-sm transition-all duration-500 ease-out cursor-pointer
+                      ${isToday
+                        ? 'bg-gradient-to-t from-green-600 to-emerald-400 ring-1 ring-green-400'
+                        : 'bg-gradient-to-t from-[#0d7377] to-[#14ffec] hover:opacity-80'
+                      }`}
+                  />
+                  <span className={`text-[10px] font-bold ${isToday ? 'text-green-600' : 'text-neutral-400'}`}>
+                    {dp.dia}
+                  </span>
                 </div>
               );
             })}
           </div>
         </div>
 
+        {/* Resumo de operação */}
         <div className="space-y-2 text-xs text-neutral-600 leading-normal">
           <p className="font-bold text-neutral-700">📌 Resumo de Operação:</p>
           <div className="grid grid-cols-2 gap-2 text-center text-[11px]">
             <div className="bg-neutral-50 p-2 rounded-xl">
-              <span className="text-[9px] text-neutral-400 block uppercase">Média diária</span>
-              <strong className="font-mono text-neutral-700 text-xs">KZ {(stats.incomeToday || 1150).toLocaleString()}</strong>
+              <span className="text-[9px] text-neutral-400 block uppercase">Média Diária</span>
+              <strong className="font-mono text-neutral-700 text-xs">
+                KZ {Math.round(mediaDiaria).toLocaleString()}
+              </strong>
             </div>
             <div className="bg-neutral-50 p-2 rounded-xl">
-              <span className="text-[9px] text-neutral-400 block uppercase">Média mensal</span>
-              <strong className="font-mono text-neutral-700 text-xs">KZ {(stats.incomeThisMonth || 76620).toLocaleString()}</strong>
+              <span className="text-[9px] text-neutral-400 block uppercase">Total Semana</span>
+              <strong className="font-mono text-neutral-700 text-xs">
+                KZ {Math.round(totalSemana).toLocaleString()}
+              </strong>
+            </div>
+            <div className="bg-neutral-50 p-2 rounded-xl">
+              <span className="text-[9px] text-neutral-400 block uppercase">Este Mês</span>
+              <strong className="font-mono text-neutral-700 text-xs">
+                KZ {Math.round(stats.incomeThisMonth).toLocaleString()}
+              </strong>
+            </div>
+            <div className="bg-neutral-50 p-2 rounded-xl">
+              <span className="text-[9px] text-neutral-400 block uppercase">Total Acumulado</span>
+              <strong className="font-mono text-neutral-700 text-xs">
+                KZ {Math.round(stats.incomeTotal).toLocaleString()}
+              </strong>
             </div>
           </div>
         </div>
