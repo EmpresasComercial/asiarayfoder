@@ -118,7 +118,7 @@ function MainAppLayout() {
     };
   }, [isDragging]);
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLImageElement>) => {
     const btn = e.currentTarget;
     const parent = btn.parentElement;
     if (parent) {
@@ -135,7 +135,7 @@ function MainAppLayout() {
     setIsDragging(true);
   };
 
-  const handleTouchStart = (e: React.TouchEvent<HTMLButtonElement>) => {
+  const handleTouchStart = (e: React.TouchEvent<HTMLImageElement>) => {
     const touch = e.touches[0];
     const btn = e.currentTarget;
     const parent = btn.parentElement;

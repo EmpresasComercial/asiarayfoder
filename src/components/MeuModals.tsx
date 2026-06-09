@@ -9,7 +9,7 @@ import inviteBannerImg from '../../assets/invite_banner.png';
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  title?: string;
 }
 
 // 1. General Modal Wrapper — Full Screen

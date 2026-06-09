@@ -38,7 +38,7 @@ interface AppContextProps {
   tasks: Task[];
   logs: LogRecord[];
   team: TeamReferral[];
-  login: (phone: string, pin: string) => boolean;
+  login: (phone: string, pin: string) => Promise<boolean>;
   logout: () => void;
   registerUser: (phone: string, pin: string, inviteCode: string) => Promise<void>;
   refreshUserProfile: () => Promise<void>;
@@ -48,7 +48,7 @@ interface AppContextProps {
   addRecharge: (amount: number, txId: string, proofFileName?: string) => void;
   addWithdrawal: (amount: number) => { success: boolean; error?: string };
   convertUsdToKz: (usdAmount: number) => Promise<{ success: boolean; message: string }>;
-  updateBankInfo: (bankName: string, bankAccount: string, holderName: string) => void;
+  updateBankInfo: (bankName: string, bankAccount: string, holderName: string) => Promise<{ success: boolean; message: string }>;
   upgradeMembership: (level: string, cost: number, productId?: string) => Promise<boolean>;
   increaseCreditScore: (points: number) => void;
   updateUserPaymentPin: (newPin: string, oldPin?: string) => Promise<{ success: boolean; message: string }>;
