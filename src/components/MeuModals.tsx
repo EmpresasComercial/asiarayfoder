@@ -639,13 +639,14 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
 
 // 4. INVITE MODAL ("Convidar amigos")
 export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
-  const { user, setIsFullScreenActive } = useApp();
+  const { user, setIsFullScreenActive, showLoading, hideLoading } = useApp();
   const [copied, setCopied] = useState(false);
   const [domain, setDomain] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (isOpen) {
       setIsFullScreenActive(true);
+      showLoading('Carregando dados de convite...');
       getAccessToken().then(token => {
         if (!token) return;
         return fetch(GATEWAY_URL, {
@@ -658,6 +659,8 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               setDomain(data.result.dominio_publicidad);
             }
           }).catch(console.error);
+      }).finally(() => {
+        hideLoading();
       });
     }
     return () => {
@@ -744,7 +747,7 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
 // 5. TEAM REPORT MODAL ("relatório da equipa")
 export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
-  const { team, setIsFullScreenActive } = useApp();
+  const { team, setIsFullScreenActive, showLoading, hideLoading } = useApp();
   const [activeTab, setActiveTab] = useState<'nivel_um' | 'secundario' | 'nivel_tres'>('nivel_um');
   const [teamData, setTeamData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -752,6 +755,7 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   React.useEffect(() => {
     if (isOpen) {
       setIsFullScreenActive(true);
+      showLoading('Carregando relatório da equipa...');
       setLoading(true);
       getAccessToken().then(token => {
         if (!token) return;
@@ -765,7 +769,10 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               setTeamData(data.result || {});
             }
           });
-      }).finally(() => setLoading(false));
+      }).catch(console.error).finally(() => {
+        setLoading(false);
+        hideLoading();
+      });
     }
     return () => {
       setIsFullScreenActive(false);
@@ -1038,7 +1045,7 @@ export const RulesModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
 // 7. DECLARAÇÃO DIÁRIA MODAL (Real data from get_weekly_income via gateway op 802)
 export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
-  const { stats } = useApp();
+  const { stats, showLoading, hideLoading } = useApp();
 
   type WeekDay = { dia: string; day_date: string; total: number };
   const [weekData, setWeekData] = useState<WeekDay[]>([]);
@@ -1046,6 +1053,7 @@ export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose })
 
   useEffect(() => {
     if (!isOpen) return;
+    showLoading('Carregando declaração diária...');
     setLoading(true);
     getAccessToken().then(token => {
       if (!token) return;
@@ -1065,7 +1073,10 @@ export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose })
           }
         })
         .catch(err => console.error('DailyDeclaration fetch error:', err));
-    }).finally(() => setLoading(false));
+    }).finally(() => {
+      setLoading(false);
+      hideLoading();
+    });
   }, [isOpen]);
 
   // Use real week data or fallback to 7 zeros while loading
@@ -1170,7 +1181,7 @@ interface ListModalProps extends ModalProps {
 
 export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, type }) => {
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
-  const { logs: contextLogs, user, setIsFullScreenActive, fetchWithdrawalRecords } = useApp();
+  const { logs: contextLogs, user, setIsFullScreenActive, fetchWithdrawalRecords, showLoading, hideLoading } = useApp();
   const [withdrawalLogs, setWithdrawalLogs] = useState<LogRecord[]>([]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -1194,6 +1205,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
   // Fetch completed tasks when modal opens for receita
   useEffect(() => {
     if (isOpen && type === 'receita') {
+      showLoading('Carregando histórico de receitas...');
       setLoading(true);
       getAccessToken().then(token => {
         if (!token) return;
@@ -1207,7 +1219,10 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
               setCompletedTasks(data.result || []);
             }
           })
-      }).finally(() => setLoading(false));
+      }).catch(console.error).finally(() => {
+        setLoading(false);
+        hideLoading();
+      });
     }
   }, [isOpen, type]);
 

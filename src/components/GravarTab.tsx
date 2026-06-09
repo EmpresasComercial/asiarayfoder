@@ -11,7 +11,7 @@ import completedIcon from '../../assets/task-completed-64.png';
 import failedIcon from '../../assets/icon-task-failed.png';
 
 export const GravarTab: React.FC = () => {
-  const { user, isSessionExpired } = useApp();
+  const { user, isSessionExpired, showLoading, hideLoading } = useApp();
   const [activeSegment, setActiveSegment] = useState<TaskStatus>('andamento');
   
   // Track expanded task detail blocks
@@ -27,6 +27,7 @@ export const GravarTab: React.FC = () => {
   // Load Active Tasks (Transformacao) via OP 604
   const loadAgdTasks = async () => {
     if (isSessionExpired) return;
+    showLoading('Carregando tarefas de transformação...');
     try {
       const token = await getAccessToken();
       if (!token) return;
@@ -43,12 +44,15 @@ export const GravarTab: React.FC = () => {
       if (res.success) setAgdTasks(res.result || []);
     } catch (err) {
       console.error(err);
+    } finally {
+      hideLoading();
     }
   };
 
   // Load Completed Tasks (Terminado) via OP 605
   const loadCompletedTasks = async () => {
     if (isSessionExpired) return;
+    showLoading('Carregando tarefas concluídas...');
     try {
       const token = await getAccessToken();
       if (!token) return;
@@ -65,12 +69,15 @@ export const GravarTab: React.FC = () => {
       if (res.success) setCompletedTasks(res.result || []);
     } catch (err) {
       console.error(err);
+    } finally {
+      hideLoading();
     }
   };
 
   // Load Failed Tasks via OP 606
   const loadFailedTasks = async () => {
     if (isSessionExpired) return;
+    showLoading('Carregando tarefas falhadas...');
     try {
       const token = await getAccessToken();
       if (!token) return;
@@ -84,6 +91,8 @@ export const GravarTab: React.FC = () => {
       if (res.success) setFailedTasks(res.result || []);
     } catch (err) {
       console.error(err);
+    } finally {
+      hideLoading();
     }
   };
 
@@ -120,6 +129,7 @@ export const GravarTab: React.FC = () => {
       return;
     }
     setSubmitting(true);
+    showLoading('Enviando evidências...');
     try {
       const token = await getAccessToken();
       if (!token) return;
@@ -141,8 +151,10 @@ export const GravarTab: React.FC = () => {
     } catch (err) {
       console.error(err);
       window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Erro na conexão', type: 'error' } }));
+    } finally {
+      hideLoading();
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   const handleOpenLink = (link: string) => {

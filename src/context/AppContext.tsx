@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Task, UserProfile, FinancialStats, LogRecord, TeamReferral, TaskType } from '../types';
 import { supabase, getAccessToken, GATEWAY_URL } from '../lib/supabase';
 
@@ -145,15 +145,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [toasts, setToasts] = useState<ToastConfig[]>([]);
   const [isLoading, setIsLoadingState] = useState<boolean>(false);
   const [loadingMessage, setLoadingMessage] = useState<string>('Carregando...');
+  const loadingCountRef = useRef<number>(0);
   const [isFullScreenActive, setIsFullScreenActive] = useState<boolean>(false);
 
   const showLoading = (message: string = 'Carregando...') => {
     setLoadingMessage(message);
+    loadingCountRef.current += 1;
     setIsLoadingState(true);
   };
 
   const hideLoading = () => {
-    setIsLoadingState(false);
+    loadingCountRef.current = Math.max(0, loadingCountRef.current - 1);
+    if (loadingCountRef.current === 0) {
+      setIsLoadingState(false);
+    }
   };
 
   const addToast = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', duration: number = 4000) => {
@@ -240,38 +245,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
    * 2. If gateway responds 401 + force_logout → triggers session expired modal and returns null
    * 3. Otherwise returns the parsed JSON body
    */
-  const gatewayFetch = async (op: number, data: Record<string, unknown> = {}): Promise<any | null> => {
+  const gatewayFetch = async (op: number, data: Record<string, unknown> = {}, loadingMessage: string = 'Carregando...'): Promise<any | null> => {
     // Guard: session already expired — block ALL gateway calls
     if (sessionExpiredRef.current) return null;
 
-    const token = await getAccessToken();
-    if (!token) return null;
+    showLoading(loadingMessage);
+    try {
+      const token = await getAccessToken();
+      if (!token) return null;
 
-    const resp = await fetch(GATEWAY_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ op, data })
-    });
+      const resp = await fetch(GATEWAY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ op, data })
+      });
 
-    const resData = await resp.json().catch(() => ({}));
+      const resData = await resp.json().catch(() => ({}));
 
-    // Intercept 401 with force_logout flag from gateway
-    if (resp.status === 401 && resData?.force_logout) {
-      const msg = resData.error || 'A sua sessão expirou por segurança. Por favor, faça login novamente.';
-      window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: msg } }));
-      return null;
+      // Intercept 401 with force_logout flag from gateway
+      if (resp.status === 401 && resData?.force_logout) {
+        const msg = resData.error || 'A sua sessão expirou por segurança. Por favor, faça login novamente.';
+        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: msg } }));
+        return null;
+      }
+
+      // Intercept any 401 (even without explicit force_logout)
+      if (resp.status === 401) {
+        window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: resData?.error || 'Sessão inválida. Faça login novamente.' } }));
+        return null;
+      }
+
+      return { resp, resData };
+    } finally {
+      hideLoading();
     }
-
-    // Intercept any 401 (even without explicit force_logout)
-    if (resp.status === 401) {
-      window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: resData?.error || 'Sessão inválida. Faça login novamente.' } }));
-      return null;
-    }
-
-    return { resp, resData };
   };
 
   // Try loading from localStorage
@@ -965,25 +975,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateUserPaymentPin = async (newPin: string, oldPin?: string): Promise<{ success: boolean; message: string }> => {
-    const gw = await gatewayFetch(415, {
-      new_pin: newPin,
-      old_pin: oldPin || null
-    });
-    if (!gw) {
-      throw new Error('Sessão expirada. Faça login novamente.');
+    showLoading('Validando PIN...');
+    try {
+      const gw = await gatewayFetch(415, {
+        new_pin: newPin,
+        old_pin: oldPin || null
+      });
+      if (!gw) {
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+
+      const { resp, resData: res } = gw;
+      if (!resp.ok || res?.success === false) {
+        return { success: false, message: res?.error || 'Erro ao gravar PIN de pagamento.' };
+      }
+
+      setUser(prev => ({
+        ...prev,
+        paymentPin: newPin
+      }));
+
+      return { success: true, message: res?.result?.message || 'PIN de pagamento gravado com sucesso.' };
+    } finally {
+      hideLoading();
     }
-
-    const { resp, resData: res } = gw;
-    if (!resp.ok || res?.success === false) {
-      return { success: false, message: res?.error || 'Erro ao gravar PIN de pagamento.' };
-    }
-
-    setUser(prev => ({
-      ...prev,
-      paymentPin: newPin
-    }));
-
-    return { success: true, message: res?.result?.message || 'PIN de pagamento gravado com sucesso.' };
   };
 
   const resetAll = () => {

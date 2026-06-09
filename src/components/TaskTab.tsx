@@ -110,7 +110,7 @@ function calcLucroRestante(item: ShopItem): number {
 }
 
 export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedCategory, setActiveTab }) => {
-  const { user, isSessionExpired } = useApp();
+  const { user, isSessionExpired, showLoading, hideLoading } = useApp();
 
   // Shop items fetched from the database (op 601)
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
@@ -122,9 +122,10 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
 
     const loadShopItems = async () => {
       setLoading(true);
+      showLoading('Carregando itens da loja...');
       try {
         const token = await getAccessToken();
-        if (!token) { setLoading(false); return; }
+        if (!token) { setLoading(false); hideLoading(); return; }
 
         const resp = await fetch(GATEWAY_URL, {
           method: 'POST',
@@ -152,8 +153,10 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
         }
       } catch (err) {
         console.error('Error loading shop items:', err);
+      } finally {
+        hideLoading();
+        setLoading(false);
       }
-      setLoading(false);
     };
     loadShopItems();
   }, [isSessionExpired]);
@@ -163,10 +166,11 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
   const handleClaimTask = async (shopId: number) => {
     if (isSessionExpired || claimingId) return;
     setClaimingId(shopId);
+    showLoading('Requisitando tarefa...');
     
     try {
       const token = await getAccessToken();
-      if (!token) { setClaimingId(null); return; }
+      if (!token) { hideLoading(); setClaimingId(null); return; }
 
       const resp = await fetch(GATEWAY_URL, {
         method: 'POST',
@@ -194,8 +198,10 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
     } catch (err) {
       console.error(err);
       window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Erro na conexão', type: 'error' } }));
+    } finally {
+      hideLoading();
+      setClaimingId(null);
     }
-    setClaimingId(null);
   };
 
   // All 3 tabs show the same shop data

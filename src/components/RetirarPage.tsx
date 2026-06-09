@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 
 export const RetirarPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, stats, addWithdrawal, addToast, setIsFullScreenActive } = useApp();
+  const { user, stats, addWithdrawal, addToast, setIsFullScreenActive, showLoading, hideLoading } = useApp();
 
   // Mode state: 'amount' | 'tips' | 'pin'
   const [step, setStep] = useState<'amount' | 'tips' | 'pin'>('amount');
@@ -76,18 +76,20 @@ export const RetirarPage: React.FC = () => {
   };
 
   const validatePin = (finalPin: string) => {
-    // Standard mock validation: any 6-digit pin is accepted for user convenience, or we can check against a dummy '123456'
-    // Let's make it show a loading success and perform withdrawal.
-    addToast('Verificando senha de pagamento...', 'info');
-    
+    showLoading('Verificando senha de pagamento...');
+
     setTimeout(() => {
-      const res = addWithdrawal(amount);
-      if (res.success) {
-        addToast(`Retirada de KZ ${amount.toLocaleString('pt-AO')} solicitada com sucesso!`, 'success');
-        navigate('/meu');
-      } else {
-        addToast(res.error || 'Erro ao processar retirada.', 'error');
-        setPin('');
+      try {
+        const res = addWithdrawal(amount);
+        if (res.success) {
+          addToast(`Retirada de KZ ${amount.toLocaleString('pt-AO')} solicitada com sucesso!`, 'success');
+          navigate('/meu');
+        } else {
+          addToast(res.error || 'Erro ao processar retirada.', 'error');
+          setPin('');
+        }
+      } finally {
+        hideLoading();
       }
     }, 1500);
   };

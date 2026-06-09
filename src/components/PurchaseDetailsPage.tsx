@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { GATEWAY_URL, getAccessToken } from '../lib/supabase';
+import { gatewayCall } from '../lib/supabase';
 
 const formatDate = (date: Date) => {
   return date.toLocaleDateString('pt-AO', {
@@ -12,7 +12,7 @@ const formatDate = (date: Date) => {
 };
 
 export const PurchaseDetailsPage: React.FC = () => {
-  const { upgradeMembership, setIsFullScreenActive, isSessionExpired } = useApp();
+  const { refreshUserProfile, addToast, setIsFullScreenActive, showLoading, hideLoading, isSessionExpired } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
   const { tierLevel } = useParams<{ tierLevel: string }>();
@@ -32,39 +32,9 @@ export const PurchaseDetailsPage: React.FC = () => {
 
     const loadProducts = async () => {
       setLoading(true);
+      showLoading('Carregando dados do produto...');
       try {
-        const token = await getAccessToken();
-        if (!token) {
-          setError('Não foi possível obter autorização.');
-          setLoading(false);
-          return;
-        }
-
-        const resp = await fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ op: 512, data: {} })
-        });
-
-        if (resp.status === 401) {
-          const errData = await resp.json().catch(() => ({}));
-          const msg = errData?.error || 'Sessão inválida. Faça login novamente.';
-          window.dispatchEvent(new CustomEvent('force-logout', { detail: { message: msg } }));
-          setError(msg);
-          setLoading(false);
-          return;
-        }
-
-        if (!resp.ok) {
-          setError('Erro ao carregar os detalhes do produto.');
-          setLoading(false);
-          return;
-        }
-
-        const res = await resp.json();
+        const res = await gatewayCall(512);
         if (!res?.success || !Array.isArray(res.result)) {
           setError('Erro ao carregar os detalhes do produto.');
           setLoading(false);
@@ -90,6 +60,7 @@ export const PurchaseDetailsPage: React.FC = () => {
         setError('Erro ao carregar os detalhes do produto.');
       } finally {
         setLoading(false);
+        hideLoading();
       }
     };
 
@@ -101,18 +72,28 @@ export const PurchaseDetailsPage: React.FC = () => {
   };
 
   const handleFinalizePurchase = async () => {
-    if (!tier) return;
+    if (!tier || !tier.dbId) {
+      addToast('Não foi possível identificar o produto para compra.', 'error');
+      return;
+    }
     setProcessing(true);
 
-    const success = await upgradeMembership(tier.level, tier.price, tier.dbId);
-
-    setProcessing(false);
-
-    if (success) {
-      alert(`Compra concluída: ${tier.level} ativado.`);
-      navigate('/ws');
-    } else {
-      alert('Não foi possível finalizar a compra. Tente novamente ou contate o suporte.');
+    try {
+      showLoading('Finalizando compra...');
+      const res = await gatewayCall(511, { product_id: tier.dbId });
+      if (res?.success && res.result?.success) {
+        addToast(res.result?.message || 'Compra concluída com sucesso!', 'success');
+        await refreshUserProfile();
+        navigate('/ws');
+      } else {
+        addToast(res?.error || res?.result?.message || 'Não foi possível finalizar a compra.', 'error');
+      }
+    } catch (err) {
+      console.error('Erro ao finalizar compra via gateway:', err);
+      addToast('Erro ao processar a compra. Tente novamente ou contate o suporte.', 'error');
+    } finally {
+      hideLoading();
+      setProcessing(false);
     }
   };
 
@@ -196,8 +177,9 @@ export const PurchaseDetailsPage: React.FC = () => {
           type="button"
           onClick={handleFinalizePurchase}
           disabled={processing}
-          className="w-full rounded-sm bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2 uppercase tracking-[0.08em] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full rounded-sm bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2 uppercase tracking-[0.08em] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
+          {processing && <span className="h-3.5 w-3.5 rounded-full border-2 border-white/80 border-t-transparent animate-spin" />}
           {processing ? 'Finalizando compra...' : 'Finalizar compra'}
         </button>
       </div>
