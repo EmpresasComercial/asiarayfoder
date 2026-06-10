@@ -11,7 +11,7 @@ import completedIcon from '../../assets/task-completed-64.png';
 import failedIcon from '../../assets/icon-task-failed.png';
 
 export const GravarTab: React.FC = () => {
-  const { user, isSessionExpired, showLoading, hideLoading } = useApp();
+  const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
   const [activeSegment, setActiveSegment] = useState<TaskStatus>('andamento');
   
   // Track expanded task detail blocks
@@ -27,6 +27,7 @@ export const GravarTab: React.FC = () => {
   // Load Active Tasks (Transformacao) via OP 604
   const loadAgdTasks = async () => {
     if (isSessionExpired) return;
+    if (!(await ensureInternetConnectivity())) return;
     showLoading('Carregando tarefas de transformação...');
     try {
       const token = await getAccessToken();
@@ -52,6 +53,7 @@ export const GravarTab: React.FC = () => {
   // Load Completed Tasks (Terminado) via OP 605
   const loadCompletedTasks = async () => {
     if (isSessionExpired) return;
+    if (!(await ensureInternetConnectivity())) return;
     showLoading('Carregando tarefas concluídas...');
     try {
       const token = await getAccessToken();
@@ -77,6 +79,7 @@ export const GravarTab: React.FC = () => {
   // Load Failed Tasks via OP 606
   const loadFailedTasks = async () => {
     if (isSessionExpired) return;
+    if (!(await ensureInternetConnectivity())) return;
     showLoading('Carregando tarefas falhadas...');
     try {
       const token = await getAccessToken();
@@ -128,6 +131,7 @@ export const GravarTab: React.FC = () => {
       window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Comentário é obrigatório', type: 'error' } }));
       return;
     }
+    if (!(await ensureInternetConnectivity())) return;
     setSubmitting(true);
     showLoading('Enviando evidências...');
     try {

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { Task, UserProfile, FinancialStats, LogRecord, TeamReferral, TaskType } from '../types';
-import { supabase, getAccessToken, GATEWAY_URL } from '../lib/supabase';
+import { supabase, getAccessToken, GATEWAY_URL, checkInternetConnectivity } from '../lib/supabase';
 
 const normalizeBankName = (bankName?: string) => {
   if (!bankName) return 'Banco BAI';
@@ -41,7 +41,7 @@ interface AppContextProps {
   login: (phone: string, pin: string) => Promise<boolean>;
   logout: () => void;
   registerUser: (phone: string, pin: string, inviteCode: string) => Promise<void>;
-  refreshUserProfile: () => Promise<void>;
+  refreshUserProfile: (showLoading?: boolean) => Promise<void>;
   claimTask: (taskId: string) => boolean;
 
   approvePendingTasks: () => void;
@@ -64,8 +64,10 @@ interface AppContextProps {
   setIsFullScreenActive: (active: boolean) => void;
   isLoading: boolean;
   loadingMessage?: string;
+  isOnline: boolean;
   showLoading: (message?: string) => void;
   hideLoading: () => void;
+  ensureInternetConnectivity: (showError?: boolean) => Promise<boolean>;
   fetchWithdrawalRecords: () => Promise<LogRecord[]>;
   isSessionExpired: boolean;
   setIsSessionExpired: (expired: boolean) => void;
@@ -147,6 +149,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [loadingMessage, setLoadingMessage] = useState<string>('Carregando...');
   const loadingCountRef = useRef<number>(0);
   const [isFullScreenActive, setIsFullScreenActive] = useState<boolean>(false);
+  const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   const showLoading = (message: string = 'Carregando...') => {
     setLoadingMessage(message);
@@ -181,6 +184,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const closeAlert = () => {
     setAlertConfig(null);
+  };
+
+  const ensureInternetConnectivity = async (showError: boolean = true): Promise<boolean> => {
+    const connected = await checkInternetConnectivity();
+    setIsOnline(connected);
+    if (!connected && showError) {
+      addToast('Sem conexão de internet. Verifique seus dados móveis ou WiFi e tente novamente.', 'error', 7000);
+    }
+    return connected;
   };
 
   // Intercept window.alert for absolute sandboxing safety in iframes
@@ -234,6 +246,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [sessionExpiredMessage, setSessionExpiredMessage] = useState<string>('');
   const sessionExpiredRef = React.useRef(false);
 
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      addToast('Conexão de internet restabelecida.', 'success', 4000);
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      addToast('Sem conexão de internet. Verifique WiFi ou dados móveis.', 'error', 7000);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   // Keep ref in sync with state so the helper can read it synchronously
   useEffect(() => {
     sessionExpiredRef.current = isSessionExpired;
@@ -245,11 +275,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
    * 2. If gateway responds 401 + force_logout → triggers session expired modal and returns null
    * 3. Otherwise returns the parsed JSON body
    */
-  const gatewayFetch = async (op: number, data: Record<string, unknown> = {}, loadingMessage: string = 'Carregando...'): Promise<any | null> => {
+  const gatewayFetch = async (op: number, data: Record<string, unknown> = {}, loadingMessage: string | false = 'Carregando...'): Promise<any | null> => {
     // Guard: session already expired — block ALL gateway calls
     if (sessionExpiredRef.current) return null;
 
-    showLoading(loadingMessage);
+    if (!(await ensureInternetConnectivity())) {
+      return null;
+    }
+
+    const shouldShowLoading = loadingMessage !== false && loadingMessage !== null;
+    if (shouldShowLoading) {
+      showLoading(loadingMessage as string);
+    }
     try {
       const token = await getAccessToken();
       if (!token) return null;
@@ -280,7 +317,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       return { resp, resData };
     } finally {
-      hideLoading();
+      if (shouldShowLoading) {
+        hideLoading();
+      }
     }
   };
 
@@ -370,9 +409,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // Load real-time financial stats from Database via Gateway (OP: 102)
-  const fetchFinancialStats = async () => {
+  const fetchFinancialStats = async (showLoader: boolean = false) => {
     try {
-      const gw = await gatewayFetch(102);
+      const gw = await gatewayFetch(102, {}, showLoader ? 'Carregando estatísticas...' : false);
       if (!gw) return; // session expired or no token
 
       const { resp, resData } = gw;
@@ -406,14 +445,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (!isLoggedIn || isSessionExpired) return;
 
-    refreshUserProfile();
-    fetchFinancialStats();
+    refreshUserProfile(false);
+    fetchFinancialStats(false);
     
     // Opcional: Atualiza a cada 30 segundos como fallback secundário
     const interval = setInterval(() => {
       if (sessionExpiredRef.current) return; // Stop polling when expired
-      refreshUserProfile();
-      fetchFinancialStats();
+      refreshUserProfile(false);
+      fetchFinancialStats(false);
     }, 30000);
     return () => clearInterval(interval);
   }, [isLoggedIn, isSessionExpired]);
@@ -485,6 +524,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Auth: Login real via Supabase Auth
   const login = async (phone: string, pin: string): Promise<boolean> => {
+    if (!(await ensureInternetConnectivity())) {
+      return false;
+    }
     const cleanPhone = phone.replace(/[^0-9]/g, '');
     const email = `${cleanPhone}@user.com`;
     try {
@@ -499,6 +541,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const token = data.session.access_token;
       let profileData: any = null;
       try {
+        if (!(await ensureInternetConnectivity())) {
+          return true;
+        }
         const resp = await fetch(GATEWAY_URL, {
           method: 'POST',
           headers: {
@@ -556,6 +601,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Registro real via Supabase Auth — triggers do banco fazem o resto
   const registerUser = async (phone: string, pin: string, inviteCode: string): Promise<void> => {
+    if (!(await ensureInternetConnectivity())) {
+      throw new Error('Sem conexão de internet. Verifique WiFi ou dados móveis.');
+    }
     const cleanPhone = phone.replace(/[^0-9]/g, '');
     const email = `${cleanPhone}@user.com`;
 
@@ -591,6 +639,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         // Pequeno delay para dar tempo ao trigger executar
         await new Promise(resolve => setTimeout(resolve, 1500));
+        if (!(await ensureInternetConnectivity())) {
+          return;
+        }
         const resp = await fetch(GATEWAY_URL, {
           method: 'POST',
           headers: {
@@ -870,9 +921,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Refresh user profile from backend (gateway op 101 → get_user_profile)
   // Returns: id, phone, balance, invite_code, balance_correte
-  const refreshUserProfile = async () => {
+  const refreshUserProfile = async (useLoading: boolean = true) => {
     try {
-      const gw = await gatewayFetch(101);
+      const gw = await gatewayFetch(101, {}, useLoading ? 'Carregando perfil...' : false);
       if (!gw) return; // session expired or no token
       const { resp, resData: res } = gw;
       if (!resp.ok || res?.success === false) {
@@ -1020,7 +1071,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTeam(INITIAL_REFERRALS);
   };
 
-  return <AppContext.Provider value={{ isLoggedIn, user, stats, tasks, logs, team, login, logout, registerUser, refreshUserProfile, claimTask, approvePendingTasks, addRecharge, addWithdrawal, convertUsdToKz, updateBankInfo, upgradeMembership, increaseCreditScore, updateUserPaymentPin, resetAll, fetchWithdrawalRecords, showAlert, showConfirm, alertConfig, closeAlert, toasts, addToast, removeToast, isFullScreenActive, setIsFullScreenActive, isLoading, loadingMessage, showLoading, hideLoading, isSessionExpired, setIsSessionExpired, sessionExpiredMessage, setSessionExpiredMessage }}>{children}</AppContext.Provider>;
+  return <AppContext.Provider value={{ isLoggedIn, user, stats, tasks, logs, team, login, logout, registerUser, refreshUserProfile, claimTask, approvePendingTasks, addRecharge, addWithdrawal, convertUsdToKz, updateBankInfo, upgradeMembership, increaseCreditScore, updateUserPaymentPin, resetAll, fetchWithdrawalRecords, showAlert, showConfirm, alertConfig, closeAlert, toasts, addToast, removeToast, isFullScreenActive, setIsFullScreenActive, isLoading, loadingMessage, showLoading, hideLoading, isOnline, ensureInternetConnectivity, isSessionExpired, setIsSessionExpired, sessionExpiredMessage, setSessionExpiredMessage }}>{children}</AppContext.Provider>;
 };
 
 export const useApp = () => {

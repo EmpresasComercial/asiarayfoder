@@ -110,7 +110,7 @@ function calcLucroRestante(item: ShopItem): number {
 }
 
 export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedCategory, setActiveTab }) => {
-  const { user, isSessionExpired, showLoading, hideLoading } = useApp();
+  const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
 
   // Shop items fetched from the database (op 601)
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
@@ -121,6 +121,7 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
     if (isSessionExpired) return;
 
     const loadShopItems = async () => {
+      if (!(await ensureInternetConnectivity())) { setLoading(false); return; }
       setLoading(true);
       showLoading('Carregando itens da loja...');
       try {
@@ -165,6 +166,7 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
 
   const handleClaimTask = async (shopId: number) => {
     if (isSessionExpired || claimingId) return;
+    if (!(await ensureInternetConnectivity())) { return; }
     setClaimingId(shopId);
     showLoading('Requisitando tarefa...');
     

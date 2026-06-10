@@ -31,7 +31,7 @@ const GoldCoinIcon: React.FC = () => (
 
 export const WSTab: React.FC = () => {
   const navigate = useNavigate();
-  const { user, isSessionExpired, showLoading, hideLoading } = useApp();
+  const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
 
   const [dbProducts, setDbProducts] = useState<any[]>([]);
 
@@ -39,6 +39,7 @@ export const WSTab: React.FC = () => {
     if (isSessionExpired) return; // Block data fetching when session expired
 
     const loadProducts = async () => {
+      if (!(await ensureInternetConnectivity())) return;
       showLoading('Carregando níveis WS...');
       try {
         const token = await getAccessToken();

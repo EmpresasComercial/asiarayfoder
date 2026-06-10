@@ -639,7 +639,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
 
 // 4. INVITE MODAL ("Convidar amigos")
 export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
-  const { user, setIsFullScreenActive, showLoading, hideLoading } = useApp();
+  const { user, setIsFullScreenActive, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
   const [copied, setCopied] = useState(false);
   const [domain, setDomain] = useState<string | null>(null);
 
@@ -647,27 +647,43 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     if (isOpen) {
       setIsFullScreenActive(true);
       showLoading('Carregando dados de convite...');
-      getAccessToken().then(token => {
-        if (!token) return;
-        return fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ op: 901, data: {} })
-        }).then(res => res.json())
-          .then(data => {
-            if (data.success && data.result?.dominio_publicidad) {
-              setDomain(data.result.dominio_publicidad);
-            }
-          }).catch(console.error);
-      }).finally(() => {
-        hideLoading();
-      });
+
+      const loadInviteData = async () => {
+        if (!(await ensureInternetConnectivity())) {
+          hideLoading();
+          return;
+        }
+
+        const token = await getAccessToken();
+        if (!token) {
+          hideLoading();
+          return;
+        }
+
+        try {
+          const res = await fetch(GATEWAY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ op: 901, data: {} })
+          });
+          const data = await res.json();
+          if (data.success && data.result?.dominio_publicidad) {
+            setDomain(data.result.dominio_publicidad);
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          hideLoading();
+        }
+      };
+
+      loadInviteData();
     }
     return () => {
       setIsFullScreenActive(false);
       setDomain(null);
     };
-  }, [isOpen, setIsFullScreenActive]);
+  }, [isOpen, setIsFullScreenActive, ensureInternetConnectivity, showLoading, hideLoading]);
 
   const cleanDomain = domain ? domain.replace(/\/$/, '') : '';
   const inviteUrl = domain && user?.inviteCode ? `${cleanDomain}/Public/reg/smid/${user.inviteCode}` : '';
@@ -747,7 +763,7 @@ export const InviteModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
 // 5. TEAM REPORT MODAL ("relatório da equipa")
 export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
-  const { team, setIsFullScreenActive, showLoading, hideLoading } = useApp();
+  const { team, setIsFullScreenActive, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
   const [activeTab, setActiveTab] = useState<'nivel_um' | 'secundario' | 'nivel_tres'>('nivel_um');
   const [teamData, setTeamData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -757,27 +773,45 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       setIsFullScreenActive(true);
       showLoading('Carregando relatório da equipa...');
       setLoading(true);
-      getAccessToken().then(token => {
-        if (!token) return;
-        return fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ op: 801, data: {} })
-        }).then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              setTeamData(data.result || {});
-            }
+
+      const loadTeamData = async () => {
+        if (!(await ensureInternetConnectivity())) {
+          setLoading(false);
+          hideLoading();
+          return;
+        }
+
+        const token = await getAccessToken();
+        if (!token) {
+          setLoading(false);
+          hideLoading();
+          return;
+        }
+
+        try {
+          const res = await fetch(GATEWAY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ op: 801, data: {} })
           });
-      }).catch(console.error).finally(() => {
-        setLoading(false);
-        hideLoading();
-      });
+          const data = await res.json();
+          if (data.success) {
+            setTeamData(data.result || {});
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setLoading(false);
+          hideLoading();
+        }
+      };
+
+      loadTeamData();
     }
     return () => {
       setIsFullScreenActive(false);
     };
-  }, [isOpen, setIsFullScreenActive]);
+  }, [isOpen, setIsFullScreenActive, ensureInternetConnectivity, showLoading, hideLoading]);
 
   if (!isOpen) return null;
 
@@ -1045,7 +1079,7 @@ export const RulesModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
 // 7. DECLARAÇÃO DIÁRIA MODAL (Real data from get_weekly_income via gateway op 802)
 export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
-  const { stats, showLoading, hideLoading } = useApp();
+  const { stats, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
 
   type WeekDay = { dia: string; day_date: string; total: number };
   const [weekData, setWeekData] = useState<WeekDay[]>([]);
@@ -1055,29 +1089,45 @@ export const DailyDeclarationModal: React.FC<ModalProps> = ({ isOpen, onClose })
     if (!isOpen) return;
     showLoading('Carregando declaração diária...');
     setLoading(true);
-    getAccessToken().then(token => {
-      if (!token) return;
-      return fetch(GATEWAY_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ op: 802, data: {} })
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && Array.isArray(data.result)) {
-            setWeekData(data.result.map((r: any) => ({
-              dia: r.dia,
-              day_date: r.day_date,
-              total: Number(r.total) || 0
-            })));
-          }
-        })
-        .catch(err => console.error('DailyDeclaration fetch error:', err));
-    }).finally(() => {
-      setLoading(false);
-      hideLoading();
-    });
-  }, [isOpen]);
+
+    const loadDeclaration = async () => {
+      if (!(await ensureInternetConnectivity())) {
+        setLoading(false);
+        hideLoading();
+        return;
+      }
+
+      const token = await getAccessToken();
+      if (!token) {
+        setLoading(false);
+        hideLoading();
+        return;
+      }
+
+      try {
+        const res = await fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ op: 802, data: {} })
+        });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.result)) {
+          setWeekData(data.result.map((r: any) => ({
+            dia: r.dia,
+            day_date: r.day_date,
+            total: Number(r.total) || 0
+          })));
+        }
+      } catch (err) {
+        console.error('DailyDeclaration fetch error:', err);
+      } finally {
+        setLoading(false);
+        hideLoading();
+      }
+    };
+
+    loadDeclaration();
+  }, [isOpen, ensureInternetConnectivity, showLoading, hideLoading]);
 
   // Use real week data or fallback to 7 zeros while loading
   const dataPoints: WeekDay[] = weekData.length === 7
@@ -1181,7 +1231,7 @@ interface ListModalProps extends ModalProps {
 
 export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, type }) => {
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
-  const { logs: contextLogs, user, setIsFullScreenActive, fetchWithdrawalRecords, showLoading, hideLoading } = useApp();
+  const { logs: contextLogs, user, setIsFullScreenActive, fetchWithdrawalRecords, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
   const [withdrawalLogs, setWithdrawalLogs] = useState<LogRecord[]>([]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -1207,24 +1257,42 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
     if (isOpen && type === 'receita') {
       showLoading('Carregando histórico de receitas...');
       setLoading(true);
-      getAccessToken().then(token => {
-        if (!token) return;
-        return fetch(GATEWAY_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ op: 605, data: {} })
-        }).then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              setCompletedTasks(data.result || []);
-            }
-          })
-      }).catch(console.error).finally(() => {
-        setLoading(false);
-        hideLoading();
-      });
+
+      const loadReceitaData = async () => {
+        if (!(await ensureInternetConnectivity())) {
+          setLoading(false);
+          hideLoading();
+          return;
+        }
+
+        const token = await getAccessToken();
+        if (!token) {
+          setLoading(false);
+          hideLoading();
+          return;
+        }
+
+        try {
+          const res = await fetch(GATEWAY_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ op: 605, data: {} })
+          });
+          const data = await res.json();
+          if (data.success) {
+            setCompletedTasks(data.result || []);
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setLoading(false);
+          hideLoading();
+        }
+      };
+
+      loadReceitaData();
     }
-  }, [isOpen, type]);
+  }, [isOpen, type, ensureInternetConnectivity, showLoading, hideLoading]);
 
   // Use fetched data if available, otherwise fallback to context logs
   let filtered: any[] = [];

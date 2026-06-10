@@ -15,7 +15,34 @@ export const getAccessToken = async (): Promise<string | null> => {
   return data.session?.access_token ?? null;
 };
 
+const INTERNET_CHECK_URL = 'https://clients3.google.com/generate_204';
+
+export const checkInternetConnectivity = async (timeoutMs = 4000): Promise<boolean> => {
+  if (typeof window === 'undefined') return true;
+  if (!navigator.onLine) return false;
+
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(INTERNET_CHECK_URL, {
+      method: 'GET',
+      cache: 'no-cache',
+      mode: 'no-cors',
+      signal: controller.signal
+    });
+    return response.ok || response.type === 'opaque' || response.status === 204 || response.status === 0;
+  } catch {
+    return false;
+  } finally {
+    window.clearTimeout(timeout);
+  }
+};
+
 export const gatewayCall = async (op: number, payload: any = {}) => {
+  const connected = await checkInternetConnectivity();
+  if (!connected) {
+    throw new Error('Sem conexão de internet. Verifique seus dados móveis ou WiFi.');
+  }
   const token = await getAccessToken();
   if (!token) throw new Error('Sessão inválida');
 

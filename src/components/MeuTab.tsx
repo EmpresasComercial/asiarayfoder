@@ -30,8 +30,8 @@ export const MeuTab: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch latest user profile info when the tab loads
-    refreshUserProfile();
+    // Fetch latest user profile info when the tab loads, but do not show the global spinner on the Meu page.
+    refreshUserProfile(false);
   }, []);
 
   useEffect(() => {
