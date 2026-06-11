@@ -21,11 +21,23 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showOldPin, setShowOldPin] = useState(false);
+  const [showNewPin, setShowNewPin] = useState(false);
+  const [showConfirmPin, setShowConfirmPin] = useState(false);
   
   const resetPasswordInputs = () => {
     setOldPassword('');
     setNewPassword('');
     setConfirmPassword('');
+    setShowOldPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+    setShowOldPin(false);
+    setShowNewPin(false);
+    setShowConfirmPin(false);
   };
   
   // Personal Info inputs
@@ -281,42 +293,99 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
             {/* Senha Antiga */}
             <div className="border-b border-gray-200">
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Senha Antiga</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
+              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 flex items-center gap-1">
                 <input 
-                  type="password"
+                  type={showOldPassword ? 'text' : 'password'}
                   placeholder="Senha Antiga"
                   value={oldPassword}
                   onChange={(e) => setOldPassword(e.target.value)}
-                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold"
+                  className="bg-transparent border-none outline-none flex-1 text-neutral-800 text-[12px] font-sans font-bold"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowOldPassword(prev => !prev)}
+                  className="shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                  aria-label={showOldPassword ? 'Ocultar senha antiga' : 'Mostrar senha antiga'}
+                >
+                  {showOldPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
 
             {/* Nova Senha */}
             <div className="border-b border-gray-200">
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Nova Senha</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
+              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 flex items-center gap-1">
                 <input 
-                  type="password"
+                  type={showNewPassword ? 'text' : 'password'}
                   placeholder="Nova Senha"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold"
+                  className="bg-transparent border-none outline-none flex-1 text-neutral-800 text-[12px] font-sans font-bold"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(prev => !prev)}
+                  className="shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                  aria-label={showNewPassword ? 'Ocultar nova senha' : 'Mostrar nova senha'}
+                >
+                  {showNewPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
 
             {/* Confirmar Nova Senha */}
             <div>
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Confirmar Nova Senha</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
+              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 flex items-center gap-1">
                 <input 
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Confirmar Nova Senha"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-sans font-bold"
+                  className="bg-transparent border-none outline-none flex-1 text-neutral-800 text-[12px] font-sans font-bold"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(prev => !prev)}
+                  className="shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                  aria-label={showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'}
+                >
+                  {showConfirmPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -377,50 +446,107 @@ export const MyInfoModal: React.FC<MyInfoModalProps> = ({ isOpen, onClose }) => 
             {!isCreateMode && (
               <div className="border-b border-gray-200">
                 <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Código PIN Antigo (4 dígitos)</div>
-                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
+                <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 flex items-center gap-1">
                   <input 
-                    type="password"
+                    type={showOldPin ? 'text' : 'password'}
                     inputMode="numeric"
                     pattern="\d*"
                     maxLength={4}
                     placeholder="PIN Antigo"
                     value={oldPassword}
                     onChange={(e) => setOldPassword(e.target.value.replace(/[^0-9]/g, ''))}
-                    className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
+                    className="bg-transparent border-none outline-none flex-1 text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowOldPin(prev => !prev)}
+                    className="shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                    aria-label={showOldPin ? 'Ocultar PIN antigo' : 'Mostrar PIN antigo'}
+                  >
+                    {showOldPin ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    )}
+                  </button>
                 </div>
               </div>
             )}
 
             <div className={isCreateMode ? '' : 'border-b border-gray-200'}>
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Novo PIN de 4 dígitos</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
+              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 flex items-center gap-1">
                 <input 
-                  type="password"
+                  type={showNewPin ? 'text' : 'password'}
                   inputMode="numeric"
                   pattern="\d*"
                   maxLength={4}
                   placeholder="Novo PIN"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value.replace(/[^0-9]/g, ''))}
-                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
+                  className="bg-transparent border-none outline-none flex-1 text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPin(prev => !prev)}
+                  className="shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                  aria-label={showNewPin ? 'Ocultar novo PIN' : 'Mostrar novo PIN'}
+                >
+                  {showNewPin ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
 
             <div>
               <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Confirmar Novo PIN</div>
-              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200">
+              <div className="bg-[#f5f5f5] text-gray-700 px-3 py-1.5 text-[12px] border-t border-gray-200 flex items-center gap-1">
                 <input 
-                  type="password"
+                  type={showConfirmPin ? 'text' : 'password'}
                   inputMode="numeric"
                   pattern="\d*"
                   maxLength={4}
                   placeholder="Confirmar PIN"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value.replace(/[^0-9]/g, ''))}
-                  className="bg-transparent border-none outline-none w-full text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
+                  className="bg-transparent border-none outline-none flex-1 text-neutral-800 text-[12px] font-mono font-bold tracking-widest"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPin(prev => !prev)}
+                  className="shrink-0 p-1 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                  aria-label={showConfirmPin ? 'Ocultar confirmação de PIN' : 'Mostrar confirmação de PIN'}
+                >
+                  {showConfirmPin ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                      <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
           </div>
