@@ -15,7 +15,7 @@ export const getAccessToken = async (): Promise<string | null> => {
   return data.session?.access_token ?? null;
 };
 
-const INTERNET_CHECK_URL = 'https://clients3.google.com/generate_204';
+const INTERNET_CHECK_URL = `${SUPABASE_URL}/auth/v1`;
 
 export const checkInternetConnectivity = async (timeoutMs = 4000): Promise<boolean> => {
   if (typeof window === 'undefined') return true;
@@ -25,14 +25,16 @@ export const checkInternetConnectivity = async (timeoutMs = 4000): Promise<boole
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(INTERNET_CHECK_URL, {
-      method: 'GET',
+      method: 'HEAD',
       cache: 'no-cache',
       mode: 'no-cors',
       signal: controller.signal
     });
-    return response.ok || response.type === 'opaque' || response.status === 204 || response.status === 0;
+    return response.ok || response.type === 'opaque';
   } catch {
-    return false;
+    // Some browsers or network environments may block cross-origin connectivity probes.
+    // If the browser still reports online, allow the request to proceed and handle real network failures later.
+    return navigator.onLine;
   } finally {
     window.clearTimeout(timeout);
   }

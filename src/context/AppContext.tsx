@@ -150,6 +150,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const loadingCountRef = useRef<number>(0);
   const [isFullScreenActive, setIsFullScreenActive] = useState<boolean>(false);
   const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const offlineToastRef = useRef<boolean>(false);
 
   const showLoading = (message: string = 'Carregando...') => {
     setLoadingMessage(message);
@@ -165,8 +166,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addToast = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', duration: number = 4000) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts(prev => [...prev, { id, message, type, duration }]);
+    setToasts(prev => {
+      const exists = prev.some(t => t.message === message && t.type === type);
+      if (exists) return prev;
+      const id = Math.random().toString(36).substring(2, 9);
+      return [...prev, { id, message, type, duration }];
+    });
   };
 
   const removeToast = (id: string) => {
@@ -189,9 +194,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const ensureInternetConnectivity = async (showError: boolean = true): Promise<boolean> => {
     const connected = await checkInternetConnectivity();
     setIsOnline(connected);
+
     if (!connected && showError) {
-      addToast('Sem conexão de internet. Verifique seus dados móveis ou WiFi e tente novamente.', 'error', 7000);
+      if (!offlineToastRef.current) {
+        offlineToastRef.current = true;
+        addToast('Sem conexão de internet. Verifique seus dados móveis ou WiFi e tente novamente.', 'error', 7000);
+        window.setTimeout(() => {
+          offlineToastRef.current = false;
+        }, 7000);
+      }
     }
+
     return connected;
   };
 
@@ -249,11 +262,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
+      offlineToastRef.current = false;
       addToast('Conexão de internet restabelecida.', 'success', 4000);
     };
     const handleOffline = () => {
       setIsOnline(false);
-      addToast('Sem conexão de internet. Verifique WiFi ou dados móveis.', 'error', 7000);
+      if (!offlineToastRef.current) {
+        offlineToastRef.current = true;
+        addToast('Sem conexão de internet. Verifique WiFi ou dados móveis.', 'error', 7000);
+        window.setTimeout(() => {
+          offlineToastRef.current = false;
+        }, 7000);
+      }
     };
 
     window.addEventListener('online', handleOnline);

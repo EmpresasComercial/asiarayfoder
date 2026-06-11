@@ -7,6 +7,7 @@ import { PurchaseDetailsPage } from './components/PurchaseDetailsPage';
 import { TaskTab } from './components/TaskTab';
 import { GravarTab } from './components/GravarTab';
 import { MeuTab } from './components/MeuTab';
+import { SupportScreen } from './components/SupportScreen';
 import { RetirarPage } from './components/RetirarPage';
 import { CustomAlert } from './components/CustomAlert';
 import { CustomToast } from './components/CustomToast';
@@ -43,6 +44,7 @@ function MainAppLayout() {
   };
 
   const activeTab = getActiveTabFromPath(location.pathname);
+  const isSupportScreen = location.pathname === '/support';
 
   // Keep document.title in sync with routing
   useEffect(() => {
@@ -172,12 +174,7 @@ function MainAppLayout() {
 
   const handleSupportClick = () => {
     if (wasDragged.current) return;
-    showConfirm(
-      'Deseja abrir o suporte via WhatsApp com um assessor da Asiaray Angola?',
-      () => {
-        window.open('https://api.whatsapp.com/send?phone=244922342885', '_blank');
-      }
-    );
+    navigate('/support');
   };
 
   // Announcement notice state
@@ -257,6 +254,7 @@ function MainAppLayout() {
         <Route path="/reg/smid/:inviteCode" element={<LoginScreen />} />
         <Route path="/retirar" element={isLoggedIn ? <RetirarPage /> : <Navigate to="/login" replace />} />
         <Route path="/ws/compra/:tierLevel" element={isLoggedIn ? <PurchaseDetailsPage /> : <Navigate to="/login" replace />} />
+        <Route path="/support" element={isLoggedIn ? <SupportScreen /> : <Navigate to="/login" replace />} />
         <Route 
           path="/*" 
           element={
@@ -269,7 +267,7 @@ function MainAppLayout() {
                 </main>
  
                 {/* Quick floating chatbot action to talk to helpline (Draggable) */}
-                {!isFullScreenActive && (
+                {!isSupportScreen && !isFullScreenActive && (
                   <div className="fixed inset-0 max-w-md mx-auto pointer-events-none z-40">
                       <img
                         id="quick-support-btn"
@@ -292,7 +290,7 @@ function MainAppLayout() {
                 )}
  
                 {/* Footer sticky navigations */}
-                {!isFullScreenActive && (
+                {!isSupportScreen && !isFullScreenActive && (
                   <footer className="fixed bottom-0 left-0 right-0 max-w-md mx-auto glass-nav py-2.5 px-2 flex justify-around items-center text-center z-50 rounded-t-2xl pb-4">
                     
                     {/* Tab 1: Página inicial */}
