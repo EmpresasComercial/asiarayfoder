@@ -21,7 +21,6 @@ export const SupportScreen: React.FC = () => {
   };
 
   const headerStyle: React.CSSProperties = {
-    position: 'relative',
     display: 'flex',
     alignItems: 'center',
     paddingBottom: 16,
@@ -39,12 +38,11 @@ export const SupportScreen: React.FC = () => {
     border: 'none',
     padding: 0,
     cursor: 'pointer',
+    flex: 'none',
   };
 
   const titleStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: 0,
-    right: 0,
+    flex: 1,
     textAlign: 'center',
     fontSize: 18,
     fontWeight: 400,
@@ -82,11 +80,19 @@ export const SupportScreen: React.FC = () => {
     cursor: 'pointer',
   };
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/meu');
+    }
+  };
+
   return (
     <div style={pageStyle}>
       <div style={pageInnerStyle}>
         <div style={headerStyle}>
-          <button type="button" onClick={() => navigate(-1)} style={backButtonStyle}>
+          <button type="button" onClick={handleBack} style={backButtonStyle}>
             <ArrowLeft size={20} strokeWidth={2.5} />
           </button>
           <div style={titleStyle}>Suporte</div>
