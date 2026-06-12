@@ -45,7 +45,7 @@ function MainAppLayout() {
 
   const activeTab = getActiveTabFromPath(location.pathname);
   const isSupportScreen = location.pathname === '/support';
-  const showTabBar = ['inicial', 'ws', 'tarefa', 'meu'].includes(activeTab);
+  const showTabBar = ['inicial', 'ws', 'tarefa', 'gravar', 'meu'].includes(activeTab);
 
   // Keep document.title in sync with routing
   useEffect(() => {
@@ -323,8 +323,18 @@ function MainAppLayout() {
                       <Sparkles size={20} className={activeTab === 'tarefa' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
                       <span className="text-[10px] tracking-tight font-bold">Tarefa</span>
                     </button>
+
+                    {/* Tab 4: gravar */}
+                    <button
+                      id="btn-nav-gravar"
+                      onClick={() => setActiveTab('gravar')}
+                      className={`flex-1 flex flex-col items-center gap-1 transition-all duration-300 cursor-pointer hover-lift ${activeTab === 'gravar' ? 'text-[#0d7377] font-bold scale-110' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                      <ClipboardCheck size={20} className={activeTab === 'gravar' ? 'stroke-[2.5] drop-shadow-[0_0_8px_rgba(13,115,119,0.3)]' : 'stroke-[1.5]'} />
+                      <span className="text-[10px] tracking-tight">Gravar</span>
+                    </button>
  
-                    {/* Tab 4: meu */}
+                    {/* Tab 5: meu */}
                     <button
                       id="btn-nav-meu"
                       onClick={() => setActiveTab('meu')}

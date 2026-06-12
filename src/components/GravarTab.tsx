@@ -19,6 +19,30 @@ export const GravarTab: React.FC = () => {
   const [comment, setComment] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
 
+  // File upload states for task completion proof
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string>('');
+  const [fileLabel, setFileLabel] = useState<string>('Nenhum arquivo escolhido');
+
+  useEffect(() => {
+    return () => {
+      if (filePreview) {
+        URL.revokeObjectURL(filePreview);
+      }
+    };
+  }, [filePreview]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (filePreview) {
+      URL.revokeObjectURL(filePreview);
+    }
+    setSelectedFile(file);
+    setFileLabel(file.name);
+    setFilePreview(URL.createObjectURL(file));
+  };
+
   // New state for real DB tasks
   const [agdTasks, setAgdTasks] = useState<any[]>([]);
   const [completedTasks, setCompletedTasks] = useState<any[]>([]);
@@ -131,6 +155,10 @@ export const GravarTab: React.FC = () => {
       window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Comentário é obrigatório', type: 'error' } }));
       return;
     }
+    if (!selectedFile) {
+      window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Por favor, carregue a captura de tela da tarefa concluída', type: 'error' } }));
+      return;
+    }
     if (!(await ensureInternetConnectivity())) return;
     setSubmitting(true);
     showLoading('Enviando evidências...');
@@ -148,6 +176,9 @@ export const GravarTab: React.FC = () => {
         window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Tarefa concluída e crédito adicionado!', type: 'success' } }));
         setExpandedId(null);
         setComment('');
+        setSelectedFile(null);
+        setFilePreview('');
+        setFileLabel('Nenhum arquivo escolhido');
         loadAgdTasks(); // reload active tasks
       } else {
         window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: res.error || 'Erro ao concluir tarefa', type: 'error' } }));
@@ -180,7 +211,12 @@ export const GravarTab: React.FC = () => {
       {/* Small grey X to close right above the message box */}
       <div className="flex justify-end pr-1">
         <button 
-          onClick={() => setExpandedId(null)} 
+          onClick={() => {
+            setExpandedId(null);
+            setSelectedFile(null);
+            setFilePreview('');
+            setFileLabel('Nenhum arquivo escolhido');
+          }} 
           className="text-neutral-400 hover:text-neutral-600 select-none cursor-pointer p-1"
           id={`close-form-btn-${task.id}`}
         >
@@ -200,6 +236,33 @@ export const GravarTab: React.FC = () => {
           className="w-full text-[12px] p-3 border border-neutral-200 rounded-sm bg-white text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-neutral-300 resize-none pr-12 font-sans"
           id={`msg-textarea-${task.id}`}
         />
+      </div>
+
+      {/* Image Upload Input */}
+      <div className="flex flex-col items-center justify-center pt-1 gap-2 text-center select-none">
+        <div className="flex items-center gap-3 w-full">
+          <label className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-1.5 px-4 rounded-sm cursor-pointer transition-colors flex items-center gap-1.5 shadow-xs">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+            </svg>
+            <span>Carregar Captura</span>
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleFileChange} 
+              className="hidden" 
+            />
+          </label>
+          <span className="text-[10px] text-neutral-500 font-sans truncate max-w-[180px]">
+            {fileLabel}
+          </span>
+        </div>
+
+        {filePreview && (
+          <div className="rounded-sm overflow-hidden border border-slate-200 w-full max-w-[200px] mt-2">
+            <img src={filePreview} alt="Captura de tela" className="w-full h-auto object-contain" />
+          </div>
+        )}
       </div>
 
       {/* Orange-Red salvar gradient button */}
@@ -311,7 +374,7 @@ export const GravarTab: React.FC = () => {
             // Map data depending on the table (tarefa_agd vs tarefas_diarias)
             const objNome = activeSegment === 'andamento' ? task.nome_produt_shop : 'Rendimento Produto';
             const dataRow = activeSegment === 'andamento' ? new Date(task.data_criada).toLocaleString() : new Date(task.data_atribuicao).toLocaleString();
-            const rewardAmount = activeSegment === 'andamento' ? '???' : Number(task.renda_coletada).toFixed(2);
+            const rewardAmount = activeSegment === 'andamento' ? (task.rendimento ? Number(task.rendimento).toFixed(2) : '0.00') : Number(task.renda_coletada).toFixed(2);
 
             return (
               <div 
@@ -392,11 +455,12 @@ export const GravarTab: React.FC = () => {
                     <div className="absolute right-4 top-[50%] -translate-y-1/2 flex items-center select-none">
                       <div className="relative">
                         <div 
-                          className="h-[52px] w-[52px] rounded-full border border-white/80 shadow-xs flex items-center justify-center shrink-0" 
+                          className="h-[62px] w-[62px] rounded-full border border-white/80 shadow-xs flex flex-col items-center justify-center shrink-0" 
                           style={{ backgroundColor: '#9aaec4' }}
                         >
-                          <span className="text-white text-[11px] font-bold tracking-tight select-all text-center">
-                            {rewardAmount}KZ
+                          <span className="text-white text-[10px] font-bold tracking-tight select-all text-center flex flex-col leading-none gap-1">
+                            <span>{rewardAmount}</span>
+                            <span className="text-[8px] font-medium opacity-85">KZ</span>
                           </span>
                         </div>
                       </div>

@@ -177,7 +177,7 @@ export const PurchaseDetailsPage: React.FC = () => {
           type="button"
           onClick={handleFinalizePurchase}
           disabled={processing}
-          className="w-full rounded-sm bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-2 uppercase tracking-[0.08em] transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full rounded-sm bg-gradient-to-r from-[#1b4d89] to-[#2563eb] hover:from-[#1d5aa3] hover:to-[#3b82f6] text-white font-bold text-[12px] py-2.5 uppercase tracking-[0.08em] transition-all duration-300 transform active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed shadow-[0_4px_12px_rgba(37,99,235,0.2)] flex items-center justify-center gap-2 cursor-pointer"
         >
           {processing && <span className="h-3.5 w-3.5 rounded-full border-2 border-white/80 border-t-transparent animate-spin" />}
           {processing ? 'Finalizando compra...' : 'Finalizar compra'}
