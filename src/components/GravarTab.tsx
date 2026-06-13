@@ -231,47 +231,41 @@ export const GravarTab: React.FC = () => {
         <textarea
           rows={3}
           value={comment}
+          maxLength={100}
           onChange={(e) => setComment(e.target.value)}
-          placeholder="Please write a message (Comentário obrigatório)"
-          className="w-full text-[12px] p-3 border border-neutral-200 rounded-sm bg-white text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-neutral-300 resize-none pr-12 font-sans"
+          placeholder="Please write a message (If you have nothing to say, you don' t have to write anything.)"
+          className="w-full text-[12px] p-3 border border-neutral-200 rounded-sm bg-white text-neutral-800 placeholder-neutral-400 focus:outline-none focus:border-neutral-300 resize-none font-sans"
           id={`msg-textarea-${task.id}`}
         />
-      </div>
-
-      {/* Image Upload Input */}
-      <div className="flex flex-col items-center justify-center pt-1 gap-2 text-center select-none">
-        <div className="flex items-center gap-3 w-full">
-          <label className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white font-bold text-[12px] py-1.5 px-4 rounded-sm cursor-pointer transition-colors flex items-center gap-1.5 shadow-xs">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-            </svg>
-            <span>Carregar Captura</span>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handleFileChange} 
-              className="hidden" 
-            />
-          </label>
-          <span className="text-[10px] text-neutral-500 font-sans truncate max-w-[180px]">
-            {fileLabel}
-          </span>
+        <div className="absolute right-3 bottom-2 text-[10px] text-neutral-400 select-none font-sans">
+          {comment.length}/100
         </div>
-
-        {filePreview && (
-          <div className="rounded-sm overflow-hidden border border-slate-200 w-full max-w-[200px] mt-2">
-            <img src={filePreview} alt="Captura de tela" className="w-full h-auto object-contain" />
-          </div>
-        )}
       </div>
 
-      {/* Orange-Red salvar gradient button */}
+      {/* Red dashed file upload square */}
+      <div className="flex flex-col items-start pt-1 gap-2 select-none">
+        <label className="w-14 h-14 border border-dashed border-[#ff3b30] rounded-[4px] flex items-center justify-center cursor-pointer hover:bg-red-50/40 transition-colors relative">
+          <input 
+            type="file" 
+            accept="image/*" 
+            onChange={handleFileChange} 
+            className="hidden" 
+          />
+          {filePreview ? (
+            <img src={filePreview} alt="Preview" className="w-full h-full object-cover rounded-[3px]" />
+          ) : (
+            <span className="text-[#ff3b30] text-[28px] font-light leading-none">+</span>
+          )}
+        </label>
+      </div>
+
+      {/* Red salvar button */}
       <div className="pt-2">
         <button
           id={`submit-proof-btn-${task.id}`}
           onClick={() => handleSubmit(task.id)}
           disabled={submitting}
-          className={`w-full max-w-[420px] h-[34px] bg-[#f97316] hover:bg-[#ea580c] text-white font-semibold text-[12px] text-center rounded-[3px] transition-all flex items-center justify-center lowercase tracking-wider cursor-pointer shadow-none select-none border-none outline-none ${submitting ? 'opacity-50' : ''}`}
+          className={`w-full max-w-[420px] h-[34px] bg-[#e1251b] hover:bg-[#c11f17] text-white font-semibold text-[12px] text-center rounded-[3px] transition-all flex items-center justify-center lowercase tracking-wider cursor-pointer shadow-none select-none border-none outline-none ${submitting ? 'opacity-50' : ''}`}
         >
           {submitting ? 'Enviando...' : 'salvar'}
         </button>
