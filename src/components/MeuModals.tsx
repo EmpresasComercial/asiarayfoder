@@ -323,16 +323,7 @@ interface WalletModalProps extends ModalProps {
 }
 
 export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initialTab = 'recharge' }) => {
-  const { stats, user, addRecharge, showLoading, hideLoading, setIsFullScreenActive } = useApp();
-
-  React.useEffect(() => {
-    if (isOpen) {
-      setIsFullScreenActive(true);
-    }
-    return () => {
-      setIsFullScreenActive(false);
-    };
-  }, [isOpen, setIsFullScreenActive]);
+  const { stats, user, showLoading, hideLoading, setIsFullScreenActive } = useApp();
   
   const [rechargeStep, setRechargeStep] = useState<'amount' | 'method' | 'instructions'>('amount');
   const [rechargeAmt, setRechargeAmt] = useState<number>(0);
@@ -343,6 +334,40 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
   const [fileLabel, setFileLabel] = useState<string>('Nenhum arquivo escolhido');
   const [ibanCopied, setIbanCopied] = useState(false);
   const [usdtCopied, setUsdtCopied] = useState(false);
+
+  const [dbBanks, setDbBanks] = useState<{ id: string; nome_do_banco: string; iban: string; nome_favorecido: string }[]>([]);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setIsFullScreenActive(true);
+      
+      const fetchDbBanks = async () => {
+        try {
+          const token = await getAccessToken();
+          if (!token) return;
+          const resp = await fetch(GATEWAY_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ op: 207, data: {} })
+          });
+          const res = await resp.json();
+          if (res.success && Array.isArray(res.result)) {
+            setDbBanks(res.result);
+          }
+        } catch (error) {
+          console.error("Erro ao obter bancos de depósito:", error);
+        }
+      };
+      
+      fetchDbBanks();
+    }
+    return () => {
+      setIsFullScreenActive(false);
+    };
+  }, [isOpen, setIsFullScreenActive]);
 
   const USDT_ADDR = 'TQdoJo3s13AtTPY1NZsnxrnLdLwJFSCqT1';
 
@@ -362,7 +387,10 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
     BAI: 'AO06 0005 0000 1579 1775 1010 5',
   };
 
-  const currentAddress = selectedMethod === 'USDT-TRC20' ? USDT_ADDR : ibanMap[selectedMethod];
+  const selectedBankInfo = dbBanks.find(b => b.nome_do_banco === selectedMethod);
+
+  const currentAddress = selectedBankInfo ? selectedBankInfo.iban : (selectedMethod === 'USDT-TRC20' ? USDT_ADDR : ibanMap[selectedMethod]);
+  const currentFavorecido = selectedBankInfo ? selectedBankInfo.nome_favorecido : (selectedMethod === 'USDT-TRC20' ? 'USDT Wallet' : 'Asiarays grupo mídia lda');
   const tipoValue = selectedMethod === 'USDT-TRC20' ? 'USDT' : 'BANCO';
   const walletLabel = selectedMethod === 'USDT-TRC20' ? 'Número da carteira' : 'Número do IBAN';
   const requisitoValue = selectedMethod === 'USDT-TRC20' ? (rechargeAmt / 430).toFixed(2) : `${rechargeAmt.toLocaleString('pt-AO')} KZ`;
@@ -385,26 +413,59 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
     setFilePreview(URL.createObjectURL(file));
   };
 
-  const handleRecharge = (e: React.FormEvent) => {
+  const handleRecharge = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile) {
       alert('Por favor, carregue o comprovativo de transferência antes de submeter.');
       return;
     }
 
-    showLoading('A submeter comprovativo de recarga...');
-    setTimeout(() => {
-      addRecharge(rechargeAmt, `Depósito via ${selectedMethod}`, selectedFile.name);
+    showLoading('A submeter pedido de depósito...');
+
+    try {
+      const token = await getAccessToken();
+      if (!token) {
+        hideLoading();
+        alert('Sessão expirada. Faça login novamente.');
+        return;
+      }
+
+      const isUSDT = selectedMethod === 'USDT-TRC20';
+
+      const opCode = isUSDT ? 206 : 205;
+      const payload = isUSDT
+        ? { amount_usdt: parseFloat((rechargeAmt / 430).toFixed(2)), exchange_rate: 430 }
+        : { amount: rechargeAmt, bank_name: selectedMethod, iban: currentAddress };
+
+      const resp = await fetch(GATEWAY_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ op: opCode, data: payload })
+      });
+
+      const res = await resp.json();
       hideLoading();
-      alert('Comprovativo submetido. A auditoria Asiaray irá validar.');
-      setRechargeStep('amount');
-      setRechargeAmt(0);
-      setSelectedFile(null);
-      setFilePreview('');
-      setFileLabel('Nenhum arquivo escolhido');
-      setComprovativo('');
-      onClose();
-    }, 1400);
+
+      if (res.success && res.result?.success) {
+        alert(res.result.message || 'Depósito solicitado com sucesso. Por favor, conclua a transferência e envie o comprovativo ao suporte.');
+        setRechargeStep('amount');
+        setRechargeAmt(0);
+        setSelectedFile(null);
+        setFilePreview('');
+        setFileLabel('Nenhum arquivo escolhido');
+        setComprovativo('');
+        onClose();
+      } else {
+        alert(res.result?.message || res.error || 'Erro ao submeter pedido de depósito.');
+      }
+    } catch (error) {
+      hideLoading();
+      console.error('Erro ao submeter depósito:', error);
+      alert('Erro de rede. Tente novamente mais tarde.');
+    }
   };
 
   if (!isOpen) return null;
@@ -486,10 +547,11 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
               </p>
 
               <div className="divide-y divide-slate-100 overflow-hidden">
-                {/* BIC, BFA, Atlântico, BCI, BAI, USDT-TRC20 */}
-                {['BIC', 'BFA', 'Atlântico', 'BCI', 'BAI', 'USDT-TRC20'].map((methodName, idx) => {
+                {(dbBanks.length > 0
+                  ? dbBanks.map(b => b.nome_do_banco)
+                  : ['BIC', 'BFA', 'Atlântico', 'BCI', 'BAI', 'USDT-TRC20']
+                ).map((methodName, idx) => {
                   const isUSDT = methodName === 'USDT-TRC20';
-                  const usdtVal = (rechargeAmt / 430).toFixed(1);
                   return (
                     <button
                       key={methodName}
@@ -543,7 +605,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                 <div className="border-b border-gray-200">
                   <div className="text-[#0a52a3] font-bold text-[12px] px-3 py-1 bg-white">Nome de conta de fundos</div>
                   <div className="bg-[#f5f5f5] text-gray-600 px-3 py-1.5 text-[11px] font-mono border-t border-gray-200 break-all select-all">
-                    Asiarays grupo mídia lda
+                    {currentFavorecido}
                   </div>
                 </div>
 
