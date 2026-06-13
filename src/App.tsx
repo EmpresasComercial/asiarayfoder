@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from './lib/supabase';
 import { AppProvider, useApp } from './context/AppContext';
 import { LoginScreen } from './components/pageasiaray';
 import { HomeTab } from './components/HomeTab';
@@ -183,6 +184,26 @@ function MainAppLayout() {
   // Announcement notice state
   const [isNoticeVisible, setIsNoticeVisible] = useState<boolean>(false);
   const [noticeCountdown, setNoticeCountdown] = useState<number>(15);
+  const [splashMessage, setSplashMessage] = useState<string | null>(null);
+
+  // Fetch splash_message from support_link table
+  useEffect(() => {
+    const fetchSplash = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('support_link')
+          .select('splash_message')
+          .limit(1)
+          .single();
+        if (!error && data?.splash_message) {
+          setSplashMessage(data.splash_message);
+        }
+      } catch (err) {
+        console.error('Error fetching splash_message:', err);
+      }
+    };
+    fetchSplash();
+  }, []);
 
   // Trigger Notice popup when entering/returning to the home tab and reset scroll position
   useEffect(() => {
@@ -356,30 +377,34 @@ function MainAppLayout() {
                     <div className="relative w-full max-w-[388px]">
                       <div className="overflow-hidden border border-[#f59e0b] bg-[#fbbf24] shadow-[0_32px_90px_rgba(251,191,36,0.22)]">
                         <div className="px-5 pt-4 pb-3 text-center select-none">
-                          <div className="text-[12px] font-semibold uppercase tracking-[0.3em] text-slate-900">
+                          <div className="text-[9px] font-semibold uppercase tracking-[0.3em] text-slate-900">
                             Shut down after {noticeCountdown} seconds
                           </div>
                           <div className="mt-2 flex items-center justify-center gap-1 text-[24px] font-black text-slate-900 tracking-[0.18em]">
                             <span>💧</span>
                             <span>~Notice~</span>
-                            <span>🍂</span>
-                            <span>🍃</span>
                             <span>💠</span>
                           </div>
                         </div>
-                        <div className="bg-white px-4 pb-4 pt-3 border-t border-[#fcd34d]/40 shadow-sm text-[14px] text-slate-700 leading-7 max-h-[58vh] overflow-y-auto no-scrollbar">
-                          <p className="mb-3 font-semibold text-slate-900">Documento n.º 20230501701</p>
-                          <p className="mb-3">Relativamente ao apoio total da empresa à rápida expansão do mercado angolano, a primeira decisão é: convidar outras pessoas para trabalhar, podendo o convidante como gestor obter um bónus de 10% do seguinte salário do empregado.</p>
-                          <p className="mb-3">Exemplo: O seu equipe tem 100 pessoas, todos no WS5, quanto dinheiro você pode ganhar todos os dias com isso.</p>
-                          <p className="text-xs text-slate-400">Leia com atenção e siga as regras de convite para garantir as melhores recompensas.</p>
+                        <div className="bg-white px-4 pb-4 pt-3 border-t border-[#fcd34d]/40 shadow-sm text-[14px] text-slate-700 leading-7 max-h-[58vh] overflow-y-auto no-scrollbar whitespace-pre-wrap">
+                          {splashMessage ? (
+                            <p>{splashMessage}</p>
+                          ) : (
+                            <>
+                              <p className="mb-3 font-semibold text-slate-900">Documento n.º 20230501701</p>
+                              <p className="mb-3">Relativamente ao apoio total da empresa à rápida expansão do mercado angolano, a primeira decisão é: convidar outras pessoas para trabalhar, podendo o convidante como gestor obter um bónus de 10% do seguinte salário do empregado.</p>
+                              <p className="mb-3">Exemplo: O seu equipe tem 100 pessoas, todos no WS5, quanto dinheiro você pode ganhar todos os dias com isso.</p>
+                              <p className="text-xs text-slate-400">Leia com atenção e siga as regras de convite para garantir as melhores recompensas.</p>
+                            </>
+                          )}
                         </div>
                       </div>
                       <button
                         onClick={() => setIsNoticeVisible(false)}
-                        className="absolute -top-3 -right-3 w-[36px] h-[36px] bg-[#f97316] flex items-center justify-center shadow-[0_10px_20px_rgba(249,115,22,0.35)] cursor-pointer border-2 border-white hover:bg-[#ea580c] transition-colors focus:outline-none"
+                        className="absolute -top-4 -right-4 w-[48px] h-[48px] bg-transparent flex items-center justify-center cursor-pointer border-none hover:opacity-70 transition-opacity focus:outline-none"
                         id="notice-close-btn"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
