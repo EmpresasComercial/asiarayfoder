@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 
 export const RetirarPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, stats, addWithdrawal, addToast, setIsFullScreenActive, showLoading, hideLoading } = useApp();
+  const { user, stats, addWithdrawal, addToast, setIsFullScreenActive, showLoading, hideLoading, refreshUserProfile } = useApp();
 
   // Mode state: 'amount' | 'tips' | 'pin'
   const [step, setStep] = useState<'amount' | 'tips' | 'pin'>('amount');
@@ -18,6 +18,8 @@ export const RetirarPage: React.FC = () => {
   // Auto-hide full screen footer layout
   useEffect(() => {
     setIsFullScreenActive(true);
+    // Always fetch fresh profile on mount to avoid showing stale bank data from cache
+    refreshUserProfile(false);
     return () => {
       setIsFullScreenActive(false);
     };

@@ -984,12 +984,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           id: p.id || prev.id,
           inviteCode: p.invite_code || prev.inviteCode,
           idChaveUnica: p.id_chave_unica ?? prev.idChaveUnica,
-          bankName: p.bank_name || prev.bankName,
-          bankAccount: p.bank_account || prev.bankAccount,
-          holderName: p.holder_name || prev.holderName,
+          // Bank fields: use DB value even if empty/null to clear stale cache
+          bankName: p.bank_name ?? '',
+          bankAccount: p.bank_account ?? '',
+          holderName: p.holder_name ?? '',
+          bankId: p.bank_id ?? undefined,
           level: p.level || prev.level,
           paymentPin: p.payment_pin || prev.paymentPin,
-          bankId: p.bank_id || prev.bankId
         }));
 
         // Update financial stats with real balance from profiles.balance
