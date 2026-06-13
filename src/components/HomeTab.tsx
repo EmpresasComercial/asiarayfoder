@@ -151,27 +151,26 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
         
         <div className="grid grid-cols-3 gap-2 px-3 py-4 select-none bg-white" id="task-room-grid">
           
-          {/* Room 1: Amazónia with yellow/orange bg */}
+          {/* Room 1: TikTok with yellow/orange bg */}
           <div 
-            onClick={() => handleTaskRoomClick('Amazon')}
-            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-center h-[76px] bg-[#ffe29b] relative shadow-none border border-amber-100/40"
+            onClick={() => handleTaskRoomClick('Tiktok')}
+            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-between h-[84px] bg-[#ffe29b] relative shadow-none border border-amber-100/40 p-2"
           >
-            {/* Top Left Tag */}
-            <div className="absolute left-0 top-0 bg-[#f97316] text-[8px] text-white px-1.5 py-0.5 rounded-br font-black select-none">
-              $
-            </div>
+            {/* Top Left Pill Tag */}
+            <div className="absolute left-2 top-1.5 w-8 h-2 bg-[#f97316] rounded-full select-none"></div>
             
-            <div className="px-2 z-10 text-left flex flex-col justify-center h-full pt-2">
-              <div className="text-[12px] font-bold text-gray-805 leading-none">Amazónia</div>
-              <div className="text-[8px] text-gray-500 font-medium mt-1 leading-tight">(fazer tarefa)</div>
+            <div className="z-10 text-left flex flex-col justify-end h-full pt-4">
+              <div className="text-[12px] font-bold text-gray-800 leading-tight">TikTok</div>
+              <div className="text-[8.5px] text-gray-600 font-medium mt-0.5 leading-tight">(fazer tarefa)</div>
             </div>
 
-            {/* Medal Icon on Right */}
-            <div className="absolute right-1.5 top-0 bottom-0 pointer-events-none flex items-center justify-end">
-              <svg className="h-[36px] w-[36px] text-amber-500 opacity-60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.2" />
-                <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="0.8" />
-                <path d="M12 7l1.2 2.5 2.8.3-2 1.9.5 2.8-2.5-1.5-2.5 1.5.5-2.8-2-1.9 2.8-.3L12 7z" fill="currentColor" />
+            {/* Hanging Ribbon Medal on Right */}
+            <div className="absolute right-2 top-0 pointer-events-none">
+              <svg className="w-[26px] h-[38px] text-[#f59e0b]" viewBox="0 0 30 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 0h18v15l-9 6-9-6V0z" fill="currentColor" opacity="0.65" />
+                <circle cx="15" cy="28" r="11" fill="currentColor" opacity="0.4" stroke="currentColor" strokeWidth="1.2" />
+                <circle cx="15" cy="28" r="8" fill="white" stroke="currentColor" strokeWidth="0.8" />
+                <path d="M15 24.5l0.8 1.8 1.9.2-1.4 1.3 0.3 1.9-1.6-1.0-1.6 1.0 0.3-1.9-1.4-1.3 1.9-.2 0.8-1.8z" fill="#f59e0b" />
               </svg>
             </div>
           </div>
@@ -179,24 +178,23 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           {/* Room 2: Facebook with blue bg */}
           <div 
             onClick={() => handleTaskRoomClick('Facebook')}
-            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-center h-[76px] bg-[#adcbf7] relative shadow-none border border-blue-100/40"
+            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-between h-[84px] bg-[#adcbf7] relative shadow-none border border-blue-100/40 p-2"
           >
-            {/* Top Left Tag */}
-            <div className="absolute left-0 top-0 bg-[#3b82f6] text-[8px] text-white px-1.5 py-0.5 rounded-br font-black select-none">
-              $
-            </div>
+            {/* Top Left Pill Tag */}
+            <div className="absolute left-2 top-1.5 w-8 h-2 bg-[#3b82f6] rounded-full select-none"></div>
             
-            <div className="px-2 z-10 text-left flex flex-col justify-center h-full pt-2">
-              <div className="text-[12px] font-bold text-gray-805 leading-none">Facebook</div>
-              <div className="text-[8px] text-gray-500 font-medium mt-1 leading-tight">(Anúncio de imagem)</div>
+            <div className="z-10 text-left flex flex-col justify-end h-full pt-4">
+              <div className="text-[12px] font-bold text-gray-800 leading-tight">Facebook</div>
+              <div className="text-[8.5px] text-gray-600 font-medium mt-0.5 leading-tight">(Anúncio de imagem)</div>
             </div>
 
-            {/* Medal Icon on Right */}
-            <div className="absolute right-1.5 top-0 bottom-0 pointer-events-none flex items-center justify-end">
-              <svg className="h-[36px] w-[36px] text-[#2563eb] opacity-60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.2" />
-                <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="0.8" />
-                <path d="M12 7l1.2 2.5 2.8.3-2 1.9.5 2.8-2.5-1.5-2.5 1.5.5-2.8-2-1.9 2.8-.3L12 7z" fill="currentColor" />
+            {/* Hanging Ribbon Medal on Right */}
+            <div className="absolute right-2 top-0 pointer-events-none">
+              <svg className="w-[26px] h-[38px] text-[#3b82f6]" viewBox="0 0 30 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 0h18v15l-9 6-9-6V0z" fill="currentColor" opacity="0.65" />
+                <circle cx="15" cy="28" r="11" fill="currentColor" opacity="0.4" stroke="currentColor" strokeWidth="1.2" />
+                <circle cx="15" cy="28" r="8" fill="white" stroke="currentColor" strokeWidth="0.8" />
+                <path d="M15 24.5l0.8 1.8 1.9.2-1.4 1.3 0.3 1.9-1.6-1.0-1.6 1.0 0.3-1.9-1.4-1.3 1.9-.2 0.8-1.8z" fill="#3b82f6" />
               </svg>
             </div>
           </div>
@@ -204,24 +202,23 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           {/* Room 3: Whatsapp with grey bg */}
           <div 
             onClick={() => handleTaskRoomClick('Whatsapp')}
-            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-center h-[76px] bg-[#e2e8f0] relative shadow-none border border-gray-150"
+            className="rounded-[4px] overflow-hidden cursor-pointer flex flex-col justify-between h-[84px] bg-[#e2e8f0] relative shadow-none border border-gray-200 p-2"
           >
-            {/* Top Left Tag */}
-            <div className="absolute left-0 top-0 bg-[#f97316] text-[8px] text-white px-1.5 py-0.5 rounded-br font-black select-none">
-              $
-            </div>
+            {/* Top Left Pill Tag */}
+            <div className="absolute left-2 top-1.5 w-8 h-2 bg-[#f97316] rounded-full select-none"></div>
             
-            <div className="px-1.5 z-10 text-left flex flex-col justify-center h-full pt-2">
-              <div className="text-[12px] font-bold text-gray-850 leading-none">Whatsapp</div>
-              <div className="text-[7.5px] text-gray-500 font-medium mt-1 leading-none">download app para ganhar recompensa</div>
+            <div className="z-10 text-left flex flex-col justify-end h-full pt-4">
+              <div className="text-[12px] font-bold text-gray-800 leading-tight">Whatsapp</div>
+              <div className="text-[8px] text-gray-500 font-medium mt-0.5 leading-tight">download app para ganhar recompensa</div>
             </div>
 
-            {/* Medal Icon on Right */}
-            <div className="absolute right-1.5 top-0 bottom-0 pointer-events-none flex items-center justify-end">
-              <svg className="h-[36px] w-[36px] text-gray-400 opacity-60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.2" />
-                <circle cx="12" cy="12" r="6" stroke="currentColor" strokeWidth="0.8" />
-                <path d="M12 7l1.2 2.5 2.8.3-2 1.9.5 2.8-2.5-1.5-2.5 1.5.5-2.8-2-1.9 2.8-.3L12 7z" fill="currentColor" />
+            {/* Hanging Ribbon Medal on Right */}
+            <div className="absolute right-2 top-0 pointer-events-none">
+              <svg className="w-[26px] h-[38px] text-gray-400" viewBox="0 0 30 45" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 0h18v15l-9 6-9-6V0z" fill="currentColor" opacity="0.65" />
+                <circle cx="15" cy="28" r="11" fill="currentColor" opacity="0.4" stroke="currentColor" strokeWidth="1.2" />
+                <circle cx="15" cy="28" r="8" fill="white" stroke="currentColor" strokeWidth="0.8" />
+                <path d="M15 24.5l0.8 1.8 1.9.2-1.4 1.3 0.3 1.9-1.6-1.0-1.6 1.0 0.3-1.9-1.4-1.3 1.9-.2 0.8-1.8z" fill="gray" />
               </svg>
             </div>
           </div>
