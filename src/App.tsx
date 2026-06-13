@@ -7,6 +7,7 @@ import { PurchaseDetailsPage } from './components/PurchaseDetailsPage';
 import { TaskTab } from './components/TaskTab';
 import { GravarTab } from './components/GravarTab';
 import { MeuTab } from './components/MeuTab';
+import { TeamReportModal } from './components/MeuModals';
 import { SupportScreen } from './components/SupportScreen';
 import { RetirarPage } from './components/RetirarPage';
 import { CustomAlert } from './components/CustomAlert';
@@ -62,6 +63,7 @@ function MainAppLayout() {
   };
 
   const [selectedTaskCategory, setSelectedTaskCategory] = useState<TaskType>('Amazon');
+  const [isTeamReportOpen, setIsTeamReportOpen] = useState(false);
 
   // Draggable customer support button states (starts at bottom-right CSS class naturally)
   const [supportPos, setSupportPos] = useState<{ x: number, y: number } | null>(null);
@@ -215,7 +217,8 @@ function MainAppLayout() {
         return (
           <HomeTab 
             setActiveTab={setActiveTab} 
-            setSelectedTaskCategory={setSelectedTaskCategory} 
+            setSelectedTaskCategory={setSelectedTaskCategory}
+            onOpenTeamReport={() => setIsTeamReportOpen(true)}
           />
         );
       case 'ws':
@@ -397,6 +400,7 @@ function MainAppLayout() {
       <CustomToast />
       <CustomSpinner />
       <SessionExpiredModal isOpen={isSessionExpired} message={sessionExpiredMessage} />
+      <TeamReportModal isOpen={isTeamReportOpen} onClose={() => setIsTeamReportOpen(false)} />
     </div>
   );
 }

@@ -6,9 +6,10 @@ import { getAccessToken, GATEWAY_URL } from '../lib/supabase';
 interface HomeTabProps {
   setActiveTab: (tab: string) => void;
   setSelectedTaskCategory: (category: TaskType) => void;
+  onOpenTeamReport: () => void;
 }
 
-export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskCategory }) => {
+export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskCategory, onOpenTeamReport }) => {
   const { stats } = useApp();
   
   const handleTaskRoomClick = (category: TaskType) => {
@@ -289,7 +290,8 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           {renderedMembers.map(mbr => (
             <div 
               key={mbr.id}
-              className="flex flex-col items-center gap-1 shrink-0"
+              className="flex flex-col items-center gap-1 shrink-0 cursor-pointer"
+              onClick={onOpenTeamReport}
             >
               <div className="w-[54px] h-[54px] rounded-full flex items-center justify-center border border-neutral-100 select-none overflow-hidden bg-[#f8fafc]">
                 {mbr.isReal ? (
