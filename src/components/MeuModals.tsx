@@ -38,7 +38,7 @@ const ModalBase: React.FC<ModalProps & { children: React.ReactNode }> = ({ isOpe
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <span className="text-[15px] font-bold text-neutral-850 tracking-tight text-center flex-1 translate-x-[-10px]">{title}</span>
+        <span className="text-[15px] font-semibold text-neutral-800 tracking-tight text-center flex-1 translate-x-[-10px]">{title}</span>
         <div className="w-6"></div>
       </div>
       {/* Dynamic scrollable body */}
@@ -1340,6 +1340,16 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
     }
   }, [isOpen, type]);
 
+  // Set fullscreen status when modal is open to hide bottom tabbar
+  useEffect(() => {
+    if (isOpen) {
+      setIsFullScreenActive(true);
+    }
+    return () => {
+      setIsFullScreenActive(false);
+    };
+  }, [isOpen, setIsFullScreenActive]);
+
   // Fetch completed tasks when modal opens for receita
   useEffect(() => {
     if (isOpen && type === 'receita') {
@@ -1364,7 +1374,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
           const res = await fetch(GATEWAY_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ op: 605, data: {} })
+            body: JSON.stringify({ op: 803, data: {} })
           });
           const data = await res.json();
           if (data.success) {
@@ -1380,21 +1390,31 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
 
       loadReceitaData();
     }
-  }, [isOpen, type, ensureInternetConnectivity, showLoading, hideLoading]);
+  }, [isOpen, type]);
 
   // Use fetched data if available, otherwise fallback to context logs
   let filtered: any[] = [];
   if (type === 'retirada') {
     filtered = withdrawalLogs.length ? withdrawalLogs : [];
   } else if (type === 'receita') {
-    filtered = completedTasks.map(task => ({
-      id: task.id.toString(),
-      type: 'recompensa',
-      amount: Number(task.renda_coletada),
-      date: new Date(task.data_atribuicao).toLocaleString('pt-AO').replace(',', ''),
-      status: 'aprovado',
-      details: 'Tarefa Concluída'
-    }));
+    filtered = completedTasks.map(task => {
+      let formattedDate = 'N/A';
+      if (task.data_recebimento) {
+        try {
+          formattedDate = new Date(task.data_recebimento).toLocaleString('pt-AO').replace(',', '');
+        } catch (e) {
+          formattedDate = String(task.data_recebimento);
+        }
+      }
+      return {
+        id: task.id.toString(),
+        type: 'recompensa',
+        amount: Number(task.valor_recebido || 0),
+        date: formattedDate,
+        status: task.status === 'success' || task.status === 'aprovado' ? 'aprovado' : task.status || 'aprovado',
+        details: task.origem_bonus || 'Recompensa de Bónus'
+      };
+    });
   } else {
     filtered = contextLogs.filter(l => l.type === type);
   }
@@ -1620,7 +1640,7 @@ export const LedgerLogsModal: React.FC<ListModalProps> = ({ isOpen, onClose, typ
 
   // Otherwise, render normal logs ledger content
   return (
-    <ModalBase isOpen={isOpen} onClose={onClose} title={`REGISTO DE ${type === 'receita' ? 'RECEITAS' : type === 'recarga' ? 'RECARGAS' : 'RETIRADAS'}`}>
+    <ModalBase isOpen={isOpen} onClose={onClose} title={type === 'receita' ? 'Registo de receitas' : type === 'recarga' ? 'Registo de recargas' : 'Registo de retirada'}>
       <div className="space-y-3">
         {filtered.length === 0 ? (
           <EmptyState

@@ -33,6 +33,7 @@ const OP_RULES: Record<number, OperationRule> = {
   415: { name: "update_payment_pin", roles: ["user"] },
   801: { name: "get_my_team", roles: ["user"] },
   802: { name: "get_weekly_income", roles: ["user"] },
+  803: { name: "get_bonus_history", roles: ["user"] },
   901: { name: "get_support", roles: ["user"] },
 };
 
@@ -472,6 +473,17 @@ serve(async (req) => {
 
       case 802: {
         const { data, error } = await supabase.rpc("get_weekly_income");
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
+      case 803: {
+        const { data, error } = await supabase
+          .from("history_bonus")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("data_recebimento", { ascending: false });
         if (error) throw error;
         result = data;
         break;
