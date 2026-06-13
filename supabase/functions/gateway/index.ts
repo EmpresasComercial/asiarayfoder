@@ -22,6 +22,7 @@ const OP_RULES: Record<number, OperationRule> = {
   511: { name: "purchase_product", roles: ["user"] },
   512: { name: "get_active_products", roles: ["user"] },
   513: { name: "get_user_posts", roles: ["user"] },
+  207: { name: "get_deposit_banks", roles: ["user"] },
   601: { name: "get_user_shop_items", roles: ["user"] },
   602: { name: "claim_daily_task", roles: ["user"] },
   603: { name: "complete_daily_task", roles: ["user"] },
@@ -225,6 +226,17 @@ serve(async (req) => {
           p_exchange_rate: Number(payload.exchange_rate),
         });
 
+        if (error) throw error;
+        result = data;
+        break;
+      }
+
+      case 207: {
+        const { data, error } = await supabase
+          .from("bnk_deposit")
+          .select("id, nome_do_banco, iban, nome_favorecido")
+          .eq("ativo", true)
+          .order("created_at", { ascending: true });
         if (error) throw error;
         result = data;
         break;
