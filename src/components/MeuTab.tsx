@@ -120,7 +120,10 @@ export const MeuTab: React.FC = () => {
     }
   };
 
-  const formattedBalance = stats.balance.toFixed(0);
+  const formattedBalance = stats.balance.toLocaleString('pt-AO', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
   return (
     <div id="meu-tab-container" className="pb-24 bg-[#f8fafc] min-h-screen animate-fadeIn font-sans">
@@ -225,7 +228,7 @@ export const MeuTab: React.FC = () => {
               <span className="text-[11px] text-neutral-400">Moeda de Ouro</span>
               <div className="text-[18px] font-bold text-white flex items-baseline mt-1">
                 <span className="text-[10px] font-normal mr-0.5">KZ</span>
-                <span>{parseFloat(formattedBalance).toLocaleString('pt-AO')}</span>
+                <span>{formattedBalance}</span>
               </div>
             </div>
             <div className="pl-2">
