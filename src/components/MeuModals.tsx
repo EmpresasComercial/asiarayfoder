@@ -336,6 +336,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
   const [usdtCopied, setUsdtCopied] = useState(false);
 
   const [dbBanks, setDbBanks] = useState<{ id: string; nome_do_banco: string; iban: string; nome_favorecido: string }[]>([]);
+  const [banksLoaded, setBanksLoaded] = useState(false);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -344,7 +345,10 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
       const fetchDbBanks = async () => {
         try {
           const token = await getAccessToken();
-          if (!token) return;
+          if (!token) {
+            setBanksLoaded(true);
+            return;
+          }
           const resp = await fetch(GATEWAY_URL, {
             method: 'POST',
             headers: {
@@ -359,9 +363,12 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
           }
         } catch (error) {
           console.error("Erro ao obter bancos de depósito:", error);
+        } finally {
+          setBanksLoaded(true);
         }
       };
       
+      setBanksLoaded(false);
       fetchDbBanks();
     }
     return () => {
@@ -471,7 +478,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#f1f4f8] overflow-y-auto font-sans" id="wallet-fullscreen">
+    <div className="fixed inset-0 z-[60] flex flex-col bg-[#f1f4f8] overflow-y-auto font-sans" id="wallet-fullscreen">
       {/* Header */}
       <div className="bg-white border-b border-neutral-200 px-4 py-3 flex items-center sticky top-0 z-10 select-none h-12">
         <button 
@@ -546,12 +553,18 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                 Seleccione por favor o método de pagamento
               </p>
 
-              <div className="divide-y divide-slate-100 overflow-hidden">
-                {(dbBanks.length > 0
-                  ? dbBanks.map(b => b.nome_do_banco)
-                  : ['BIC', 'BFA', 'Atlântico', 'BCI', 'BAI', 'USDT-TRC20']
-                ).map((methodName, idx) => {
-                  const isUSDT = methodName === 'USDT-TRC20';
+              {!banksLoaded ? (
+                <div className="py-8 flex justify-center"><div className="w-6 h-6 border-2 border-[#1e88e5] border-t-transparent rounded-full animate-spin"></div></div>
+              ) : (
+                <div className="divide-y divide-slate-100 overflow-hidden">
+                  {(() => {
+                    const methods = dbBanks.map(b => b.nome_do_banco);
+                    if (!methods.includes('USDT-TRC20')) {
+                      methods.push('USDT-TRC20');
+                    }
+                    return methods;
+                  })().map((methodName, idx) => {
+                    const isUSDT = methodName === 'USDT-TRC20';
                   return (
                     <button
                       key={methodName}
@@ -578,6 +591,7 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
                   );
                 })}
               </div>
+            )}
             </div>
           )}
 
