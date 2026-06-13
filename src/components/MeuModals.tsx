@@ -899,7 +899,7 @@ export const TeamReportModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     return () => {
       setIsFullScreenActive(false);
     };
-  }, [isOpen, setIsFullScreenActive, ensureInternetConnectivity, showLoading, hideLoading]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

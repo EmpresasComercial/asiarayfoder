@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { TaskType } from '../types';
+import { getAccessToken, GATEWAY_URL } from '../lib/supabase';
 
 interface HomeTabProps {
   setActiveTab: (tab: string) => void;
@@ -15,16 +16,66 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
     setActiveTab('tarefa');
   };
 
-  // Alternating mock members matching the screenshot rail
-  const members = [
-    { id: 1, isReal: true, pic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120' }, // Man face 1
-    { id: 2, isReal: false }, // Generic silhouette
-    { id: 3, isReal: true, pic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120' }, // Man face 2
-    { id: 4, isReal: false }, // Generic silhouette
-    { id: 5, isReal: false }, // Generic silhouette
-    { id: 6, isReal: true, pic: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120' }, // Woman face 1
-    { id: 7, isReal: true, pic: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120' }  // Woman face 2
+  const [teamList, setTeamList] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchTeam = async () => {
+      try {
+        const token = await getAccessToken();
+        if (!token) return;
+        const resp = await fetch(GATEWAY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ op: 801, data: {} })
+        });
+        const res = await resp.json();
+        if (res.success && Array.isArray(res.result)) {
+          setTeamList(res.result);
+        }
+      } catch (err) {
+        console.error('Erro ao buscar equipa para a Home:', err);
+      }
+    };
+    fetchTeam();
+  }, []);
+
+  const AVATAR_POOL = [
+    { isReal: true, pic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120' },
+    { isReal: false },
+    { isReal: true, pic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120' },
+    { isReal: false },
+    { isReal: false },
+    { isReal: true, pic: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120' },
+    { isReal: true, pic: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120' }
   ];
+
+  // If team is empty, fall back to mock members so screen layout stays robust
+  const getRenderedMembers = () => {
+    if (teamList.length === 0) {
+      return AVATAR_POOL.map((avatar, idx) => ({
+        id: `mock-${idx}`,
+        phone: `244922***${10 + idx}`,
+        ...avatar
+      }));
+    }
+
+    return teamList.map((mbr, index) => {
+      const strToHash = mbr.phone || mbr.id || String(index);
+      let hash = 0;
+      for (let i = 0; i < strToHash.length; i++) {
+        hash = strToHash.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const poolIndex = Math.abs(hash) % AVATAR_POOL.length;
+      const avatar = AVATAR_POOL[poolIndex];
+      return {
+        id: mbr.id || index,
+        phone: mbr.phone,
+        ...avatar
+      };
+    });
+  };
+
+  const renderedMembers = getRenderedMembers();
 
   return (
     <div id="home-tab-container" className="pb-24 bg-[#f4f6f9] min-h-screen animate-fadeIn font-sans select-none">
@@ -234,25 +285,32 @@ export const HomeTab: React.FC<HomeTabProps> = ({ setActiveTab, setSelectedTaskC
           </h3>
         </div>
 
-        <div className="py-4 px-4 flex gap-2.5 overflow-x-auto no-scrollbar scroll-smooth bg-white" id="home-members-rail">
-          {members.map(mbr => (
+        <div className="py-4 px-4 flex gap-3 overflow-x-auto no-scrollbar scroll-smooth bg-white" id="home-members-rail">
+          {renderedMembers.map(mbr => (
             <div 
               key={mbr.id}
-              className="bg-[#f8fafc] w-[54px] h-[54px] rounded-full shrink-0 flex items-center justify-center border border-neutral-100 select-none overflow-hidden"
+              className="flex flex-col items-center gap-1 shrink-0"
             >
-              {mbr.isReal ? (
-                <img 
-                  referrerPolicy="no-referrer"
-                  src={mbr.pic} 
-                  alt="avatar" 
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="h-full w-full bg-[#f1f5f9] flex items-center justify-center text-gray-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-[28px] w-[28px] text-slate-350" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                  </svg>
-                </div>
+              <div className="w-[54px] h-[54px] rounded-full flex items-center justify-center border border-neutral-100 select-none overflow-hidden bg-[#f8fafc]">
+                {mbr.isReal ? (
+                  <img 
+                    referrerPolicy="no-referrer"
+                    src={(mbr as any).pic} 
+                    alt="avatar" 
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-[#f1f5f9] flex items-center justify-center text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-[28px] w-[28px] text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+              {(mbr as any).phone && (
+                <span className="text-[8px] text-neutral-400 font-sans text-center leading-tight max-w-[58px] truncate">
+                  {(mbr as any).phone}
+                </span>
               )}
             </div>
           ))}
