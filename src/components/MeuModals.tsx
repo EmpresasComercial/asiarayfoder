@@ -437,12 +437,24 @@ export const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose, initi
         return;
       }
 
+      // Converter o arquivo selecionado para base64
+      const fileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
+        });
+      };
+      
+      const base64Image = await fileToBase64(selectedFile);
+
       const isUSDT = selectedMethod === 'USDT-TRC20';
 
       const opCode = isUSDT ? 206 : 205;
       const payload = isUSDT
         ? { amount_usdt: parseFloat((rechargeAmt / 430).toFixed(2)), exchange_rate: 430 }
-        : { amount: rechargeAmt, bank_name: selectedMethod, iban: currentAddress };
+        : { amount: rechargeAmt, bank_name: selectedMethod, iban: currentAddress, comprovante_url: base64Image };
 
       const resp = await fetch(GATEWAY_URL, {
         method: 'POST',

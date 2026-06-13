@@ -36,7 +36,7 @@ const OP_RULES: Record<number, OperationRule> = {
   901: { name: "get_support", roles: ["user"] },
 };
 
-const MAX_BODY_BYTES = 8192;
+const MAX_BODY_BYTES = 5242880; // 5MB para suportar imagens em base64
 const MAX_TOKEN_AGE_SECONDS = 1800; // 30 minutos
 
 const corsHeaders = {
@@ -197,7 +197,8 @@ serve(async (req) => {
         if (
           !mustBePositiveNumber(payload.amount) ||
           !mustBeNonEmptyString(payload.bank_name) ||
-          !mustBeNonEmptyString(payload.iban)
+          !mustBeNonEmptyString(payload.iban) ||
+          !mustBeNonEmptyString(payload.comprovante_url)
         ) {
           return json(400, { success: false, error: "Dados do depósito inválidos" });
         }
@@ -206,6 +207,7 @@ serve(async (req) => {
           p_amount: Number(payload.amount),
           p_bank_name: String(payload.bank_name).trim(),
           p_iban: String(payload.iban).trim(),
+          p_comprovante_url: String(payload.comprovante_url).trim(),
         });
 
         if (error) throw error;
