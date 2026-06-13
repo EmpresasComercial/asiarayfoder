@@ -35,8 +35,14 @@ export const MeuTab: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if ((location.state as any)?.openMyInfoModal) {
-      setIsMyInfoOpen(true);
+    const state = location.state as any;
+    if (state?.openMyInfoModal) {
+      if (state?.selectBankSection) {
+        // Coming from RetirarPage needing to link a bank — open BankModal directly
+        setIsBankOpen(true);
+      } else {
+        setIsMyInfoOpen(true);
+      }
       navigate(location.pathname, { replace: true, state: {} });
     }
   }, [location, navigate]);

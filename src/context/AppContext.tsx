@@ -46,7 +46,7 @@ interface AppContextProps {
 
   approvePendingTasks: () => void;
   addRecharge: (amount: number, txId: string, proofFileName?: string) => void;
-  addWithdrawal: (amount: number) => { success: boolean; error?: string };
+  addWithdrawal: (amount: number, pin: string) => Promise<{ success: boolean; error?: string }>;
   convertUsdToKz: (usdAmount: number) => Promise<{ success: boolean; message: string }>;
   updateBankInfo: (bankName: string, bankAccount: string, holderName: string) => Promise<{ success: boolean; message: string }>;
   upgradeMembership: (level: string, cost: number, productId?: string) => Promise<boolean>;
@@ -591,7 +591,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bankAccount: profileData?.bank_account || '',
         holderName: profileData?.holder_name || '',
         paymentPin: profileData?.payment_pin ?? undefined,
-        idChaveUnica: profileData?.id_chave_unica ?? undefined
+        idChaveUnica: profileData?.id_chave_unica ?? undefined,
+        bankId: profileData?.bank_id || undefined
       };
       setUser(loggedUser);
       // Set real balances from profile
@@ -689,7 +690,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bankAccount: profileData?.bank_account || '',
         holderName: profileData?.holder_name || '',
         paymentPin: profileData?.payment_pin ?? undefined,
-        idChaveUnica: profileData?.id_chave_unica ?? undefined
+        idChaveUnica: profileData?.id_chave_unica ?? undefined,
+        bankId: profileData?.bank_id || undefined
       };
       setUser(newUser);
       // Set real balances from profile
@@ -824,8 +826,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }));
   };
 
-  // Withdraw simulation
-  const addWithdrawal = (amount: number) => {
+  // Withdraw real logic via gateway
+  const addWithdrawal = async (amount: number, pin: string): Promise<{ success: boolean; error?: string }> => {
     if (stats.balance < amount) {
       return { success: false, error: 'Saldo de Kwanza (KZ) insuficiente para esta retirada.' };
     }
@@ -835,33 +837,59 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!user.bankAccount) {
       return { success: false, error: 'Por favor, registre sua informação bancária primeiro em "Banco associado" para poder retirar.' };
     }
+    if (!user.bankId) {
+      return { success: false, error: 'Não foi possível localizar o ID da sua conta bancária. Tente vincular novamente.' };
+    }
 
-    const newLog: LogRecord = {
-      id: 'ret_' + String(Math.floor(10000 + Math.random() * 90000)),
-      type: 'retirada',
-      amount: amount,
-      date: new Date().toISOString().replace('T', ' ').slice(0, 16),
-      status: 'pendente', // Leaves it pending so it looks realistic!
-      details: `Banco: ${user.bankName} - IBAN: ${user.bankAccount}`
-    };
+    try {
+      const gw = await gatewayFetch(309, {
+        amount: amount,
+        bank_id: user.bankId,
+        pin: pin
+      }, 'A processar a sua solicitação de retirada...');
 
-    setLogs(prev => [newLog, ...prev]);
-    setStats(prev => ({
-      ...prev,
-      balance: prev.balance - amount
-    }));
+      if (!gw) {
+        return { success: false, error: 'Sessão expirada. Faça login novamente.' };
+      }
 
-    // Auto-approve after 30 seconds for nice visuals
-    setTimeout(() => {
-      setLogs(currLogs => currLogs.map(l => {
-        if (l.id === newLog.id) {
-          return { ...l, status: 'aprovado', details: l.details + ' (Processado e pago)' };
+      const { resp, resData } = gw;
+      if (resp.ok) {
+        if (resData?.success && resData?.result) {
+          const r = resData.result;
+          if (r.success) {
+            // Refresh stats, profile and logs in real-time
+            await refreshUserProfile(false);
+            await fetchFinancialStats(false);
+            const wRecords = await fetchWithdrawalRecords();
+            if (wRecords.length > 0) {
+              setLogs(prev => {
+                // filter out existing 'retirada' logs
+                const nonRetiradas = prev.filter(l => l.type !== 'retirada');
+                const newRetiradas: LogRecord[] = wRecords.map((rec: any) => ({
+                  id: rec.id || 'ret_' + String(Math.floor(10000 + Math.random() * 90000)),
+                  type: 'retirada',
+                  amount: Number(rec.valor_solicitado),
+                  date: rec.created_at ? new Date(rec.created_at).toISOString().replace('T', ' ').slice(0, 16) : new Date().toISOString().replace('T', ' ').slice(0, 16),
+                  status: rec.estado_da_retirada === 'pendente' ? 'pendente' : (rec.estado_da_retirada === 'rejeitado' ? 'rejeitado' : 'aprovado'),
+                  details: `Banco: ${rec.nome_do_banco} - IBAN: ${rec.iban}`
+                }));
+                return [...newRetiradas, ...nonRetiradas];
+              });
+            }
+            return { success: true };
+          } else {
+            return { success: false, error: r.message || 'Erro ao processar retirada.' };
+          }
+        } else {
+          return { success: false, error: resData?.error || 'Erro ao processar retirada.' };
         }
-        return l;
-      }));
-    }, 30000);
-
-    return { success: true };
+      } else {
+        return { success: false, error: resData?.error || 'Falha na comunicação com o servidor.' };
+      }
+    } catch (err: any) {
+      console.error('Erro na retirada:', err);
+      return { success: false, error: err.message || 'Erro de rede. Tente novamente.' };
+    }
   };
 
   // Convert USDT balance to KZ via Gateway OP 310 calling transfer_reproducao_to_balance
@@ -909,13 +937,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!resp.ok || !resData.success) {
       throw new Error(resData.error || 'Erro desconhecido');
     }
-    // Só atualizar estado local após confirmação do backend
-    setUser(prev => ({
-      ...prev,
-      bankName,
-      bankAccount,
-      holderName
-    }));
+    // Refresh full profile from backend to pick up the new bank_id
+    await refreshUserProfile(false);
     const resultMsg = resData.result?.message || 'Operação concluída.';
     return { success: true, message: resultMsg };
   };
@@ -965,7 +988,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           bankAccount: p.bank_account || prev.bankAccount,
           holderName: p.holder_name || prev.holderName,
           level: p.level || prev.level,
-          paymentPin: p.payment_pin || prev.paymentPin
+          paymentPin: p.payment_pin || prev.paymentPin,
+          bankId: p.bank_id || prev.bankId
         }));
 
         // Update financial stats with real balance from profiles.balance

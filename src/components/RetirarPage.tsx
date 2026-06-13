@@ -24,8 +24,8 @@ export const RetirarPage: React.FC = () => {
   }, [setIsFullScreenActive]);
 
   // Derived values
-  const displayBank = user.bankName || 'Banco BAI';
-  const lastFourDigits = user.bankAccount ? user.bankAccount.replace(/\s+/g, '').slice(-4) : '0185';
+  const displayBank = user.bankName || '';
+  const lastFourDigits = user.bankAccount ? user.bankAccount.replace(/\s+/g, '').slice(-4) : '';
   
   const pocketBalance = 0; // Pocket money is KZ 0 in the screenshot
   const taskWalletBalance = stats.balance; // Using stats.balance for task wallet
@@ -38,6 +38,10 @@ export const RetirarPage: React.FC = () => {
   const realAmount = amount - commission - accessFee;
 
   const handleConfirmAmount = () => {
+    if (!user.bankAccount || !user.bankId) {
+      addToast('Por favor, vincule uma conta bancária primeiro para prosseguir.', 'warning');
+      return;
+    }
     if (amount <= 0) {
       addToast('Por favor, introduza um valor de retirada válido.', 'warning');
       return;
@@ -48,6 +52,10 @@ export const RetirarPage: React.FC = () => {
     }
     if (amount < 2000) {
       addToast('O limite mínimo para retirada é de KZ 2.000,00.', 'warning');
+      return;
+    }
+    if (amount > 100000) {
+      addToast('O limite máximo por operação é de KZ 100.000,00.', 'warning');
       return;
     }
     setStep('tips');
@@ -75,23 +83,24 @@ export const RetirarPage: React.FC = () => {
     }
   };
 
-  const validatePin = (finalPin: string) => {
+  const validatePin = async (finalPin: string) => {
     showLoading('Verificando senha de pagamento...');
 
-    setTimeout(() => {
-      try {
-        const res = addWithdrawal(amount);
-        if (res.success) {
-          addToast(`Retirada de KZ ${amount.toLocaleString('pt-AO')} solicitada com sucesso!`, 'success');
-          navigate('/meu');
-        } else {
-          addToast(res.error || 'Erro ao processar retirada.', 'error');
-          setPin('');
-        }
-      } finally {
-        hideLoading();
+    try {
+      const res = await addWithdrawal(amount, finalPin);
+      if (res.success) {
+        addToast(`Retirada de KZ ${amount.toLocaleString('pt-AO')} solicitada com sucesso!`, 'success');
+        navigate('/meu');
+      } else {
+        addToast(res.error || 'Erro ao processar retirada.', 'error');
+        setPin('');
       }
-    }, 1500);
+    } catch (err: any) {
+      addToast(err.message || 'Erro ao processar retirada.', 'error');
+      setPin('');
+    } finally {
+      hideLoading();
+    }
   };
 
   return (
@@ -123,9 +132,18 @@ export const RetirarPage: React.FC = () => {
             {/* Scrollable Content Area */}
             <div className="flex-1 overflow-y-auto no-scrollbar pb-4">
               {/* Gateway Card (Grey block) */}
-              <div className="bg-[#f0f3f6] p-4 flex flex-col justify-between border-b border-slate-200">
-                <div className="flex justify-between items-center text-neutral-800 font-bold text-[13px] cursor-pointer">
-                  <span>Tipo de Gateway: {displayBank.split(' ')[0]} ({lastFourDigits})</span>
+              <div 
+                onClick={() => navigate('/meu', { state: { openMyInfoModal: true, selectBankSection: true } })}
+                className="bg-[#f0f3f6] p-4 flex flex-col justify-between border-b border-slate-200 cursor-pointer hover:bg-slate-100/80 transition-colors"
+              >
+                <div className="flex justify-between items-center text-neutral-800 font-bold text-[13px]">
+                  {displayBank && lastFourDigits ? (
+                    <span>Tipo de Gateway: {displayBank} (...{lastFourDigits})</span>
+                  ) : displayBank ? (
+                    <span>Tipo de Gateway: {displayBank}</span>
+                  ) : (
+                    <span className="text-red-600 font-bold">⚠ Nenhuma conta bancária associada — Toque para adicionar</span>
+                  )}
                   <span className="text-neutral-400 text-lg font-light">&gt;</span>
                 </div>
                 <span className="text-[10px] text-neutral-500 text-right mt-3 self-end block max-w-[240px] leading-tight">
@@ -229,7 +247,7 @@ export const RetirarPage: React.FC = () => {
             <div className="opacity-40 pointer-events-none flex flex-col flex-1">
               <div className="bg-[#f0f3f6] p-4 flex flex-col">
                 <div className="flex justify-between items-center text-neutral-800 font-bold text-[13px]">
-                  <span>Tipo de Gateway: {displayBank.split(' ')[0]} ({lastFourDigits})</span>
+                  <span>Tipo de Gateway: {displayBank} (...{lastFourDigits})</span>
                 </div>
               </div>
               <div className="p-5 flex-1">
@@ -288,7 +306,7 @@ export const RetirarPage: React.FC = () => {
             {/* Top info summary */}
             <div className="p-4 flex flex-col items-center">
               <span className="text-[12px] text-neutral-500 font-bold mb-1">
-                Tipo de Gateway: {displayBank.split(' ')[0]} ({lastFourDigits})
+                Tipo de Gateway: {displayBank} (...{lastFourDigits})
               </span>
               <span className="text-[28px] font-black text-neutral-900 mb-4">
                 KZ {amount.toLocaleString('pt-AO')}
