@@ -12,7 +12,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   message = 'Sem dados',
   description,
   className = '',
-  iconClassName = 'w-16 h-16'
+  iconClassName = 'w-12 h-12'
 }) => (
   <div className={`flex flex-col items-center justify-center gap-3 text-center text-neutral-500 ${className}`}>
     <img src={emptyIcon} alt="Sem dados" className={iconClassName} />
