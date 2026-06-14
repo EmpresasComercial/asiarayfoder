@@ -829,22 +829,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Withdraw real logic via gateway
   const addWithdrawal = async (amount: number, pin: string): Promise<{ success: boolean; error?: string }> => {
     if (stats.balance < amount) {
-      return { success: false, error: 'Saldo de Kwanza (KZ) insuficiente para esta retirada.' };
+      return { success: false, error: 'O valor solicitado excede o seu saldo disponível.' };
     }
     if (amount < 2000) {
-      return { success: false, error: 'O limite mínimo para retirada é de KZ 2.000,00.' };
+      return { success: false, error: 'O saldo mínimo para retirada é de 2.000 AOA.' };
     }
     if (!user.bankAccount) {
-      return { success: false, error: 'Por favor, registre sua informação bancária primeiro em "Banco associado" para poder retirar.' };
+      return { success: false, error: 'Por favor, vincule uma conta bancária para prosseguir.' };
     }
     if (!user.bankId) {
-      return { success: false, error: 'Não foi possível localizar o ID da sua conta bancária. Tente vincular novamente.' };
+      return { success: false, error: 'Por favor, vincule uma conta bancária para prosseguir.' };
     }
 
     try {
       const gw = await gatewayFetch(309, {
         amount: amount,
-        bank_id: user.bankId,
+        bank_id: user.bankId || null,
         pin: pin
       }, 'A processar a sua solicitação de retirada...');
 

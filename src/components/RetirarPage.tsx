@@ -41,7 +41,7 @@ export const RetirarPage: React.FC = () => {
 
   const handleConfirmAmount = () => {
     if (!user.bankAccount || !user.bankId) {
-      addToast('Por favor, vincule uma conta bancária primeiro para prosseguir.', 'warning');
+      addToast('Por favor, vincule uma conta bancária para prosseguir.', 'warning');
       return;
     }
     if (amount <= 0) {
@@ -49,15 +49,15 @@ export const RetirarPage: React.FC = () => {
       return;
     }
     if (amount > currentAvailableBalance) {
-      addToast('Saldo insuficiente na carteira selecionada.', 'error');
+      addToast('O valor solicitado excede o seu saldo disponível.', 'error');
       return;
     }
     if (amount < 2000) {
-      addToast('O limite mínimo para retirada é de KZ 2.000,00.', 'warning');
+      addToast('O saldo mínimo para retirada é de 2.000 AOA.', 'warning');
       return;
     }
     if (amount > 100000) {
-      addToast('O limite máximo por operação é de KZ 100.000,00.', 'warning');
+      addToast('O limite máximo por operação é de 100.000 AOA.', 'warning');
       return;
     }
     setStep('tips');
