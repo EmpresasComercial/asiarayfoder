@@ -362,18 +362,35 @@ serve(async (req) => {
       }
 
       case 511: {
-        if (!mustBeNonEmptyString(payload.product_id)) {
+        const productId = String(payload.product_id || "").trim();
+        if (!mustBeNonEmptyString(productId)) {
           return json(400, { success: false, error: "Produto inválido" });
         }
 
+        // Executar a compra de forma transacional e segura diretamente na RPC
         const { data, error } = await supabase.rpc("purchase_product", {
-          p_product_id: String(payload.product_id).trim(),
+          p_product_id: productId,
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error("Erro RPC purchase_product:", error);
+          throw error;
+        }
+
+        // Log para debug com base no retorno seguro da RPC, para não expor consultas/credenciais na Edge Function
+        if (data && typeof data === "object") {
+          const resObj = data as Record<string, any>;
+          console.log(`[COMPRA DEBUG] user_id: ${resObj.user_id}, produto_id_clicado: ${resObj.produto_id_clicado}, preco_produto: ${resObj.preco_produto}, saldo_antes: ${resObj.saldo_antes}`);
+        }
+
+        if (data && typeof data === "object" && data.success === false) {
+          return json(400, data);
+        }
+
         result = data;
         break;
       }
+
 
       case 512: {
         const { data, error } = await supabase.rpc("get_active_products");
