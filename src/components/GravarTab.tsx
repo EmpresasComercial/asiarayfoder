@@ -11,7 +11,7 @@ import completedIcon from '../../assets/task-completed-64.png';
 import failedIcon from '../../assets/icon-task-failed.png';
 
 export const GravarTab: React.FC = () => {
-  const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
+  const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity, refreshUserProfile } = useApp();
   const [activeSegment, setActiveSegment] = useState<TaskStatus>('andamento');
   
   // Track expanded task detail blocks
@@ -179,6 +179,9 @@ export const GravarTab: React.FC = () => {
         setSelectedFile(null);
         setFilePreview('');
         setFileLabel('Nenhum arquivo escolhido');
+        // ── Refresh balance immediately after crediting ──
+        // refreshUserProfile reads profiles.balance which complete_daily_task now updates correctly
+        refreshUserProfile(false);
         loadAgdTasks(); // reload active tasks
       } else {
         window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: res.error || 'Erro ao concluir tarefa', type: 'error' } }));
