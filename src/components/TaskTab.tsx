@@ -109,12 +109,48 @@ function calcLucroRestante(item: ShopItem): number {
   return Number((item.rendimento_diario * diasRestantes).toFixed(2));
 }
 
+// ─── localStorage helpers for claimed tasks (global across all 3 tabs) ───
+const CLAIMED_TASKS_KEY = 'tasktab_claimed_tasks';
+const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+
+// Record<shopId, claimedAtTimestamp>
+function loadClaimedTasks(): Record<number, number> {
+  try {
+    const raw = localStorage.getItem(CLAIMED_TASKS_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as Record<number, number>;
+  } catch {
+    return {};
+  }
+}
+
+function saveClaimedTasks(data: Record<number, number>): void {
+  localStorage.setItem(CLAIMED_TASKS_KEY, JSON.stringify(data));
+}
+
+// Purge entries older than 24h and return clean record
+function getPurgedClaimedTasks(): Record<number, number> {
+  const now = Date.now();
+  const data = loadClaimedTasks();
+  const purged: Record<number, number> = {};
+  for (const [key, ts] of Object.entries(data)) {
+    if (now - ts < TWENTY_FOUR_HOURS_MS) {
+      purged[Number(key)] = ts;
+    }
+  }
+  saveClaimedTasks(purged);
+  return purged;
+}
+
 export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedCategory, setActiveTab }) => {
   const { user, isSessionExpired, showLoading, hideLoading, ensureInternetConnectivity } = useApp();
 
   // Shop items fetched from the database (op 601)
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Map of shopId -> claimedAt timestamp (persisted in localStorage, global across all tabs)
+  const [claimedTasks, setClaimedTasks] = useState<Record<number, number>>(() => getPurgedClaimedTasks());
 
   // Fetch user's active shop items from gateway
   useEffect(() => {
@@ -162,10 +198,27 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
     loadShopItems();
   }, [isSessionExpired]);
 
+  // Re-sync claimed state from localStorage when window regains focus
+  useEffect(() => {
+    const onFocus = () => {
+      setClaimedTasks(getPurgedClaimedTasks());
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, []);
+
   const [claimingId, setClaimingId] = useState<number | null>(null);
 
+  // Returns true if this shopId was claimed less than 24h ago
+  const isClaimed = (shopId: number): boolean => {
+    const ts = claimedTasks[shopId];
+    if (!ts) return false;
+    return Date.now() - ts < TWENTY_FOUR_HOURS_MS;
+  };
+
   const handleClaimTask = async (shopId: number) => {
-    if (isSessionExpired || claimingId) return;
+    if (isSessionExpired || claimingId !== null) return;
+    if (isClaimed(shopId)) return; // already claimed — guard
     if (!(await ensureInternetConnectivity())) { return; }
     setClaimingId(shopId);
     showLoading('Requisitando tarefa...');
@@ -192,6 +245,12 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
 
       const res = await resp.json();
       if (res.success) {
+        // ── Mark as claimed globally (persists across all 3 tabs) ──
+        const updated = getPurgedClaimedTasks();
+        updated[shopId] = Date.now();
+        saveClaimedTasks(updated);
+        setClaimedTasks({ ...updated });
+
         window.dispatchEvent(new CustomEvent('show-toast', { detail: { message: 'Tarefa recebida com sucesso!', type: 'success' } }));
         setActiveTab('Gravar');
       } else {
@@ -265,9 +324,8 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
         ) : (
           displayItems.map((item) => {
             const lucroRestante = calcLucroRestante(item);
-            
-            // Notice: We don't block by isOwnItem anymore. If it's in this list, it IS their item (fetched from their shop_id).
-            // We just let them click it. If they already claimed it today, the backend (OP 602) will return an error and we show it.
+            const claimed = isClaimed(item.id);
+            const isProcessing = claimingId === item.id;
 
             return (
               <div 
@@ -308,16 +366,28 @@ export const TaskTab: React.FC<TaskTabProps> = ({ selectedCategory, setSelectedC
 
                 {/* Right actions column */}
                 <div className="p-3 flex items-center justify-center shrink-0">
-                  <button
-                    onClick={() => handleClaimTask(item.id)}
-                    disabled={claimingId === item.id}
-                    id={`get-task-btn-${item.id}`}
-                    className={`h-[28px] px-3 text-[11.5px] font-black text-slate-800 bg-gradient-to-b from-[#f97316] to-[#ea580c] hover:brightness-[1.05] active:brightness-[0.95] rounded-xs shadow-sm cursor-pointer select-none transition-all outline-none border-none border-orange-600/25 ${
-                      claimingId === item.id ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    {claimingId === item.id ? 'Processando...' : 'Obter a tarefa'}
-                  </button>
+                  {claimed ? (
+                    /* ── CLAIMED STATE: neutral, disabled — same across all 3 tabs ── */
+                    <button
+                      disabled
+                      id={`get-task-btn-${item.id}`}
+                      className="h-[28px] px-3 text-[11.5px] font-black text-zinc-400 bg-zinc-100 border border-zinc-200 rounded-xs shadow-none cursor-not-allowed select-none outline-none"
+                    >
+                      Reivindicado
+                    </button>
+                  ) : (
+                    /* ── AVAILABLE STATE: orange gradient ── */
+                    <button
+                      onClick={() => handleClaimTask(item.id)}
+                      disabled={isProcessing}
+                      id={`get-task-btn-${item.id}`}
+                      className={`h-[28px] px-3 text-[11.5px] font-black text-slate-800 bg-gradient-to-b from-[#f97316] to-[#ea580c] hover:brightness-[1.05] active:brightness-[0.95] rounded-xs shadow-sm cursor-pointer select-none transition-all outline-none border-none border-orange-600/25 ${
+                        isProcessing ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {isProcessing ? 'Processando...' : 'Obter a tarefa'}
+                    </button>
+                  )}
                 </div>
 
               </div>
